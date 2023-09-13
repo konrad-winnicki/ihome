@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { User } from "../domain/User";
 
 export const UserSchema = new mongoose.Schema({
   nickName: {
@@ -31,3 +32,34 @@ export const UserSchema = new mongoose.Schema({
   },
   
 });
+
+export const ChatRoomSchema = new mongoose.Schema({
+  id: {
+    type: String,
+      unique: true,
+  },
+
+  ownerId: {
+    type: String,
+    
+  },
+
+  name: {
+    type: String,
+    index: {
+      unique: true,
+    },
+  },
+  participants: {
+    type: Array<User>,
+    required: true,
+  },
+
+ 
+  creationDate: {
+    type: Date,
+    required: true,
+  },
+  
+});
+

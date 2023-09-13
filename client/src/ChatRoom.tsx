@@ -1,21 +1,35 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import io, { Socket } from "socket.io-client";
-import {v4} from 'uuid'
+import { v4 } from "uuid";
+import { PORT } from "./config/config";
+
 type Message = {
-  nickName: string; message: string;
-  messageId:string
-}
+  nickName: string;
+  message: string;
+  messageId: string;
+};
 
 type Participant = {
-  nickName: string; socketId: string;
-  reason?:string
+  nickName: string;
+  socketId: string;
+  room:string,
+  reason?: string;
+};
+
+interface ChatRoomInterface {
+  isLoggedIn: boolean
+  setRoomChoosen: (param: boolean) => void;
 
 }
 
-export const ChatRoom: React.FC = () => {
+export const ChatRoom: React.FC<ChatRoomInterface> = (props) => {
   const [socketListener, setSocketListener] = useState<Socket | null>(null);
+ // const [isMessageSent, setMessageSent]= useState(false)
   const token = localStorage.getItem("token");
-  const nickName = localStorage.getItem('nickName');
+  const nickName = localStorage.getItem("nickName");
+const room = localStorage.getItem('room')
+
+const scrollableContainerRef = useRef(null)
 
   const [formData, setFormData] = useState({
     message: "",
@@ -23,13 +37,14 @@ export const ChatRoom: React.FC = () => {
 
   const [messageList, setNewMessage] = useState<Array<Message>>([]);
   const [participantList, setNewParticipant] = useState<Array<Participant>>([]);
-
+    console.log('room', localStorage.getItem('room'))
 
   const socket = (token: string | null) => {
-    const URL = "http://localhost:8004";
+    const URL = `http://localhost:${PORT}`;
     const socket = io(URL, {
       autoConnect: false,
       auth: {
+        room:room,
         token: token,
       },
     });
@@ -43,72 +58,110 @@ export const ChatRoom: React.FC = () => {
       [name]: value,
     }));
   };
-  socketListener?.on("messag", (msg:Message) => {
+  socketListener?.on("messag", (msg: Message) => {
     setNewMessage([...messageList, msg]);
     //console.log('msg', msg)
   });
 
-  socketListener?.on("connected", (participant:{socketId:string, nickName:string}) => {
-    setNewParticipant([...participantList, participant])
-    console.log('connected', participant)
+  socketListener?.on(
+    "connected",
+    //console.log('room', localStorage.getItem('room'))
+    (participant: { socketId: string; nickName: string, room:string }) => {
+      setNewParticipant([...participantList, participant]);
+      console.log("connected with datos", participant);
+    }
+  );
 
-  });
+  socketListener?.on(
+    "disconnected",
+    (participant: { socketId: string; nickName: string, room:string }) => {
+      deleteParticipant(participant);
+      console.log("disconnected", participant);
+    }
+  );
 
-  socketListener?.on("disconnected", (participant:{socketId:string, nickName:string}) => {
-    deleteParticipant(participant)
-    console.log('disconnected', participant)
-  });
+  const deleteParticipant = (toDelete: Participant) => {
+    console.log(toDelete.socketId);
+    const newParticipantList = participantList.filter(
+      (participant) => participant.socketId != toDelete.socketId
+    );
+    setNewParticipant(newParticipantList);
+    console.log(newParticipantList);
+  };
 
+  const leaveRoom = ()=>{
+    socketListener?.disconnect();
+    props.setRoomChoosen(false)
 
-const deleteParticipant = (toDelete:Participant)=>{
-  console.log(toDelete.socketId)
-  const newParticipantList = participantList.filter((participant)=> participant.socketId !=  toDelete.socketId)
-  setNewParticipant(newParticipantList)
-  console.log(newParticipantList)
 }
-
   useEffect(() => {
+    console.log('room', localStorage.getItem('room'))
+    console.log("list", participantList);
+
     if (!socketListener) {
       const socketListener = socket(token);
       setSocketListener(socketListener);
       socketListener.connect();
       console.log("socket listener setted");
     }
-    console.log('partlist',participantList)
 
-  }, [participantList, socketListener, messageList, token]);
+    if(!props.isLoggedIn){
+      socketListener?.disconnect();
+
+    }
+
+    console.log("partlist", participantList);
+  }, [props, participantList, socketListener, messageList, token]);
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-   // const socketEmitter = socket(token);
+    // const socketEmitter = socket(token);
     //socketEmitter?.connect();
-    const messageId = v4()
-    socketListener?.emit("messag", {nickName: nickName, messageId: messageId, message: formData.message});
-    setFormData({message: ""})
-
+   // setMessageSent(true)
+    const messageId = v4();
+    socketListener?.emit("messag", {
+      nickName: nickName,
+      messageId: messageId,
+      message: formData.message,
+      room: room
+    });
+    setFormData({ message: "" });
   };
+
+
+  const scrollToBottom = () => {
+    if (scrollableContainerRef.current) {
+      scrollableContainerRef.current.scrollTop = scrollableContainerRef.current.scrollHeight;
+    }
+  };
+
+  useEffect(()=>{
+    scrollToBottom()
+  }, [messageList])
   return (
-    <>
-          <h2 className="text-2xl font-semibold mb-4">Chat</h2>
+    <div className="flex-col">
+      <h2 className="text-2l font-semibold mb-4">Chat</h2>
 
-      <div className="m-5  border-t-4 border-double border-emerald-950 flex-col inline-block max-h-360 overflow-y-auto ">
-
-          {messageList.map((msg) => {
-            
-            return (
-              <div className={`shadow-lg  rounded-lg m-4 p-4 max-h-96 ${nickName===msg.nickName?"bg-green-200":"bg-blue-200"}`} key={msg.messageId}>
-
-                
-                  <p><b>{msg.nickName}:</b> {msg.message}</p>
-               
-              </div>
-            );
-          })}
-        
+      <div className="grid-rows-1 grid-flow-row gap-1 max-h-80 overflow-y-auto " ref={scrollableContainerRef}>
+        {messageList.map((msg) => {
+          return (
+            <div
+              className={`shadow-lg rounded-lg m-2 p-2 ${
+                nickName === msg.nickName ? "bg-green-200" : " bg-blue-200"
+              }`}
+              key={msg.messageId}
+            >
+              <p>
+                <b>{msg.nickName}:</b> {msg.message}
+              </p>
+            </div>
+          );
+        })}
       </div>
 
       <form>
-        <div className="mb-4 inline-block" >
+      <div className="grid-cols-2">
+        <div className="mb-4 inline-block">
           <label
             className="block text-gray-700 text-sm font-bold mb-2"
             htmlFor="email"
@@ -116,7 +169,7 @@ const deleteParticipant = (toDelete:Participant)=>{
             message
           </label>
           <input
-            className="w-full p-2 border rounded-md focus:outline-none focus:border-blue-500"
+            className="p-2 border rounded-md focus:outline-none focus:border-blue-500"
             type="text"
             id="message"
             name="message"
@@ -125,12 +178,21 @@ const deleteParticipant = (toDelete:Participant)=>{
           />
         </div>
         <button
-          className="w-full mt-4 bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring focus:ring-blue-300"
+          className="mt-2 bg-blue-500 text-white text-lg py-1 px-1 rounded-md hover:bg-blue-600 focus:outline-none focus:ring focus:ring-blue-300"
           onClick={handleSubmit}
         >
           SEND
         </button>
+        </div>
       </form>
-    </>
+      <div>
+        <button
+          onClick={leaveRoom}
+          className="bg-amber-500 hover:bg-blue-700 text-white text-sm font-bold py-1 px-1 rounded"
+        >
+          Leave room
+        </button>
+      </div>
+    </div>
   );
 };

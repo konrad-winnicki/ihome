@@ -1,7 +1,6 @@
 import { User } from "../domain/User";
 import { UserInterface } from "./UserInterface";
 
-
 export class UserService {
   userInterface: UserInterface;
   constructor(userInterface: UserInterface) {
@@ -13,8 +12,8 @@ export class UserService {
   }
 
   //changeName(playerId: string, newName: string): Promise<Partial<Player>> {
- //   return this.playerInterface.changeName(playerId, newName);
- // }
+  //   return this.playerInterface.changeName(playerId, newName);
+  // }
 
   findUser(userId: string): Promise<User> {
     return this.userInterface.findUser(userId);
@@ -24,8 +23,7 @@ export class UserService {
     return this.userInterface.findUserByEmail(userEmail);
   }
 
-  
- // getPlayerList(): Promise<PlayerList> {
+  // getPlayerList(): Promise<PlayerList> {
   //  return this.playerInterface.getPlayerList();
   //}
 }

@@ -6,6 +6,8 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import sanitizedConfig from "../../config/config";
 import { UserService } from "./UserService";
+import { ChatRoomService } from "./ChatRoomService";
+import { ChatRoom } from "../domain/ChatRoom";
 
 
 export function userControllers(userService: UserService) {
@@ -47,9 +49,9 @@ export function userControllers(userService: UserService) {
   ) => {
     playerService
       .getPlayerList()
-      .then((players) => {
-        if (players) {
-          return res.status(200).json(players);
+      .then((chatRooms) => {
+        if (chatRooms) {
+          return res.status(200).json(chatRooms);
         }
       })
       .catch((err) => {
@@ -110,3 +112,78 @@ export function userControllers(userService: UserService) {
   };
 }
 
+
+
+
+export function chatRoomControllers(chatRoomService: ChatRoomService) {
+  
+
+  const getChatRoomList = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
+    chatRoomService
+      .getChatRoomList()
+      .then((chatRooms) => {
+        if (chatRooms) {
+          return res.status(200).json(chatRooms);
+        }
+      })
+      .catch((err) => {
+        next(err);
+        //in which scenario we will return this and what will be err.message???
+        //return res.status(404).json({ error: err.message, error_code: "GP001" });
+      });
+  };
+
+  const postChatRoom= async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
+    console.log('psotCharRoom')
+    if (!("ownerId" in req.body)) {
+      return res
+        .status(400)
+        .json({ Bad_reqest: "owner id required" });
+    }
+    const { ownerId, chatName} = req.body;
+    const id = v4()
+    const creationDate = new Date()
+    const newChatRoom = new ChatRoom(id, chatName, ownerId, [], creationDate)
+    chatRoomService
+      .createChatRoom(newChatRoom)
+      .then((response) => {
+        return res.status(201).json({ chat_id: response });
+      })
+      .catch((err: Error) => {
+        next(err);
+      });
+  };
+
+ 
+
+ /*
+  const changeName = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
+    const playerId = req.params.id;
+    const newName = req.body.name;
+    try {
+      const player = await playerService.changeName(playerId, newName);
+      return res.status(200).json(player);
+    } catch (err) {
+      next(err);
+    }
+  };
+*/
+  
+  return {
+    postChatRoom,
+    getChatRoomList
+  
+  };
+}

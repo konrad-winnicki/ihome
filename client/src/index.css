@@ -3,6 +3,124 @@
 @import 'tailwindcss/utilities';
 
 :root {
+    
+  font-weight: 400;
+  margin: 0 auto;
+  text-align: center;
+  --color-primary: #199a48;
+  /* Replace with your primary color */
+  --color-secondary: #bfb02a;
+  /* Replace with your secondary color */
+}
+
+@keyframes colorMovement {
+
+  0%,
+  100% {
+    background-position: 0 0;
+  }
+
+  50% {
+    background-position: 100% 0;
+  }
+}
+
+.bg-color-movement {
+  background: linear-gradient(to right, var(--color-primary), white, var(--color-secondary));
+  background-size: 300% 100%;
+  /* Triple the width for smooth movement */
+  animation: colorMovement 20s infinite linear;
+}
+
+input[type="text"],
+input[type="password"],
+button,
+textarea {
+  font-family: 'Nunito', sans-serif;
+  font-size: 22px;
+  padding: 0.25rem;
+  border-radius: 0.5rem;
+}
+
+label,
+button {
+  margin-top: 1rem;
+}
+
+button {
+  padding: 0.5rem;
+}
+
+.app-container {
+  min-height: 400px;
+}
+
+.gameList{
+  max-height: 120px;
+  /* max-width: 600px; */
+  /* justify-content: center; */
+}
+
+.instructions {
+  font-size: 0.75rem;
+  border-radius: 0.5rem;
+  background: #000;
+  color: #fff;
+  padding: 0.25rem;
+  position: relative;
+  bottom: -10px;
+}
+
+.instructions>svg {
+  margin-right: 0.25rem;
+}
+
+.offscreen {
+  position: absolute;
+  left: -9999px;
+}
+
+.hide {
+  display: none;
+}
+
+.valid {
+  color: limegreen;
+  margin-left: 0.25rem;
+}
+
+.invalid {
+  color: red;
+  margin-left: 0.25rem;
+}
+
+.errmsg {
+  background-color: lightpink;
+  color: firebrick;
+  font-weight: bold;
+  padding: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.line {
+  display: inline-block;
+}
+
+ .form {display: flex;
+ flex-direction: column;
+ justify-content: space-evenly;
+ flex-grow: 1;
+ padding-bottom: 1rem;
+ }
+
+
+
+/*
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+
+:root {
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
@@ -71,3 +189,4 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 }
+*/

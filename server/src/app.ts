@@ -6,16 +6,16 @@ import { initRoutes } from "./routes";
 //import { errorHandler } from "./errorHandler";
 import express, { NextFunction, Request, Response, Router } from "express";
 import { Express } from "express-serve-static-core";
-import { userControllers } from "./application/controller";
+import { chatRoomControllers, userControllers } from "./application/controller";
 import { Connection } from "mongoose";
 import { IncomingMessage, ServerResponse, createServer } from "http";
 import { Server, Socket } from "socket.io";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import sanitizedConfig from "../config/config";
-import {v4} from 'uuid'
+import { v4 } from "uuid";
 
 interface CustomSocket extends Socket {
-  token: JwtPayload // Add your custom properties here
+  token: JwtPayload; // Add your custom properties here
 }
 export type UserRootControllers = {
   handleLogin: (
@@ -30,8 +30,22 @@ export type UserRootControllers = {
   ) => Promise<Response | undefined>;
 };
 
+export type ChatRoomRootControllers = {
+  postChatRoom: (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => Promise<Response | undefined>;
+
+  getChatRoomList: (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => Promise<void>;
+};
+
 export class Application {
-  server: Server<typeof IncomingMessage, typeof ServerResponse>
+  server: Server<typeof IncomingMessage, typeof ServerResponse>;
   connection: Connection;
   constructor(server: Server, connection: Connection) {
     this.server = server;
@@ -74,53 +88,61 @@ async function startServer(databaseName: string) {
   const services = buildServices();
 
   const userRootControllers = userControllers(services.userService);
+  const chatRoomRootControllers = chatRoomControllers(services.chatRoomService);
   const app = express();
   const router = express.Router();
-  await initRoutes(router, userRootControllers);
+  await initRoutes(router, userRootControllers, chatRoomRootControllers);
   await appSetup(app, router);
-  console.log('aaaaaaaa')
+  console.log("aaaaaaaa");
 
   const httpServer = createServer(app);
-  
+
   const io = new Server(httpServer, {
     cors: {
       origin: "http://localhost:5173",
     },
   });
-io.use((socket, next) => {
-  const token = socket.handshake.auth.token;
-  try {
-    const decodedToken = jwt.verify(token, sanitizedConfig.JWT_SECRET, {
-      ignoreExpiration: false,
-    }) as JwtPayload;
+  io.use((socket, next) => {
+    const token = socket.handshake.auth.token;
+    console.log("moj", socket.handshake.auth.room);
+    try {
+      const decodedToken = jwt.verify(token, sanitizedConfig.JWT_SECRET, {
+        ignoreExpiration: false,
+      }) as JwtPayload;
 
-    (socket as CustomSocket).token = decodedToken
-    next();
-  } catch (error) {
-    if (error === "jwt expired") {
-      console.log('jwt expired')
-      //next(error)
+      (socket as CustomSocket).token = decodedToken;
+      next();
+    } catch (error) {
+      if (error === "jwt expired") {
+        console.log("jwt expired");
+        //next(error)
+      }
+      console.log("no token or bad token");
+      //next(error);
     }
-    console.log('no token or bad token')
-    //next(error);
-  }
-})
+  });
   io.on("connection", (socket) => {
-    const nickName = (socket as CustomSocket).token.nickName
+    const nickName = (socket as CustomSocket).token.nickName;
+    const roomId = socket.handshake.auth.room;
+    socket.join(roomId);
     console.log(`⚡: ${nickName} just connected!`);
-    io.emit('connected', {socketId: socket.id, nickName:nickName})
+    io.emit("connected", { socketId: socket.id, nickName: nickName });
     socket.on("messag", (msg) => {
       console.log(msg);
       //const decodedToken = jwt.verify(socket.handshake.auth.token, sanitizedConfig.JWT_SECRET, {
-       // ignoreExpiration: false,
-      //}) as JwtPayload;
-      //console.log(decodedToken.nickName)
-      io.emit('messag', msg);
+      //  ignoreExpiration: false,
+      // }) as JwtPayload;
+      // console.log(decodedToken.nickName)
+      io.to(roomId).emit("messag", msg);
     });
     socket.on("disconnect", (reason) => {
-      io.emit('disconnected', {reason: reason, socketId: socket.id, nickName:nickName})
+      io.emit("disconnected", {
+        reason: reason,
+        socketId: socket.id,
+        nickName: nickName,
+      });
 
-      console.log(`🔥: ${nickName} disconnected`);
+      console.log(`🔥: ${nickName} disconnected`, reason);
     });
   });
 

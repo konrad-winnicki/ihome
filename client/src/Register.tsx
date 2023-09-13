@@ -64,7 +64,7 @@ const Register: React.FC = () => {
 			const response = await fetchRegistration({ nickName: (nickName ? nickName : null), email: email, password: pwd });
 			if (response.ok) {
 				alert("Registration completed succesfully")
-				navigate("/login")
+				navigate("api/login")
 
 			} else {
 				alert("Email and/or name already in use");

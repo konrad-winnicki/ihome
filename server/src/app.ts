@@ -136,24 +136,6 @@ async function startServer(databaseName: string) {
       io.to(roomId).emit("messag", msg);
     });
 
-    socket.on("userEntered", (msg) => {
-      console.log('entered', msg);
-      //const decodedToken = jwt.verify(socket.handshake.auth.token, sanitizedConfig.JWT_SECRET, {
-      //  ignoreExpiration: false,
-      // }) as JwtPayload;
-      // console.log(decodedToken.nickName)
-      io.to(roomId).emit("userEntered", msg);
-    });
-
-    socket.on("userLeft", (msg) => {
-      console.log('left', msg);
-      //const decodedToken = jwt.verify(socket.handshake.auth.token, sanitizedConfig.JWT_SECRET, {
-      //  ignoreExpiration: false,
-      // }) as JwtPayload;
-      // console.log(decodedToken.nickName)
-      io.to(roomId).emit("userLeft", msg);
-    });
-
     socket.on("roomAdded", (msg) => {
       console.log(msg);
       //const decodedToken = jwt.verify(socket.handshake.auth.token, sanitizedConfig.JWT_SECRET, {

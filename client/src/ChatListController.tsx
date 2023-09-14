@@ -8,8 +8,9 @@ import { Socket } from "socket.io-client";
 type ChatListControllerProps = {
   setRefreshChatPanel: (param: boolean) => void;
   setRoomChoosen: (param: boolean) => void;
-  socketListener: Socket | null
-setActualRoom:(param: string) => void;
+  socketListener: Socket | null;
+  setRoom:(param:string)=>void;
+
   refreshChatPanel: boolean;
 };
 
@@ -64,7 +65,7 @@ const ChatListController: React.FC<ChatListControllerProps> = (props) => {
         ""
       )}
       
-      <ChatRoomList setActualRoom={props.setActualRoom}isNewRoom={isNewRoom} setRoomChoosen={props.setRoomChoosen} setRefreshChatPanel={props.setRefreshChatPanel} setCreateChatRoomInProgress={setCreateChatRoomInProgress} isCreateChatRoomInProgress={isCreateChatRoomInProgress}
+      <ChatRoomList setRoom={props.setRoom} isNewRoom={isNewRoom} setRoomChoosen={props.setRoomChoosen} setRefreshChatPanel={props.setRefreshChatPanel} setCreateChatRoomInProgress={setCreateChatRoomInProgress} isCreateChatRoomInProgress={isCreateChatRoomInProgress}
 />
 
      

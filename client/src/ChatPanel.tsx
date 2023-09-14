@@ -32,13 +32,13 @@ export const ChatPanel: React.FC<ChatPanelInterface> = (props) => {
   const [refreshGameList, setRefreshGameList] = useState(false);
   const [refreshChatPanel, setRefreshChatPanel] = useState(false);
   const [isRoomChoosen, setRoomChoosen] = useState(false);
-  const [actualRoom, setActualRoom] = useState('');
+  const [room, setRoom] = useState<string>('');
 
   const [socketListener, setSocketListener] = useState<Socket | null>(null);
  // const [isMessageSent, setMessageSent]= useState(false)
   const token = localStorage.getItem("token");
   const nickName = localStorage.getItem("nickName");
-const room = localStorage.getItem('room')
+//const room = localStorage.getItem('room')
 
   const navigate = useNavigate();
 
@@ -92,12 +92,9 @@ const room = localStorage.getItem('room')
     if (refreshChatPanel) {
       //socketListener?.emit('roomAdded', 'newRoom')
       setRefreshChatPanel(false);
-
     }
   }, [refreshGameList, refreshChatPanel]);
 
-
-  useEffect(()=>{console.log('actualroom', actualRoom)},[actualRoom])
   // const token = localStorage.getItem("token");
 
 
@@ -124,9 +121,9 @@ const room = localStorage.getItem('room')
           refreshChatPanel={refreshChatPanel}
           setRoomChoosen={setRoomChoosen}
           socketListener={socketListener}
-          setActualRoom={setActualRoom}
+          setRoom={setRoom}
           
-        />:  <ChatRoom actualRoom={actualRoom} socketListener={socketListener} isLoggedIn={props.isLoggedIn} setRoomChoosen = {setRoomChoosen}/>}
+        />:  <ChatRoom room={room} socketListener={socketListener} isLoggedIn={props.isLoggedIn} setRoomChoosen = {setRoomChoosen}/>}
       </div>
       <div>
         <button

@@ -14,13 +14,14 @@ interface ChatRoomProps {
 isNewRoom: boolean
   isCreateChatRoomInProgress:boolean
   setCreateChatRoomInProgress: (parat: boolean) => void;
+  setActualRoom:(param: string) => void;
+
 
 }
 
 export const ChatRoomList: React.FC<ChatRoomProps> = (props) => {
   const [chatRooms, setChatRooms] = useState([]);
   const [fetchData, setFetchData] = useState(true)
-  //const [roomChoosen, setRoomChoosen] = useState(false);
 
   const getChatRoomList = useCallback(async () => {
     console.log("GGGGGGG");
@@ -67,9 +68,13 @@ if (fetchData){
     console.log('List content changed:', chatRooms);
   }, [chatRooms])
 */
+
+
+
   const handleButtonClick = (chatRoomId: string) => {
     props.setRoomChoosen(true)
-    localStorage.setItem('room', chatRoomId)
+    props.setActualRoom(chatRoomId)
+    //localStorage.setItem('room', chatRoomId)
     console.log(chatRoomId);
   };
 

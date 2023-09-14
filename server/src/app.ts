@@ -135,6 +135,17 @@ async function startServer(databaseName: string) {
       // console.log(decodedToken.nickName)
       io.to(roomId).emit("messag", msg);
     });
+
+    socket.on("roomAdded", (msg) => {
+      console.log(msg);
+      //const decodedToken = jwt.verify(socket.handshake.auth.token, sanitizedConfig.JWT_SECRET, {
+      //  ignoreExpiration: false,
+      // }) as JwtPayload;
+      // console.log(decodedToken.nickName)
+      io.emit("roomAdded", "roomAdded");
+    });
+
+
     socket.on("disconnect", (reason) => {
       io.emit("disconnected", {
         reason: reason,

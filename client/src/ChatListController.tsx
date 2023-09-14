@@ -3,10 +3,12 @@ import React, { useState, useEffect } from "react";
 //import DeleteGames from "./DeleteGames";
 import CreateChatRoom from "./CreateChatRoom";
 import { ChatRoomList } from "./ChatRoomList";
+import { Socket } from "socket.io-client";
 
 type ChatListControllerProps = {
   setRefreshChatPanel: (param: boolean) => void;
   setRoomChoosen: (param: boolean) => void;
+  socketListener: Socket | null
 
   refreshChatPanel: boolean;
 };
@@ -15,12 +17,29 @@ const ChatListController: React.FC<ChatListControllerProps> = (props) => {
   const [isCreateChatRoomInProgress, setCreateChatRoomInProgress] = useState(false);
   //const [isGameInProgress, setGameInProgress] = useState(false);
   //const [gamesDeleted, setGamesDeleted] = useState(false);
+  const [isNewRoom, setNewRoom] = useState(false);
+
+
+  props.socketListener?.on(
+    "roomAdded",()=>{ console.log('ala')
+    setNewRoom(true)
+  }
+    //console.log('room', localStorage.getItem('room'))
+    //(participant: { socketId: string; nickName: string, room:string }) => {
+//setNewParticipant([...participantList, participant]);
+      //console.log("connected with datos", participant);
+    //}
+  );
+
 
   useEffect(() => {
     console.log('chatListcontroller', isCreateChatRoomInProgress)
-    
+    console.log('list controller', isNewRoom)
+    if (isNewRoom){
+      setNewRoom(false)
+    }
 
-  }, [isCreateChatRoomInProgress]);
+  }, [isCreateChatRoomInProgress, isNewRoom]);
 
   return (
     // TODO changeName a overlay div
@@ -38,12 +57,14 @@ const ChatListController: React.FC<ChatListControllerProps> = (props) => {
         <CreateChatRoom
         setCreateChatRoomInProgress={setCreateChatRoomInProgress}
         setRefreshChatPanel={props.setRefreshChatPanel}
+        socketListener={props.socketListener}
+
         />
       ) : (
         ""
       )}
       
-      <ChatRoomList setRoomChoosen={props.setRoomChoosen}setRefreshChatPanel={props.setRefreshChatPanel} setCreateChatRoomInProgress={setCreateChatRoomInProgress} isCreateChatRoomInProgress={isCreateChatRoomInProgress}
+      <ChatRoomList isNewRoom={isNewRoom} setRoomChoosen={props.setRoomChoosen} setRefreshChatPanel={props.setRefreshChatPanel} setCreateChatRoomInProgress={setCreateChatRoomInProgress} isCreateChatRoomInProgress={isCreateChatRoomInProgress}
 />
 
      

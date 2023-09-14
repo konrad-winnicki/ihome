@@ -1,9 +1,12 @@
 import React, { useState } from "react";
 import { createChatRoom } from "./services";
+import { Socket } from "socket.io-client";
 
 export type CreateChtRoomProps = {
   setCreateChatRoomInProgress: (param: boolean) => void;
   setRefreshChatPanel: (param: boolean) => void;
+  socketListener: Socket | null
+
 };
 
 export const CreateChatRoom: React.FC<CreateChtRoomProps> = (props) => {
@@ -22,6 +25,8 @@ export const CreateChatRoom: React.FC<CreateChtRoomProps> = (props) => {
       if (response.ok) {
         if (response.ok) {
           alert("Room created")
+          props.socketListener?.emit('roomAdded', 'newRoom')
+
   
         } else {
           alert("Room name already in use");

@@ -11,7 +11,7 @@ export interface ChatRoomInterface {
 interface ChatRoomProps {
   setRefreshChatPanel: (parat: boolean) => void;
   setRoomChoosen: (parat: boolean) => void;
-
+isNewRoom: boolean
   isCreateChatRoomInProgress:boolean
   setCreateChatRoomInProgress: (parat: boolean) => void;
 
@@ -43,10 +43,18 @@ export const ChatRoomList: React.FC<ChatRoomProps> = (props) => {
 
   },[chatRooms, props]);
 
+
+  
+
   useEffect(() => {
     console.log("new rooms:", chatRooms);
+    console.log('newRoom Ok', props.isNewRoom)
 if(props.isCreateChatRoomInProgress){
     setFetchData(true);}
+
+if (props.isNewRoom){
+  setFetchData(true)
+}
 if (fetchData){
   setFetchData(false)
 

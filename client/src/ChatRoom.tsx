@@ -19,11 +19,12 @@ type Participant = {
 interface ChatRoomInterface {
   isLoggedIn: boolean
   setRoomChoosen: (param: boolean) => void;
+  socketListener: Socket | null
 
 }
 
 export const ChatRoom: React.FC<ChatRoomInterface> = (props) => {
-  const [socketListener, setSocketListener] = useState<Socket | null>(null);
+ // const [socketListener, setSocketListener] = useState<Socket | null>(null);
  // const [isMessageSent, setMessageSent]= useState(false)
   const token = localStorage.getItem("token");
   const nickName = localStorage.getItem("nickName");
@@ -38,7 +39,7 @@ const scrollableContainerRef = useRef(null)
   const [messageList, setNewMessage] = useState<Array<Message>>([]);
   const [participantList, setNewParticipant] = useState<Array<Participant>>([]);
     console.log('room', localStorage.getItem('room'))
-
+/*
   const socket = (token: string | null) => {
     const URL = `http://localhost:${PORT}`;
     const socket = io(URL, {
@@ -50,7 +51,7 @@ const scrollableContainerRef = useRef(null)
     });
     return socket;
   };
-
+*/
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
     setFormData((prevData) => ({
@@ -58,12 +59,12 @@ const scrollableContainerRef = useRef(null)
       [name]: value,
     }));
   };
-  socketListener?.on("messag", (msg: Message) => {
+  props.socketListener?.on("messag", (msg: Message) => {
     setNewMessage([...messageList, msg]);
-    //console.log('msg', msg)
+    console.log('msg', msg)
   });
 
-  socketListener?.on(
+  props.socketListener?.on(
     "connected",
     //console.log('room', localStorage.getItem('room'))
     (participant: { socketId: string; nickName: string, room:string }) => {
@@ -71,15 +72,15 @@ const scrollableContainerRef = useRef(null)
       console.log("connected with datos", participant);
     }
   );
-
-  socketListener?.on(
+/*
+  props.socketListener?.on(
     "disconnected",
     (participant: { socketId: string; nickName: string, room:string }) => {
       deleteParticipant(participant);
       console.log("disconnected", participant);
     }
   );
-
+*/
   const deleteParticipant = (toDelete: Participant) => {
     console.log(toDelete.socketId);
     const newParticipantList = participantList.filter(
@@ -90,28 +91,28 @@ const scrollableContainerRef = useRef(null)
   };
 
   const leaveRoom = ()=>{
-    socketListener?.disconnect();
+   // props.socketListener?.disconnect();
     props.setRoomChoosen(false)
 
 }
   useEffect(() => {
     console.log('room', localStorage.getItem('room'))
     console.log("list", participantList);
-
+/*
     if (!socketListener) {
       const socketListener = socket(token);
       setSocketListener(socketListener);
       socketListener.connect();
       console.log("socket listener setted");
     }
-
+*/
     if(!props.isLoggedIn){
-      socketListener?.disconnect();
+      props.socketListener?.disconnect();
 
     }
 
     console.log("partlist", participantList);
-  }, [props, participantList, socketListener, messageList, token]);
+  }, [props, participantList, messageList, token]);
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -119,7 +120,7 @@ const scrollableContainerRef = useRef(null)
     //socketEmitter?.connect();
    // setMessageSent(true)
     const messageId = v4();
-    socketListener?.emit("messag", {
+    props.socketListener?.emit("messag", {
       nickName: nickName,
       messageId: messageId,
       message: formData.message,

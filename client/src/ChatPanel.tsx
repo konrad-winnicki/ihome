@@ -11,6 +11,8 @@ import { useNavigate } from "react-router-dom";
 //import { UserContext } from "./context/UserContext";
 import { ChatRoom } from "./ChatRoom";
 import ChatListController from "./ChatListController";
+import io, { Socket } from "socket.io-client";
+import { PORT } from "./config/config";
 
 export interface playerRanking {
   name: string | null;
@@ -30,6 +32,12 @@ export const ChatPanel: React.FC<ChatPanelInterface> = (props) => {
   const [refreshGameList, setRefreshGameList] = useState(false);
   const [refreshChatPanel, setRefreshChatPanel] = useState(false);
   const [isRoomChoosen, setRoomChoosen] = useState(false);
+
+  const [socketListener, setSocketListener] = useState<Socket | null>(null);
+ // const [isMessageSent, setMessageSent]= useState(false)
+  const token = localStorage.getItem("token");
+  const nickName = localStorage.getItem("nickName");
+const room = localStorage.getItem('room')
 
   const navigate = useNavigate();
 
@@ -51,12 +59,37 @@ export const ChatPanel: React.FC<ChatPanelInterface> = (props) => {
   // 	navigate("/")
   // }
 
+
+
+
+
+  const socket = (token: string | null) => {
+    const URL = `http://localhost:${PORT}`;
+    const socket = io(URL, {
+      autoConnect: false,
+      auth: {
+        room:room,
+        token: token,
+      },
+    });
+    return socket;
+  };
+
   useEffect(() => {
     console.log("dashboard ref");
+
+    if (!socketListener) {
+      const socketListener = socket(token);
+      setSocketListener(socketListener);
+      socketListener.connect();
+      console.log("socket listener setted");
+    }
+
     if (refreshGameList) {
       setRefreshGameList(false);
     }
     if (refreshChatPanel) {
+      //socketListener?.emit('roomAdded', 'newRoom')
       setRefreshChatPanel(false);
     }
   }, [refreshGameList, refreshChatPanel]);
@@ -86,7 +119,9 @@ export const ChatPanel: React.FC<ChatPanelInterface> = (props) => {
           setRefreshChatPanel={setRefreshChatPanel}
           refreshChatPanel={refreshChatPanel}
           setRoomChoosen={setRoomChoosen}
-        />:  <ChatRoom isLoggedIn={props.isLoggedIn} setRoomChoosen = {setRoomChoosen}/>}
+          socketListener={socketListener}
+          
+        />:  <ChatRoom socketListener={socketListener} isLoggedIn={props.isLoggedIn} setRoomChoosen = {setRoomChoosen}/>}
       </div>
       <div>
         <button

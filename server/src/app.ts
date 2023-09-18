@@ -23,6 +23,13 @@ export type UserRootControllers = {
     res: Response,
     next: NextFunction
   ) => Promise<Response | undefined>;
+
+  handleGoogleLogin: (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => void
+  
   postUser: (
     req: Request,
     res: Response,
@@ -84,6 +91,31 @@ export async function appSetup(app: Express, router: Router) {
   */
 }
 
+class MapsManager {
+  private _roomsOccupancyMap;
+  constructor() {
+    this._roomsOccupancyMap = new Map<string, Array<string>>();
+  }
+
+  addItemToRoomsOccupancyMap(key: string, value: string) {
+    const existingArray = this._roomsOccupancyMap.get(key) || [];
+    existingArray.push(value);
+    this._roomsOccupancyMap.set(key, existingArray);
+  }
+
+  deleteItemFromRoomsOccupancyMap(key: string, value: string) {
+    const existingArray = this._roomsOccupancyMap.get(key) || [];
+    const newArray = existingArray.filter(
+      (participant) => participant != value
+    );
+    this._roomsOccupancyMap.set(key, newArray);
+  }
+
+  get roomsOccupancyMap(): Map<string, Array<string>> {
+    return this._roomsOccupancyMap;
+  }
+}
+
 async function startServer(databaseName: string) {
   const services = buildServices();
 
@@ -97,14 +129,32 @@ async function startServer(databaseName: string) {
 
   const httpServer = createServer(app);
 
+  const mapsManager = new MapsManager();
+
+  const roomsOccupancyMap = new Map<string, Array<string>>();
+
+  function addItemToRoomsOccupancyMap(key: string, value: string) {
+    const existingArray = roomsOccupancyMap.get(key) || [];
+    existingArray.push(value);
+    roomsOccupancyMap.set(key, existingArray);
+  }
+
+  function deleteItemFromRoomsOccupancyMap(key: string, value: string) {
+    const existingArray = roomsOccupancyMap.get(key) || [];
+    const newArray = existingArray.filter(
+      (participant) => participant != value
+    );
+    roomsOccupancyMap.set(key, newArray);
+  }
+
   const io = new Server(httpServer, {
     cors: {
       origin: "http://localhost:5173",
     },
   });
+
   io.use((socket, next) => {
     const token = socket.handshake.auth.token;
-    console.log("moj", socket.handshake.auth.room);
     try {
       const decodedToken = jwt.verify(token, sanitizedConfig.JWT_SECRET, {
         ignoreExpiration: false,
@@ -121,19 +171,22 @@ async function startServer(databaseName: string) {
       //next(error);
     }
   });
+
+
   io.on("connection", (socket) => {
     const nickName = (socket as CustomSocket).token.nickName;
-    const roomId = socket.handshake.auth.room;
-    socket.join(roomId);
+    let room: string | null = null;
     console.log(`⚡: ${nickName} just connected!`);
     io.emit("connected", { socketId: socket.id, nickName: nickName });
     socket.on("messag", (msg) => {
       console.log(msg);
-      //const decodedToken = jwt.verify(socket.handshake.auth.token, sanitizedConfig.JWT_SECRET, {
-      //  ignoreExpiration: false,
-      // }) as JwtPayload;
-      // console.log(decodedToken.nickName)
-      io.to(roomId).emit("messag", msg);
+      if (room) {
+        io.to(room).emit("messag", {
+          nickName: nickName,
+          messageId: msg.messageId,
+          message: msg.message,
+        });
+      }
     });
 
     socket.on("roomAdded", (msg) => {
@@ -145,14 +198,50 @@ async function startServer(databaseName: string) {
       io.emit("roomAdded", "roomAdded");
     });
 
+    socket.on("userEntered", (msg) => {
+      room = msg.room;
+      if (room) {
+        socket.join(msg.room);
+
+        //mapsManager.addItemToRoomsOccupancyMap(msg.room, msg.nickName)
+        addItemToRoomsOccupancyMap(room, nickName);
+        io.to(room).emit("userEntered", roomsOccupancyMap.get(room));
+        console.log(roomsOccupancyMap);
+      }
+    });
+
+    socket.on("userLeft", () => {
+      if (room) {
+        socket.leave(room);
+        deleteItemFromRoomsOccupancyMap(room, nickName);
+        io.emit("userLeft", roomsOccupancyMap.get(room));
+      }
+    });
+
+    socket.on("loggedOut", () => {
+      if (room) {
+        socket.leave(room);
+        deleteItemFromRoomsOccupancyMap(room, nickName);
+        io.emit("userLeft", roomsOccupancyMap.get(room));
+      }
+    });
+    /*
+    socket.on("listChanged", (msg) => {
+      console.log('listChanged', msg);
+      //const decodedToken = jwt.verify(socket.handshake.auth.token, sanitizedConfig.JWT_SECRET, {
+      //  ignoreExpiration: false,
+      // }) as JwtPayload;
+      // console.log(decodedToken.nickName)
+      io.emit('listChanged', msg);
+    });
+*/
 
     socket.on("disconnect", (reason) => {
-      io.emit("disconnected", {
-        reason: reason,
-        socketId: socket.id,
-        nickName: nickName,
-      });
-
+      console.log("rroom", room);
+      if (room) {
+        deleteItemFromRoomsOccupancyMap(room, nickName);
+        io.emit("userLeft", roomsOccupancyMap.get(room));
+      }
       console.log(`🔥: ${nickName} disconnected`, reason);
     });
   });

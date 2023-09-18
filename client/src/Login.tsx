@@ -1,127 +1,183 @@
-import React, {  useState} from 'react';
+import React, { useState, useEffect,  } from "react";
 //import { UserContext } from './context/UserContext';
-import { useNavigate } from 'react-router-dom';
-import { fetchLogin } from './services';
-import jwt_decode from "jwt-decode"
+import { useNavigate } from "react-router-dom";
+import { fetchLogin } from "./services";
+import jwt_decode from "jwt-decode";
+import { useLocation } from 'react-router-dom';
+import GoogleButton from 'react-google-button'
+
 
 
 interface DecodedToken {
-	userId: string;
-	nickName: string
+  userId: string;
+  nickName: string;
 }
 
 type LoginType = {
-	setIsLoggedIn: (param: boolean) => void
-}
+  setIsLoggedIn: (param: boolean) => void;
+};
 
 const Login: React.FC<LoginType> = (props) => {
+  const navigate = useNavigate();
+  //const userContext = useContext(UserContext);
+  const location = useLocation();
 
-	const navigate = useNavigate();
-	//const userContext = useContext(UserContext);
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+  });
 
-	const [formData, setFormData] = useState({
-		email: "",
-		password: ""
-	})
+  //useEffect(() => {
+  //if (userContext.isTokenValid) {
+  //	props.setIsLoggedIn(true)
+  //}
+  //})
 
-	//useEffect(() => {
-		//if (userContext.isTokenValid) {
-		//	props.setIsLoggedIn(true)
-		//}
-	//})
+  const navigateRegistration = () => {
+    navigate("/api/users");
+  };
 
-	const navigateRegistration = () => {
-		navigate("/api/users")
+  const getGoogleOauth = () => {
+    const rootUrl = "https://accounts.google.com/o/oauth2/v2/auth?";
+    const options = {
+      redirect_uri: "http://localhost:8011/api/auth/google/callback",
+      client_id:
+        "74310907898-vnmrbmvbipc734086n3e65jblppl4c9n.apps.googleusercontent.com",
+      access_type: "offline",
+      response_type: "code",
+      prompt: "consent",
+      scope: [
+        "https://www.googleapis.com/auth/userinfo.profile",
+        "https://www.googleapis.com/auth/userinfo.email",
+      ].join(" "),
+    };
+    const qs = new URLSearchParams(options);
+	console.log(`${rootUrl}${qs.toString()}`)
+    return `${rootUrl}${qs.toString()}`;
+  };
 
-	}
+  const googleLogin = () => {
+    const uri = getGoogleOauth();
 
-	const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-		const { name, value } = event.target;
-		setFormData(prevData => ({
-			...prevData, [name]: value
-		}))
+	window.location.replace(uri)
+  console.log(location)
 
-	}
+  };
 
-	const handleSubmit = async (event: React.FormEvent) => {
-		event.preventDefault();
-		try {
-			const response = await fetchLogin(formData);
-			if (response.ok) {
-				const data = await response.json();
-				const token = data.token;
-				console.log(data)
-				//using local storage
-				const decodedToken: DecodedToken = jwt_decode(token)
-				localStorage.setItem("token", token)
-				localStorage.setItem("nickName", decodedToken.nickName)
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = event.target;
+    setFormData((prevData) => ({
+      ...prevData,
+      [name]: value,
+    }));
+  };
+
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+    try {
+      const response = await fetchLogin(formData);
+      if (response.ok) {
+        const data = await response.json();
+        const token = data.token;
+        console.log(data);
+        //using local storage
+        const decodedToken: DecodedToken = jwt_decode(token);
+        localStorage.setItem("token", token);
+        localStorage.setItem("nickName", decodedToken.nickName);
+
+        //using context
+        // userContext.setUser({
+        // 	email: formData.email,
+        // 	token: localStorage.getItem("token"),
+        // 	id: localStorage.getItem("id")
+        // });
+
+        console.log("login successful");
+        props.setIsLoggedIn(true);
+        // navigate("/dashboard")
+      } else {
+        alert("Email and/or password incorrect");
+        console.error("login failed");
+      }
+    } catch (error) {
+      console.error("an error occurred:", error);
+    }
+  };
 
 
-				//using context
-				// userContext.setUser({
-				// 	email: formData.email,
-				// 	token: localStorage.getItem("token"),
-				// 	id: localStorage.getItem("id")
-				// });
 
-				console.log("login successful")
-				props.setIsLoggedIn(true)
-				// navigate("/dashboard")
+  
+ 
+  useEffect(() => {
+    console.log('URL has changed to:', location);
+    const urlParams = new URLSearchParams(window.location.search)
+    const token = urlParams.get('token')
+    if(token){
+      const decodedToken: DecodedToken = jwt_decode(token);
+        localStorage.setItem("token", token);
+        localStorage.setItem("nickName", decodedToken.nickName);
+        props.setIsLoggedIn(true);
 
-			} else {
-				alert("Email and/or password incorrect");
-				console.error("login failed");
-			}
-		} catch (error) {
-			console.error("an error occurred:", error)
-		}
-	}
+    }
 
-	return (
-		<>
-			<h2 className="text-2xl font-semibold mb-4">Login</h2>
-			<form onSubmit={handleSubmit}>
-				<div className="mb-4">
-					<label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="email">
-						email
-					</label>
-					<input
-						className="w-full p-2 border rounded-md focus:outline-none focus:border-blue-500"
-						type="text"
-						id="email"
-						name="email"
-						value={formData.email}
-						onChange={handleChange}
-					/>
-				</div>
-				<div className="mb-6">
-					<label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="password">
-						Password
-					</label>
-					<input
-						className="w-full p-2 border rounded-md focus:outline-none focus:border-blue-500"
-						type="password"
-						id="password"
-						name="password"
-						value={formData.password}
-						onChange={handleChange}
-					/>
-				</div>
-				<button
-					className="w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring focus:ring-blue-300"
-					type="submit"
-				>
-					Log In
-				</button>
-				<button
-					className="w-full mt-4 bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring focus:ring-blue-300"
-					onClick={navigateRegistration}
-				>
-					Registration
-				</button>
-			</form>
-		</>
-	)
+  }, [location, props])
+
+  return (
+    <>
+      <h2 className="text-2xl font-semibold mb-4">Login</h2>
+      <form onSubmit={handleSubmit}>
+        <div className="mb-4">
+          <label
+            className="block text-gray-700 text-sm font-bold mb-2"
+            htmlFor="email"
+          >
+            email
+          </label>
+          <input
+            className="w-full p-2 border rounded-md focus:outline-none focus:border-blue-500"
+            type="text"
+            id="email"
+            name="email"
+            value={formData.email}
+            onChange={handleChange}
+          />
+        </div>
+        <div className="mb-6">
+          <label
+            className="block text-gray-700 text-sm font-bold mb-2"
+            htmlFor="password"
+          >
+            Password
+          </label>
+          <input
+            className="w-full p-2 border rounded-md focus:outline-none focus:border-blue-500"
+            type="password"
+            id="password"
+            name="password"
+            value={formData.password}
+            onChange={handleChange}
+          />
+        </div>
+        <button
+          className="w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring focus:ring-blue-300"
+          type="submit"
+        >
+          Log In
+        </button>
+        <button
+          className="w-full mt-4 bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring focus:ring-blue-300"
+          onClick={navigateRegistration}
+        >
+          Registration
+        </button>
+        
+      
+      
+      </form>
+      <GoogleButton onClick={googleLogin}></GoogleButton>
+      
+    </>
+  );
 };
 
 export default Login;

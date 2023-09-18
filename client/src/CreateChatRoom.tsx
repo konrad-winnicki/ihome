@@ -1,12 +1,10 @@
 import React, { useState } from "react";
 import { createChatRoom } from "./services";
-import { Socket } from "socket.io-client";
 
 export type CreateChtRoomProps = {
   setCreateChatRoomInProgress: (param: boolean) => void;
   setRefreshChatPanel: (param: boolean) => void;
-  socketListener: Socket | null
-
+  setNewRoom: (param: boolean) => void;
 };
 
 export const CreateChatRoom: React.FC<CreateChtRoomProps> = (props) => {
@@ -24,18 +22,16 @@ export const CreateChatRoom: React.FC<CreateChtRoomProps> = (props) => {
       const response = await createChatRoom(token, user_id, inputField);
       if (response.ok) {
         if (response.ok) {
-          alert("Room created")
-          props.socketListener?.emit('roomAdded', 'newRoom')
-
-  
+          alert("Room created");
+          props.setNewRoom(true);
         } else {
           alert("Room name already in use");
         }
-    }} catch (error) {
+      }
+    } catch (error) {
       console.error("an error occurred:", error);
     }
-     props.setCreateChatRoomInProgress(false)
-    //props.setRefreshChatPanel(true)
+    props.setCreateChatRoomInProgress(false);
   };
 
   return (

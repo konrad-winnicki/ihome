@@ -8,6 +8,9 @@ dotenv.config({ path: path.resolve(__dirname, "../.env") });
 // Interface to load env variables
 
 interface ENV {
+  CLIENT_ID: string|undefined;
+CLIENT_SECRET: string | undefined;
+REDIRECT_URL: string |undefined;
   NODE_ENV: string | undefined;
   PORT: number | undefined;
   MONGO_URI: string | undefined;
@@ -17,6 +20,9 @@ interface ENV {
 }
 
 interface Config {
+  CLIENT_ID: string
+CLIENT_SECRET: string
+REDIRECT_URL: string
   NODE_ENV: string;
   PORT: number;
   MONGO_URI: string;
@@ -29,6 +35,9 @@ interface Config {
 
 const getConfig = (): ENV => {
   return {
+    CLIENT_ID: process.env.CLIENT_ID,
+CLIENT_SECRET: process.env.CLIENT_SECRET,
+REDIRECT_URL: process.env.REDIRECT_URL,
     DATABASE: process.env.DATABASE,
     NODE_ENV: process.env.NODE_ENV,
     TEST_DATABASE: process.env.TEST_DATABASE,

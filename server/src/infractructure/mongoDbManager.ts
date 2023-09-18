@@ -4,7 +4,7 @@ import { ChatRoom } from "../domain/ChatRoom";
 import { User } from "../domain/User";
 //import { PlayerList } from "../domain/PlayerList";
 import mongoose, { Model } from "mongoose";
-import { mongo } from "mongoose";
+import {  mongo} from "mongoose";
 import { ChatRoomList } from "../domain/ChatRoomList";
 
 export class UserMongoDbManager implements UserInterface {
@@ -68,7 +68,7 @@ export class UserMongoDbManager implements UserInterface {
       throw new Error("PlayerNotFound");
     }
     const { nickName, email, password, id, registrationDate } = userDetails;
-    const user = new User(id, email, password, nickName, registrationDate);
+    const user = new User(id, email, nickName, registrationDate, password);
     return user;
   }
 
@@ -80,7 +80,7 @@ export class UserMongoDbManager implements UserInterface {
       throw new Error("EmailNotExists");
     }
     const { nickName, email, password, id, registrationDate } = userDetails;
-    const user = new User(id, email, password, nickName, registrationDate);
+    const user = new User(id, email, nickName, registrationDate, password);
     return user;
   }
   /*
@@ -151,7 +151,7 @@ export class ChatRoomMongoDbManager implements ChatRoomInterface {
 
   async createChatRoom(chatRoom: ChatRoom): Promise<string> {
     const newChatRoom = {
-      id: chatRoom.id,
+      id:  chatRoom.id,
       name: chatRoom.name,
       ownerId: chatRoom.ownerId,
       participants: [],

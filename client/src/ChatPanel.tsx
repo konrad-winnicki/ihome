@@ -1,4 +1,4 @@
-import React, { useContext, useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 //import Navbar from "./components/Navbar";
 //import UserDataManipulation from "./components/UserDataManipulation";
 //import { PlayerList } from "./components/PlayerList";
@@ -24,21 +24,16 @@ export interface IRanking {
 }
 
 interface ChatPanelInterface {
-	setIsLoggedIn: (param: boolean) => void;
-  isLoggedIn: boolean
+  setIsLoggedIn: (param: boolean) => void;
+  isLoggedIn: boolean;
 }
 
 export const ChatPanel: React.FC<ChatPanelInterface> = (props) => {
-  const [refreshGameList, setRefreshGameList] = useState(false);
+  const [socketConnection, setSocketConnection] = useState<Socket | null>(null);
   const [refreshChatPanel, setRefreshChatPanel] = useState(false);
-  const [isRoomChoosen, setRoomChoosen] = useState(false);
-  const [room, setRoom] = useState<string>('');
+  const [room, setRoom] = useState<string | null>(null);
 
-  const [socketListener, setSocketListener] = useState<Socket | null>(null);
- // const [isMessageSent, setMessageSent]= useState(false)
   const token = localStorage.getItem("token");
-  const nickName = localStorage.getItem("nickName");
-//const room = localStorage.getItem('room')
 
   const navigate = useNavigate();
 
@@ -48,7 +43,8 @@ export const ChatPanel: React.FC<ChatPanelInterface> = (props) => {
     console.log("Logging out...");
     localStorage.clear();
     props.setIsLoggedIn(false);
-    
+  socketConnection?.emit("loggedOut")
+
     //userContext.setIsTokenValid(false)
     navigate("/api/chatroom");
   };
@@ -60,43 +56,32 @@ export const ChatPanel: React.FC<ChatPanelInterface> = (props) => {
   // 	navigate("/")
   // }
 
+  useEffect(() => {
+    const socket = (token: string | null) => {
+      const URL = `http://localhost:${PORT}`;
+      const socket = io(URL, {
+        autoConnect: false,
+        auth: {
+          token: token,
+        },
+      });
+      return socket;
+    };
 
-
-
-
-  const socket = (token: string | null) => {
-    const URL = `http://localhost:${PORT}`;
-    const socket = io(URL, {
-      autoConnect: false,
-      auth: {
-        room:room,
-        token: token,
-      },
-    });
-    return socket;
-  };
+    const socketConnection = socket(token);
+    setSocketConnection(socketConnection);
+    socketConnection.connect();
+    console.log("socket listener setted");
+  }, [token]);
 
   useEffect(() => {
-    console.log("dashboard ref");
-
-    if (!socketListener) {
-      const socketListener = socket(token);
-      setSocketListener(socketListener);
-      socketListener.connect();
-      console.log("socket listener setted");
-    }
-
-    if (refreshGameList) {
-      setRefreshGameList(false);
-    }
     if (refreshChatPanel) {
       //socketListener?.emit('roomAdded', 'newRoom')
       setRefreshChatPanel(false);
     }
-  }, [refreshGameList, refreshChatPanel]);
+  }, [refreshChatPanel]);
 
   // const token = localStorage.getItem("token");
-
 
   // TODO:
   // if (token) {
@@ -114,16 +99,23 @@ export const ChatPanel: React.FC<ChatPanelInterface> = (props) => {
   // }
 
   return (
-    <div className="flex-col">
-      <div className="m-5 border-t-4 border-double border-emerald-950 flex max-h-360 ">
-        {!isRoomChoosen? <ChatListController
-          setRefreshChatPanel={setRefreshChatPanel}
-          refreshChatPanel={refreshChatPanel}
-          setRoomChoosen={setRoomChoosen}
-          socketListener={socketListener}
-          setRoom={setRoom}
-          
-        />:  <ChatRoom room={room} socketListener={socketListener} isLoggedIn={props.isLoggedIn} setRoomChoosen = {setRoomChoosen}/>}
+    <div className="h-screen">
+      <div className="m-5 border-t-2 border-emerald-950 h-screen">
+        {!room ? (
+          <ChatListController
+            setRefreshChatPanel={setRefreshChatPanel}
+            refreshChatPanel={refreshChatPanel}
+            socketConnection={socketConnection}
+            setRoom={setRoom}
+          />
+        ) : (
+          <ChatRoom
+            room={room}
+            socketConnection={socketConnection}
+            isLoggedIn={props.isLoggedIn}
+            setRoom={setRoom}
+          />
+        )}
       </div>
       <div>
         <button

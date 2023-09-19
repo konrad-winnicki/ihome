@@ -42,7 +42,7 @@ export const ChatRoomList: React.FC<ChatRoomProps> = (props) => {
     } catch (error) {
       console.error("An error occurred:", error);
     }
-  }, [props]);
+  }, [props, navigate]);
 
   useEffect(() => {
     if (props.actualiseRoomList) {

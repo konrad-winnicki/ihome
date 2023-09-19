@@ -33,15 +33,7 @@ export const fetchRegistration = async (data: RegistrationData | null) => {
   return response;
 };
 
-export const fetchPlayerList = async (token: string | null) => {
-  const response = await fetch(`http://localhost:${PORT}/api/players`, {
-    method: "GET",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-  return response;
-};
+
 
 export const createChatRoom = async (
   token: string | null,
@@ -49,7 +41,6 @@ export const createChatRoom = async (
   chatName: string
 ) => {
   const data = { chatName: chatName, ownerId: userId };
-  console.log(JSON.stringify(data));
   const response = await fetch(`http://localhost:${PORT}/api/chatrooms`, {
     method: "POST",
     headers: {
@@ -58,22 +49,11 @@ export const createChatRoom = async (
     },
     body: JSON.stringify(data),
   });
+  
   return response;
 };
 
-export const fetchPlayGame = async (
-  token: string | null,
-  id: string | null | undefined
-) => {
-  const response = await fetch(`http://localhost:${PORT}/api/games/${id}`, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json",
-    },
-  });
-  return response;
-};
+
 
 export const fetchChatRoomList = async (token: string | null) => {
 	const response = await fetch(`http://localhost:${PORT}/api/chatrooms`, {
@@ -82,5 +62,6 @@ export const fetchChatRoomList = async (token: string | null) => {
 			Authorization: `Bearer ${token}`
 		}
 	})
+
 	return response;
 }

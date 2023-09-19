@@ -11,19 +11,8 @@ export class UserService {
     return this.userInterface.createUser(userDetails);
   }
 
-  //changeName(playerId: string, newName: string): Promise<Partial<Player>> {
-  //   return this.playerInterface.changeName(playerId, newName);
-  // }
-
-  findUser(userId: string): Promise<User> {
-    return this.userInterface.findUser(userId);
-  }
-
-  findUserByEmail(userEmail: string): Promise<User> {
+  findUserByEmail(userEmail: string): Promise<User|null> {
     return this.userInterface.findUserByEmail(userEmail);
   }
 
-  // getPlayerList(): Promise<PlayerList> {
-  //  return this.playerInterface.getPlayerList();
-  //}
 }

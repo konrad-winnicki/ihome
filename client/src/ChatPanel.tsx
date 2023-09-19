@@ -37,24 +37,13 @@ export const ChatPanel: React.FC<ChatPanelInterface> = (props) => {
 
   const navigate = useNavigate();
 
-  //const userContext = useContext(UserContext)
-
   const logout = () => {
     console.log("Logging out...");
     localStorage.clear();
     props.setIsLoggedIn(false);
-  socketConnection?.emit("loggedOut")
-
-    //userContext.setIsTokenValid(false)
-    navigate("/api/chatroom");
+    socketConnection?.emit("loggedOut");
+    navigate("/api/login");
   };
-
-  /* Throttling navigation to prevent the browser from hanging. See https://crbug.com/1038223. Command line switch --disable-ipc-flooding-protection can be used to bypass the protection */
-
-  //one more condition to secure navigation to login if token not valid
-  // if (!userContext.isTokenValid) {
-  // 	navigate("/")
-  // }
 
   useEffect(() => {
     const socket = (token: string | null) => {
@@ -71,32 +60,13 @@ export const ChatPanel: React.FC<ChatPanelInterface> = (props) => {
     const socketConnection = socket(token);
     setSocketConnection(socketConnection);
     socketConnection.connect();
-    console.log("socket listener setted");
   }, [token]);
 
   useEffect(() => {
     if (refreshChatPanel) {
-      //socketListener?.emit('roomAdded', 'newRoom')
       setRefreshChatPanel(false);
     }
   }, [refreshChatPanel]);
-
-  // const token = localStorage.getItem("token");
-
-  // TODO:
-  // if (token) {
-  //   const decodedToken: JwtPayload = jwt_decode(token);
-  //   const currentDate = new Date();
-  //   const tokenExpiration = decodedToken.exp ? decodedToken.exp : null;
-  //   if (tokenExpiration) {
-  //     if (tokenExpiration * 1000 < currentDate.getTime()) {
-  //       console.log("Token expired.");
-  //       props.setIsLoggedIn(false)
-  //     } else {
-  //       console.log("Valid token");
-  //     }
-  //   }
-  // }
 
   return (
     <div className="h-screen">
@@ -106,6 +76,7 @@ export const ChatPanel: React.FC<ChatPanelInterface> = (props) => {
             setRefreshChatPanel={setRefreshChatPanel}
             refreshChatPanel={refreshChatPanel}
             socketConnection={socketConnection}
+            setIsLoggedIn={props.setIsLoggedIn}
             setRoom={setRoom}
           />
         ) : (

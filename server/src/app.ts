@@ -3,7 +3,7 @@ import config from "../config/config";
 import { buildServices } from "./application/servicesBuilder";
 import cors from "cors";
 import { initRoutes } from "./routes";
-//import { errorHandler } from "./errorHandler";
+import { errorHandler } from "./errorHandler";
 import express, { NextFunction, Request, Response, Router } from "express";
 import { Express } from "express-serve-static-core";
 import { chatRoomControllers, userControllers } from "./application/controller";
@@ -12,7 +12,7 @@ import { IncomingMessage, ServerResponse, createServer } from "http";
 import { Server, Socket } from "socket.io";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import sanitizedConfig from "../config/config";
-import { v4 } from "uuid";
+import * as httpLibrary from "http";
 
 interface CustomSocket extends Socket {
   token: JwtPayload; // Add your custom properties here
@@ -24,12 +24,8 @@ export type UserRootControllers = {
     next: NextFunction
   ) => Promise<Response | undefined>;
 
-  handleGoogleLogin: (
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ) => void
-  
+  handleGoogleLogin: (req: Request, res: Response, next: NextFunction) => void;
+
   postUser: (
     req: Request,
     res: Response,
@@ -52,9 +48,9 @@ export type ChatRoomRootControllers = {
 };
 
 export class Application {
-  server: Server<typeof IncomingMessage, typeof ServerResponse>;
+  server: httpLibrary.Server<typeof IncomingMessage, typeof ServerResponse>;
   connection: Connection;
-  constructor(server: Server, connection: Connection) {
+  constructor(server: httpLibrary.Server, connection: Connection) {
     this.server = server;
     this.connection = connection;
   }
@@ -76,8 +72,7 @@ export async function appSetup(app: Express, router: Router) {
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
   app.use("/api", router);
-
-  /*app.use(
+  app.use(
     (
       error: Error,
       _request: Request,
@@ -87,65 +82,52 @@ export async function appSetup(app: Express, router: Router) {
       errorHandler(error, response, next);
     }
   );
-
-  */
 }
 
-class MapsManager {
-  private _roomsOccupancyMap;
-  constructor() {
-    this._roomsOccupancyMap = new Map<string, Array<string>>();
+class RoomOccupancyMapManager {
+  private _map: Map<string, Array<string>>;
+  constructor(map: Map<string, Array<string>>) {
+    this._map = map;
   }
 
-  addItemToRoomsOccupancyMap(key: string, value: string) {
-    const existingArray = this._roomsOccupancyMap.get(key) || [];
+  addItemToMap(key: string, value: string) {
+    const existingArray = this._map.get(key) || [];
     existingArray.push(value);
-    this._roomsOccupancyMap.set(key, existingArray);
+    this._map.set(key, existingArray);
   }
 
-  deleteItemFromRoomsOccupancyMap(key: string, value: string) {
-    const existingArray = this._roomsOccupancyMap.get(key) || [];
+  deleteItemFromMap(key: string, value: string) {
+    const existingArray = this._map.get(key) || [];
     const newArray = existingArray.filter(
       (participant) => participant != value
     );
-    this._roomsOccupancyMap.set(key, newArray);
+    this._map.set(key, newArray);
   }
 
-  get roomsOccupancyMap(): Map<string, Array<string>> {
-    return this._roomsOccupancyMap;
+  get map(): Map<string, Array<string>> {
+    return this._map;
   }
 }
 
-async function startServer(databaseName: string) {
-  const services = buildServices();
 
+function socketSetup () {
+
+}
+
+async function startServer(databaseName: string) {
+  const services = buildServices(databaseName);
   const userRootControllers = userControllers(services.userService);
   const chatRoomRootControllers = chatRoomControllers(services.chatRoomService);
   const app = express();
   const router = express.Router();
   await initRoutes(router, userRootControllers, chatRoomRootControllers);
   await appSetup(app, router);
-  console.log("aaaaaaaa");
 
   const httpServer = createServer(app);
+  const roomsMap = new Map<string, Array<string>>();
+  const roomsOccupancyMap = new RoomOccupancyMapManager(roomsMap);
 
-  const mapsManager = new MapsManager();
 
-  const roomsOccupancyMap = new Map<string, Array<string>>();
-
-  function addItemToRoomsOccupancyMap(key: string, value: string) {
-    const existingArray = roomsOccupancyMap.get(key) || [];
-    existingArray.push(value);
-    roomsOccupancyMap.set(key, existingArray);
-  }
-
-  function deleteItemFromRoomsOccupancyMap(key: string, value: string) {
-    const existingArray = roomsOccupancyMap.get(key) || [];
-    const newArray = existingArray.filter(
-      (participant) => participant != value
-    );
-    roomsOccupancyMap.set(key, newArray);
-  }
 
   const io = new Server(httpServer, {
     cors: {
@@ -155,6 +137,7 @@ async function startServer(databaseName: string) {
 
   io.use((socket, next) => {
     const token = socket.handshake.auth.token;
+    console.log("handshake");
     try {
       const decodedToken = jwt.verify(token, sanitizedConfig.JWT_SECRET, {
         ignoreExpiration: false,
@@ -171,7 +154,6 @@ async function startServer(databaseName: string) {
       //next(error);
     }
   });
-
 
   io.on("connection", (socket) => {
     const nickName = (socket as CustomSocket).token.nickName;
@@ -191,10 +173,6 @@ async function startServer(databaseName: string) {
 
     socket.on("roomAdded", (msg) => {
       console.log(msg);
-      //const decodedToken = jwt.verify(socket.handshake.auth.token, sanitizedConfig.JWT_SECRET, {
-      //  ignoreExpiration: false,
-      // }) as JwtPayload;
-      // console.log(decodedToken.nickName)
       io.emit("roomAdded", "roomAdded");
     });
 
@@ -202,45 +180,33 @@ async function startServer(databaseName: string) {
       room = msg.room;
       if (room) {
         socket.join(msg.room);
-
-        //mapsManager.addItemToRoomsOccupancyMap(msg.room, msg.nickName)
-        addItemToRoomsOccupancyMap(room, nickName);
-        io.to(room).emit("userEntered", roomsOccupancyMap.get(room));
-        console.log(roomsOccupancyMap);
+        roomsOccupancyMap.addItemToMap(room, nickName);
+        io.to(room).emit("userEntered", roomsOccupancyMap.map.get(room));
+        console.log(roomsOccupancyMap.map);
       }
     });
 
     socket.on("userLeft", () => {
       if (room) {
         socket.leave(room);
-        deleteItemFromRoomsOccupancyMap(room, nickName);
-        io.emit("userLeft", roomsOccupancyMap.get(room));
+        roomsOccupancyMap.deleteItemFromMap(room, nickName);
+        io.emit("userLeft", roomsOccupancyMap.map.get(room));
       }
     });
 
     socket.on("loggedOut", () => {
       if (room) {
         socket.leave(room);
-        deleteItemFromRoomsOccupancyMap(room, nickName);
-        io.emit("userLeft", roomsOccupancyMap.get(room));
+        roomsOccupancyMap.deleteItemFromMap(room, nickName);
+        io.emit("userLeft", roomsOccupancyMap.map.get(room));
       }
     });
-    /*
-    socket.on("listChanged", (msg) => {
-      console.log('listChanged', msg);
-      //const decodedToken = jwt.verify(socket.handshake.auth.token, sanitizedConfig.JWT_SECRET, {
-      //  ignoreExpiration: false,
-      // }) as JwtPayload;
-      // console.log(decodedToken.nickName)
-      io.emit('listChanged', msg);
-    });
-*/
 
     socket.on("disconnect", (reason) => {
       console.log("rroom", room);
       if (room) {
-        deleteItemFromRoomsOccupancyMap(room, nickName);
-        io.emit("userLeft", roomsOccupancyMap.get(room));
+        roomsOccupancyMap.deleteItemFromMap(room, nickName);
+        io.emit("userLeft", roomsOccupancyMap.map.get(room));
       }
       console.log(`🔥: ${nickName} disconnected`, reason);
     });
@@ -250,5 +216,5 @@ async function startServer(databaseName: string) {
     console.log(`Server is listening on port ${config.PORT}! 🍄 `);
   });
 
-  //return new Application(server, services.connection);
+  return new Application(server, services.connection);
 }

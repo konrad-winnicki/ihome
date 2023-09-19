@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { fetchChatRoomList } from "./services";
+import { useNavigate } from "react-router-dom";
 
 export interface ChatRoomInterface {
   id: string;
@@ -11,12 +12,16 @@ interface ChatRoomProps {
   setRoom: (param: string) => void;
   actualiseRoomList: boolean;
   setActualiseRoomList: (parat: boolean) => void;
-
+  setIsLoggedIn: (param: boolean) => void;
 }
 
 export const ChatRoomList: React.FC<ChatRoomProps> = (props) => {
   const [chatRooms, setChatRooms] = useState([]);
   const [fetchData, setFetchData] = useState(true);
+
+
+  const navigate = useNavigate();
+
 
   const getChatRoomList = useCallback(async () => {
     try {
@@ -29,18 +34,21 @@ export const ChatRoomList: React.FC<ChatRoomProps> = (props) => {
       } else {
         console.error("fetching games");
       }
+      if (response.status == 401) {
+        props.setIsLoggedIn(false);
+        localStorage.clear();
+        navigate('/api/login')
+      }
     } catch (error) {
       console.error("An error occurred:", error);
     }
   }, [props]);
 
-  
-
   useEffect(() => {
     if (props.actualiseRoomList) {
-      console.log('actualize activated')
+      console.log("actualize activated");
       setFetchData(true);
-      props.setActualiseRoomList(false)
+      props.setActualiseRoomList(false);
     }
 
     if (fetchData) {

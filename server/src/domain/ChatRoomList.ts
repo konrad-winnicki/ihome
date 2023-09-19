@@ -12,7 +12,7 @@ export class ChatRoomList {
     this.chatRoomList = this.prepareChatRoomDetails(chatRooms);
   }
 
-  public prepareChatRoomDetails(
+  private prepareChatRoomDetails(
     chatRooms: Array<ChatRoom>
   ): Array<ChatRoomDetailsType> {
     return chatRooms.map((chatRoom) => {
@@ -25,7 +25,4 @@ export class ChatRoomList {
     });
   }
 
-  sortList() {
-    return this.chatRoomList.sort();
-  }
 }

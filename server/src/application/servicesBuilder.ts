@@ -12,28 +12,30 @@ import { ChatRoom } from "../domain/ChatRoom";
 import { ChatRoomService } from "./ChatRoomService";
 
 export type Dependencias = {
-  connection: Connection
+  connection: Connection;
   userService: UserService;
-  chatRoomService: ChatRoomService
+  chatRoomService: ChatRoomService;
 };
 
-export  function buildServices():Dependencias {
-  const connection = connectDatabase(config.MONGO_URI, config.DATABASE)
+export function buildServices(databaseName:string): Dependencias {
+  const connection = connectDatabase(config.MONGO_URI, databaseName);
   const userDocument = connection.model<User>("User", UserSchema);
-  const chatRoomDocument = connection.model<ChatRoom>("ChatRoom", ChatRoomSchema);
+  const chatRoomDocument = connection.model<ChatRoom>(
+    "ChatRoom",
+    ChatRoomSchema
+  );
 
-
-   if (!userDocument || !connection) {
+  if (!userDocument || !connection) {
     throw new Error("connection and documents must exist");
   }
   const userManager = new UserMongoDbManager(userDocument);
-const chatRoomManager = new ChatRoomMongoDbManager(chatRoomDocument)
+  const chatRoomManager = new ChatRoomMongoDbManager(chatRoomDocument);
   const userService = new UserService(userManager);
   const chatRoomService = new ChatRoomService(chatRoomManager);
 
   return {
     connection: connection,
     userService: userService,
-    chatRoomService: chatRoomService
-  }
+    chatRoomService: chatRoomService,
+  };
 }

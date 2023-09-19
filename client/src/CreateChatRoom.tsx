@@ -1,17 +1,19 @@
 import React, { useState } from "react";
 import { createChatRoom } from "./services";
+import { useNavigate } from "react-router-dom";
 
 export type CreateChtRoomProps = {
   setCreateChatRoomInProgress: (param: boolean) => void;
   setRefreshChatPanel: (param: boolean) => void;
   setNewRoom: (param: boolean) => void;
+  setIsLoggedIn: (param: boolean) => void;
 };
 
 export const CreateChatRoom: React.FC<CreateChtRoomProps> = (props) => {
   const [inputField, setInputValue] = useState("");
   const token = localStorage.getItem("token");
   const user_id = localStorage.getItem("id");
-
+const navigate = useNavigate()
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setInputValue(event.target.value);
   };
@@ -19,6 +21,8 @@ export const CreateChatRoom: React.FC<CreateChtRoomProps> = (props) => {
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     try {
+      console.log('ussssss', user_id);
+
       const response = await createChatRoom(token, user_id, inputField);
       if (response.ok) {
         if (response.ok) {
@@ -26,6 +30,11 @@ export const CreateChatRoom: React.FC<CreateChtRoomProps> = (props) => {
           props.setNewRoom(true);
         } else {
           alert("Room name already in use");
+        }
+        if (response.status == 401) {
+          props.setIsLoggedIn(false);
+          localStorage.clear();
+          navigate('/api/login')
         }
       }
     } catch (error) {

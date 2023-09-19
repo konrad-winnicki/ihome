@@ -9,7 +9,7 @@ type ChatListControllerProps = {
   setRefreshChatPanel: (param: boolean) => void;
   socketConnection: Socket | null;
   setRoom: (param: string) => void;
-
+  setIsLoggedIn: (param: boolean) => void;
   refreshChatPanel: boolean;
 };
 
@@ -33,10 +33,9 @@ const ChatListController: React.FC<ChatListControllerProps> = (props) => {
       props.socketConnection?.emit("roomAdded", "newRoom");
       setNewRoom(false);
     }
-  }, [isCreateChatRoomInProgress, isNewRoom, actualiseRoomList]);
+  }, [isCreateChatRoomInProgress, isNewRoom, actualiseRoomList, props]);
 
   return (
-    // TODO changeName a overlay div
     <div className="chatList flex items-center justify-center border-5 border-sky-500 m-4 p- flex flex-col rounded-lg">
       <button
         className="bg-blue-500 hover:bg-blue-700 text-white text-lg font-bold py-2 px-2 rounded"
@@ -51,6 +50,8 @@ const ChatListController: React.FC<ChatListControllerProps> = (props) => {
           setCreateChatRoomInProgress={setCreateChatRoomInProgress}
           setRefreshChatPanel={props.setRefreshChatPanel}
           setNewRoom={setNewRoom}
+          setIsLoggedIn={props.setIsLoggedIn}
+
         />
       ) : (
         ""
@@ -59,6 +60,8 @@ const ChatListController: React.FC<ChatListControllerProps> = (props) => {
       <ChatRoomList
         setRoom={props.setRoom}
         setActualiseRoomList={setActualiseRoomList}
+        setIsLoggedIn={props.setIsLoggedIn}
+
         actualiseRoomList={actualiseRoomList}
       />
     </div>

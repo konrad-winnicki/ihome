@@ -12,18 +12,6 @@ export class ChatRoomService {
     return this.chatRoomInterface.createChatRoom(chatRoomDetails);
   }
 
-  //changeName(playerId: string, newName: string): Promise<Partial<Player>> {
-  //   return this.playerInterface.changeName(playerId, newName);
-  // }
-
-  //findUser(userId: string): Promise<User> {
-  //  return this.userInterface.findUser(userId);
-  //}
-
-  //findUserByEmail(userEmail: string): Promise<User> {
-  // return this.userInterface.findUserByEmail(userEmail);
-  //}
-
    getChatRoomList(): Promise<ChatRoomList> {
     return this.chatRoomInterface.getChatRoomList();
   }

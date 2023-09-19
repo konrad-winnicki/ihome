@@ -1,4 +1,3 @@
-import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './App.tsx'
 import './index.css'
@@ -8,8 +7,8 @@ import Register from './Register.tsx';
 
 export const AppRoutes = () => (
   <Routes>
-    <Route path="/api/login" element={<App />} />
-    <Route path="/api/chatroom" element={<App />} />
+    <Route path="/api/login" element={<App/>} />
+    <Route path="/api/chatroom" element={<App/>} />
     <Route path="/api/users" element={<Register />} />
   </Routes>
 );

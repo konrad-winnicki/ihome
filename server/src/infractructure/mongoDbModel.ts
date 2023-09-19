@@ -1,13 +1,14 @@
 import mongoose from "mongoose";
-import { User } from "../domain/User";
 
 export const UserSchema = new mongoose.Schema({
   nickName: {
     type: String,
     index: {
       unique: true,
+      partialFilterExpression: { nickName: { $type: "string" } },
     },
   },
+
   email: {
     type: String,
     unique: true,
@@ -17,6 +18,7 @@ export const UserSchema = new mongoose.Schema({
       return emailRegex.test(value);
     },
   },
+
   password: {
     type: String,
     required: false,
@@ -24,42 +26,41 @@ export const UserSchema = new mongoose.Schema({
 
   id: {
     type: String,
-    required: true,
+    index: {
+      unique: true,
+      required: true,
+    },
   },
   registrationDate: {
     type: Date,
     required: true,
   },
-  
 });
 
 export const ChatRoomSchema = new mongoose.Schema({
   id: {
     type: String,
+    index: {
       unique: true,
+      required: true,
+    },
   },
 
   ownerId: {
     type: String,
-    
+    required: true,
   },
 
   name: {
     type: String,
     index: {
       unique: true,
+      required: true,
     },
   },
-  participants: {
-    type: Array<User>,
-    required: true,
-  },
 
- 
   creationDate: {
     type: Date,
     required: true,
   },
-  
 });
-

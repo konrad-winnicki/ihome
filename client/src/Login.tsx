@@ -5,6 +5,7 @@ import { fetchLogin } from "./services";
 import jwt_decode from "jwt-decode";
 import { useLocation } from 'react-router-dom';
 import GoogleButton from 'react-google-button'
+import type { NavigateOptions} from "./context";
 
 
 
@@ -13,14 +14,10 @@ interface DecodedToken {
   nickName: string;
 }
 
-type LoginType = {
-  setIsLoggedIn: (param: boolean) => void;
-};
 
-const Login: React.FC<LoginType> = (props) => {
+const Login: React.FC = () => {
   const navigate = useNavigate();
   //const userContext = useContext(UserContext);
-  const location = useLocation();
 
   const [formData, setFormData] = useState({
     email: "",
@@ -58,9 +55,7 @@ const Login: React.FC<LoginType> = (props) => {
 
   const googleLogin = () => {
     const uri = getGoogleOauth();
-
-	window.location.replace(uri)
-  console.log(location)
+    window.location.href = uri
 
   };
 
@@ -80,21 +75,13 @@ const Login: React.FC<LoginType> = (props) => {
         const data = await response.json();
         const token = data.token;
         console.log(data);
-        //using local storage
         const decodedToken: DecodedToken = jwt_decode(token);
         localStorage.setItem("token", token);
         localStorage.setItem("nickName", decodedToken.nickName);
-
-        //using context
-        // userContext.setUser({
-        // 	email: formData.email,
-        // 	token: localStorage.getItem("token"),
-        // 	id: localStorage.getItem("id")
-        // });
+        localStorage.setItem("id", decodedToken.userId);
 
         console.log("login successful");
-        props.setIsLoggedIn(true);
-        // navigate("/dashboard")
+        navigate("/api/chatroom", {state: true})
       } else {
         alert("Email and/or password incorrect");
         console.error("login failed");
@@ -103,24 +90,6 @@ const Login: React.FC<LoginType> = (props) => {
       console.error("an error occurred:", error);
     }
   };
-
-
-
-  
- 
-  useEffect(() => {
-    console.log('URL has changed to:', location);
-    const urlParams = new URLSearchParams(window.location.search)
-    const token = urlParams.get('token')
-    if(token){
-      const decodedToken: DecodedToken = jwt_decode(token);
-        localStorage.setItem("token", token);
-        localStorage.setItem("nickName", decodedToken.nickName);
-        props.setIsLoggedIn(true);
-
-    }
-
-  }, [location, props])
 
   return (
     <>

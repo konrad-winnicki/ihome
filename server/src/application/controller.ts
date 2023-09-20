@@ -157,7 +157,7 @@ export function chatRoomControllers(chatRoomService: ChatRoomService) {
       .getChatRoomList()
       .then((chatRooms) => {
         if (chatRooms) {
-          return res.status(200).json(chatRooms);
+          return res.status(200).json(chatRooms.chatRooms);
         }
       })
       .catch((err) => {

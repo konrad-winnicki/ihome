@@ -30,7 +30,8 @@ export const ChatRoomList: React.FC<ChatRoomProps> = (props) => {
 
       if (response.ok) {
         const responseData = await response.json();
-        setChatRooms(responseData.chatRoomList);
+        setChatRooms(responseData);
+        console.log('response', responseData)
       } else {
         console.error("fetching games");
       }
@@ -56,7 +57,7 @@ export const ChatRoomList: React.FC<ChatRoomProps> = (props) => {
       setFetchData(false);
       getChatRoomList();
     }
-    // getChatRoomList();
+    console.log('chatssss', chatRooms)
   }, [props, chatRooms, props.actualiseRoomList]);
   /*
   useEffect(() => {

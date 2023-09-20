@@ -30,10 +30,8 @@ export async function socketSetup (httpServer:httpLibrary.Server) {
       } catch (error) {
         if (error === "jwt expired") {
           console.log("jwt expired");
-          //next(error)
         }
         console.log("no token or bad token");
-        //next(error);
       }
     });
   
@@ -43,7 +41,6 @@ export async function socketSetup (httpServer:httpLibrary.Server) {
       console.log(`⚡: ${nickName} just connected!`);
       io.emit("connected", { socketId: socket.id, nickName: nickName });
       socket.on("messag", (msg) => {
-        console.log(msg);
         if (room) {
           io.to(room).emit("messag", {
             nickName: nickName,
@@ -64,37 +61,36 @@ export async function socketSetup (httpServer:httpLibrary.Server) {
           socket.join(msg.room);
           roomsOccupancyMap.addItemToMap(room, nickName);
           io.to(room).emit("userEntered", roomsOccupancyMap.map.get(room));
-          console.log(roomsOccupancyMap.map);
         }
       });
   
       socket.on("userLeft", () => {
         if (room) {
-          socket.leave(room);
-          roomsOccupancyMap.deleteItemFromMap(room, nickName);
-          io.emit("userLeft", roomsOccupancyMap.map.get(room));
-          console.log(`🔥: ${nickName} left`);
-
+          deleteFromRoomOccupancyMapAndEmitEvent(socket, room, nickName)
         }
       });
   
       socket.on("loggedOut", () => {
         if (room) {
-          socket.leave(room);
-          roomsOccupancyMap.deleteItemFromMap(room, nickName);
-          io.emit("userLeft", roomsOccupancyMap.map.get(room));
-          console.log(`🔥: ${nickName} logged out`);
-
+          deleteFromRoomOccupancyMapAndEmitEvent(socket, room, nickName)
         }
       });
   
       socket.on("disconnect", (reason) => {
-        console.log("rroom", room);
         if (room) {
-          roomsOccupancyMap.deleteItemFromMap(room, nickName);
-          io.emit("userLeft", roomsOccupancyMap.map.get(room));
+          deleteFromRoomOccupancyMapAndEmitEvent(socket, room, nickName)
         }
         console.log(`🔥: ${nickName} disconnected`, reason);
       });
     });
+
+    function deleteFromRoomOccupancyMapAndEmitEvent(socket: Socket, room:string, nickName:string){
+      socket.leave(room);
+      roomsOccupancyMap.deleteItemFromMap(room, nickName);
+      io.emit("userLeft", roomsOccupancyMap.map.get(room));
+      console.log(`🔥: ${nickName} left`);
+
+    }
   }
+
+  

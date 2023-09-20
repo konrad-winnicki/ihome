@@ -68,10 +68,11 @@ export const ChatPanel: React.FC<ChatPanelInterface> = (props) => {
       setRefreshChatPanel(false);
     }
 
-   // if (!props.isLoggedIn){
-     // socketConnection?.emit("disconnect");
+    if (!props.isLoggedIn){
+      console.log('chaatroom disconnect')
+      socketConnection?.emit("disconnect");
 
-    //}
+    }
   }, [refreshChatPanel, props, socketConnection]);
 
   return (

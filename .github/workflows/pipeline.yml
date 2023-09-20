@@ -1,0 +1,67 @@
+name: CHAT
+
+on:
+  push:
+    branches:
+      - "main"
+    
+  pull_request:
+    branches:
+      - "main"
+     
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    environment: CHAT
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Create .env file
+        env:
+          MONGO_URI: "${{secrets.MONGO_URI}}"
+          TEST_DATABASE: "${{secrets.TEST_DATABASE}}"
+          PORT: "${{secrets.PORT}}"
+          JWT_SECRET: "${{secrets.JWT_SECRET}}"
+
+        run: |
+          cd server
+          echo "MONGO_URI=${MONGO_URI}" >> .env
+          echo "TEST_DATABASE"="test" >> .env
+          echo "PORT=${PORT}" >> .env
+          echo "JWT_SECRET=${JWT_SECRET}" >> .env
+
+      - name: Print .env file
+        run: |
+          echo "Printing .env:"
+          cat server/.env
+
+      - name: Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+
+      - name: Start MongoDB
+        uses: supercharge/mongodb-github-action@1.8.0
+        with:
+          mongodb-version: 6.0
+          mongodb-port: 27017
+
+      - name: Build NODE APP
+        run: |
+          npm ci
+          npm run eslint
+          npm run build
+        working-directory: ./server
+
+      - name: Run mongo_test
+        run: |
+          npm run test_api
+        working-directory: ./server
+      - name: Run domain_test
+        run: |
+          npm run test_domain
+        working-directory: ./server

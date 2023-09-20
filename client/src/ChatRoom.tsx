@@ -58,7 +58,7 @@ export const ChatRoom: React.FC<ChatRoomProps> = (props) => {
     props.socketConnection?.emit("userLeft");
     props.setRoom(null);
   };
-
+/*
   useEffect(() => {
     if (!props.isLoggedIn) {
       console.log('chaatroom disconnect')
@@ -66,7 +66,7 @@ export const ChatRoom: React.FC<ChatRoomProps> = (props) => {
     }
 
   }, [props, participantList, messageList, token]);
-
+*/
   useEffect(() => {
     props.socketConnection?.on("messag", (msg: Message) => {
       setNewMessage([...messageList, msg]);

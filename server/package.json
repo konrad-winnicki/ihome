@@ -10,7 +10,6 @@
     "dev": "concurrently \"tsc -w\" \"nodemon ./dist/src/Server.js\"",
     "test_domain": "npx jest --silent --runInBand --testPathPattern=./__tests__/domain",
     "test_api": "cross-env NODE_ENV=test npx jest  --runInBand --testPathPattern=./__tests__/apiTests"
-
   },
   "author": "Konrad Winnicki",
   "license": "ISC",
@@ -20,8 +19,8 @@
     "@types/jest": "^29.5.4",
     "@types/jsonwebtoken": "^9.0.2",
     "@types/node": "^20.5.9",
-    "@types/socket.io": "^3.0.2",
     "@types/supertest": "^2.0.12",
+    "@types/uuid": "^9.0.4",
     "@typescript-eslint/eslint-plugin": "^6.5.0",
     "@typescript-eslint/parser": "^6.5.0",
     "eslint": "^8.48.0",

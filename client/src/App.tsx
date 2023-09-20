@@ -25,6 +25,7 @@ const App: React.FC = () => {
   };
 
   useEffect(() => {
+    
     const token = getCookie("token");
     document.cookie = `token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
     if (token) {
@@ -32,12 +33,16 @@ const App: React.FC = () => {
       localStorage.setItem("token", token);
       localStorage.setItem("nickName", decodedToken.nickName);
       localStorage.setItem("id", decodedToken.userId);
-
+      //console.log('in if locationstate', location.state)
       setIsLoggedIn(true);
     }else{
       setIsLoggedIn(location.state);
 
     }
+    console.log('locationstate', location.state)
+    console.log('islogged in app', isLoggedIn)
+
+
   }, [location.state]);
 
   return (

@@ -54,16 +54,17 @@ export const ChatRoom: React.FC<ChatRoomProps> = (props) => {
   };
 
   const leaveRoom = () => {
+    console.log('left bottom')
     props.socketConnection?.emit("userLeft");
     props.setRoom(null);
   };
 
   useEffect(() => {
     if (!props.isLoggedIn) {
+      console.log('chaatroom disconnect')
       props.socketConnection?.disconnect();
     }
 
-    console.log("partlist", participantList);
   }, [props, participantList, messageList, token]);
 
   useEffect(() => {

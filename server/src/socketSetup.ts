@@ -73,6 +73,8 @@ export async function socketSetup (httpServer:httpLibrary.Server) {
           socket.leave(room);
           roomsOccupancyMap.deleteItemFromMap(room, nickName);
           io.emit("userLeft", roomsOccupancyMap.map.get(room));
+          console.log(`🔥: ${nickName} left`);
+
         }
       });
   
@@ -81,6 +83,8 @@ export async function socketSetup (httpServer:httpLibrary.Server) {
           socket.leave(room);
           roomsOccupancyMap.deleteItemFromMap(room, nickName);
           io.emit("userLeft", roomsOccupancyMap.map.get(room));
+          console.log(`🔥: ${nickName} logged out`);
+
         }
       });
   

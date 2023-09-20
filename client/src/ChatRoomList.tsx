@@ -39,6 +39,7 @@ export const ChatRoomList: React.FC<ChatRoomProps> = (props) => {
         localStorage.clear();
         navigate('/api/login')
       }
+    
     } catch (error) {
       console.error("An error occurred:", error);
     }

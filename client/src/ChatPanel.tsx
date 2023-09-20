@@ -38,10 +38,10 @@ export const ChatPanel: React.FC<ChatPanelInterface> = (props) => {
   const navigate = useNavigate();
 
   const logout = () => {
+    socketConnection?.emit("loggedOut");
     console.log("Logging out...");
     localStorage.clear();
     props.setIsLoggedIn(false);
-    socketConnection?.emit("loggedOut");
     navigate("/api/login");
   };
 
@@ -63,10 +63,16 @@ export const ChatPanel: React.FC<ChatPanelInterface> = (props) => {
   }, [token]);
 
   useEffect(() => {
+    console.log('is loged in in chat panel', props.isLoggedIn)
     if (refreshChatPanel) {
       setRefreshChatPanel(false);
     }
-  }, [refreshChatPanel]);
+
+   // if (!props.isLoggedIn){
+     // socketConnection?.emit("disconnect");
+
+    //}
+  }, [refreshChatPanel, props, socketConnection]);
 
   return (
     <div className="h-screen">

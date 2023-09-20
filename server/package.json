@@ -4,7 +4,9 @@
   "description": "",
   "main": "app.ts",
   "scripts": {
+    "start": "node ./dist/src/Server.js",
     "build": "npx tsc",
+    "eslint": "npx eslint .",
     "dev": "concurrently \"tsc -w\" \"nodemon ./dist/src/Server.js\"",
     "test_domain": "npx jest --silent --runInBand --testPathPattern=./__tests__/domain",
     "test_api": "cross-env NODE_ENV=test npx jest  --runInBand --testPathPattern=./__tests__/apiTests"

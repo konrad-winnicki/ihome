@@ -45,7 +45,7 @@ export class UserMongoDbManager implements UserInterface {
     if (isUniqueViolation && err.errmsg.includes("email")) {
       throw new Error("EmailConflictError");
     }
-    if (isUniqueViolation && err.errmsg.includes("name")) {
+    if (isUniqueViolation && err.errmsg.includes("nickName")) {
       throw new Error("NameConflictError");
     }
     throw err;

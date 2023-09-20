@@ -2,14 +2,14 @@ import { ChatRoom } from "./ChatRoom";
 
 export type ChatRoomDetailsType = {
   id: string;
-  chatRoomName: string|null;
-  chatOwner: string
+  chatRoomName: string | null;
+  chatOwner: string;
 };
 
 export class ChatRoomList {
-  readonly chatRoomList: Array<ChatRoomDetailsType>;
+  readonly chatRooms: Array<ChatRoomDetailsType>;
   constructor(chatRooms: Array<ChatRoom>) {
-    this.chatRoomList = this.prepareChatRoomDetails(chatRooms);
+    this.chatRooms = this.prepareChatRoomDetails(chatRooms);
   }
 
   private prepareChatRoomDetails(
@@ -19,10 +19,8 @@ export class ChatRoomList {
       return {
         id: chatRoom.id,
         chatRoomName: chatRoom.name,
-        chatOwner: chatRoom.ownerId
-        
+        chatOwner: chatRoom.ownerId,
       };
     });
   }
-
 }

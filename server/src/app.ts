@@ -9,6 +9,7 @@ import * as httpLibrary from "http";
 import { socketSetup } from "./socketSetup";
 import { appSetup } from "./appSetup";
 import sanitizedConfig from "../config/config";
+import { connectDatabase } from "./infractructure/mongoDbConnection";
 
 
 export type UserRootControllers = {
@@ -62,7 +63,8 @@ export async function applicationStart() {
 }
 
 async function startServer(databaseName: string) {
-  const services = buildServices(databaseName);
+  const connection = await connectDatabase(sanitizedConfig.MONGO_URI, databaseName).asPromise()
+  const services = buildServices(connection);
   const userRootControllers = userControllers(services.userService);
   const chatRoomRootControllers = chatRoomControllers(services.chatRoomService);
   const app = express();
@@ -76,5 +78,5 @@ async function startServer(databaseName: string) {
     console.log(`Server is listening on port ${sanitizedConfig.PORT}! 🍄 `);
   });
 
-  return new Application(server, services.connection);
+  return new Application(server, connection);
 }

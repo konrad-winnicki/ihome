@@ -45,6 +45,24 @@ export function userControllers(userService: UserService) {
     }
   }
 
+  const createUserWithGoogleAuth = async (decodedIdToken: GoogleIdToken) => {
+    const user = await userService.findUserByEmail(decodedIdToken.email);
+    if (!user) {
+      const id = v4();
+      const registrationDate = new Date();
+      const newUser = new User(
+        id,
+        decodedIdToken.email,
+        decodedIdToken.given_name,
+        registrationDate,
+        null
+      );
+      userService.createUser(newUser);
+      return { id, nickName: decodedIdToken.given_name };
+    }
+    return { id: user.id, nickName: user.nickName };
+  };
+
   const handleLogin = async (
     req: Request,
     res: Response,
@@ -78,29 +96,11 @@ export function userControllers(userService: UserService) {
     next: NextFunction
   ) => {
     try {
-      let customToken: string;
       const code = req.query.code as string;
       const { id_token } = await exchangeCodeToToken(code);
       const decodedIdToken = jwt.decode(id_token) as GoogleIdToken;
-
-      const user = await userService.findUserByEmail(decodedIdToken.email);
-
-      if (!user) {
-        const id = v4();
-        const registrationDate = new Date();
-        const newUser = new User(
-          id,
-          decodedIdToken.email,
-          decodedIdToken.given_name,
-          registrationDate,
-          null
-        );
-        userService.createUser(newUser);
-        customToken = prepareCustomToken(id, decodedIdToken.given_name);
-      } else {
-        customToken = prepareCustomToken(user.id, user.nickName);
-      }
-
+      const { id, nickName } = await createUserWithGoogleAuth(decodedIdToken);
+      const customToken = prepareCustomToken(id, nickName);
       res
         .cookie("token", customToken)
         .redirect(sanitizedConfig.REDIRECT_URL_WITH_TOKEN);
@@ -180,7 +180,7 @@ export function chatRoomControllers(chatRoomService: ChatRoomService) {
     chatRoomService
       .createChatRoom(newChatRoom)
       .then((response) => {
-        return res.status(201).json({ chat_id: response });
+        return res.status(201).json({ chatRoom_id: response });
       })
       .catch((err: Error) => {
         next(err);

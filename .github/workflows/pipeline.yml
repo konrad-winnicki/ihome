@@ -33,6 +33,11 @@ jobs:
           echo "TEST_DATABASE"="test" >> .env
           echo "PORT=${PORT}" >> .env
           echo "JWT_SECRET=${JWT_SECRET}" >> .env
+          echo "CLIENT_ID"="" >> .env
+          echo "CLIENT_SECRET"="" >> .env
+          echo "EXCHANGE_TOKEN_URI"="" >> .env
+          echo "REDIRECT_URL_WITH_TOKEN"="" >> .env
+         
 
       - name: Print .env file
         run: |

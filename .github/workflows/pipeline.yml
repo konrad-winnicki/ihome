@@ -31,7 +31,7 @@ jobs:
           cd server
           echo "MONGO_URI=${MONGO_URI}" >> .env
           echo "TEST_DATABASE"="test" >> .env
-          echo "DATABASE="" >> .env
+          echo "DATABASE"="" >> .env
           echo "PORT=${PORT}" >> .env
           echo "JWT_SECRET=${JWT_SECRET}" >> .env
           echo "CLIENT_ID"="" >> .env

@@ -21,8 +21,6 @@ const navigate = useNavigate()
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     try {
-      console.log('ussssss', user_id);
-
       const response = await createChatRoom(token, user_id, inputField);
       if (response.ok) {
           alert("Room created");

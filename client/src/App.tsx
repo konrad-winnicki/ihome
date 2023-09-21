@@ -33,7 +33,6 @@ const App: React.FC = () => {
       localStorage.setItem("token", token);
       localStorage.setItem("nickName", decodedToken.nickName);
       localStorage.setItem("id", decodedToken.userId);
-      //console.log('in if locationstate', location.state)
       setIsLoggedIn(true);
     }else{
       setIsLoggedIn(location.state);

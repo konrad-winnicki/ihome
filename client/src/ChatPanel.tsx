@@ -1,14 +1,5 @@
 import React, { useState, useEffect } from "react";
-//import Navbar from "./components/Navbar";
-//import UserDataManipulation from "./components/UserDataManipulation";
-//import { PlayerList } from "./components/PlayerList";
-//import GetGameData from "./components/GetGameData";
-//import GameList from "./components/GameList";
-//import RankingList from "./components/RankingList";
-// TODO import jwt_decode from "jwt-decode";
-// TODO import { JwtPayload } from "jwt-decode";
 import { useNavigate } from "react-router-dom";
-//import { UserContext } from "./context/UserContext";
 import { ChatRoom } from "./ChatRoom";
 import ChatListController from "./ChatListController";
 import io, { Socket } from "socket.io-client";
@@ -39,7 +30,6 @@ export const ChatPanel: React.FC<ChatPanelInterface> = (props) => {
 
   const logout = () => {
     socketConnection?.emit("loggedOut");
-    console.log("Logging out...");
     localStorage.clear();
     props.setIsLoggedIn(false);
     navigate("/api/login");
@@ -63,13 +53,11 @@ export const ChatPanel: React.FC<ChatPanelInterface> = (props) => {
   }, [token]);
 
   useEffect(() => {
-    console.log('is loged in in chat panel', props.isLoggedIn)
     if (refreshChatPanel) {
       setRefreshChatPanel(false);
     }
 
     if (!props.isLoggedIn){
-      console.log('chaatroom disconnect')
       socketConnection?.emit("disconnect");
 
     }

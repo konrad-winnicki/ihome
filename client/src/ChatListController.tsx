@@ -1,6 +1,4 @@
 import React, { useState, useEffect } from "react";
-//import PlayGame from "./PlayGame";
-//import DeleteGames from "./DeleteGames";
 import CreateChatRoom from "./CreateChatRoom";
 import { ChatRoomList } from "./ChatRoomList";
 import { Socket } from "socket.io-client";
@@ -21,14 +19,11 @@ const ChatListController: React.FC<ChatListControllerProps> = (props) => {
 
   useEffect(() => {
     props.socketConnection?.on("roomAdded", () => {
-      console.log("ala");
       setActualiseRoomList(true);
     });
   }, [props.socketConnection]);
 
   useEffect(() => {
-    console.log("chatListcontroller", isCreateChatRoomInProgress);
-    console.log("list controller", isNewRoom);
     if (isNewRoom) {
       props.socketConnection?.emit("roomAdded", "newRoom");
       setNewRoom(false);
@@ -51,7 +46,6 @@ const ChatListController: React.FC<ChatListControllerProps> = (props) => {
           setRefreshChatPanel={props.setRefreshChatPanel}
           setNewRoom={setNewRoom}
           setIsLoggedIn={props.setIsLoggedIn}
-
         />
       ) : (
         ""
@@ -61,7 +55,6 @@ const ChatListController: React.FC<ChatListControllerProps> = (props) => {
         setRoom={props.setRoom}
         setActualiseRoomList={setActualiseRoomList}
         setIsLoggedIn={props.setIsLoggedIn}
-
         actualiseRoomList={actualiseRoomList}
       />
     </div>

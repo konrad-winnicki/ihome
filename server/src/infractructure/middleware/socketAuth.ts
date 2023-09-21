@@ -1,7 +1,7 @@
 import { Socket } from "socket.io";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import sanitizedConfig from "../../../config/config";
-import { CustomSocketAttributes } from "../../../types";
+import { CustomSocketAttributes } from "../../types";
 
 export const socketAuthentication = (
   socket: Socket,

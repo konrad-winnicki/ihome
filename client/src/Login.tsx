@@ -1,10 +1,9 @@
 import React, { useState } from "react";
-//import { UserContext } from './context/UserContext';
 import { useNavigate } from "react-router-dom";
 import { fetchLogin } from "./services";
 import jwt_decode from "jwt-decode";
 import GoogleButton from 'react-google-button'
-
+import { REDIRECT_URI, CLIENT_ID} from "./config/config";
 
 
 interface DecodedToken {
@@ -15,18 +14,11 @@ interface DecodedToken {
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
-  //const userContext = useContext(UserContext);
 
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
-
-  //useEffect(() => {
-  //if (userContext.isTokenValid) {
-  //	props.setIsLoggedIn(true)
-  //}
-  //})
 
   const navigateRegistration = () => {
     navigate("/api/users");
@@ -35,9 +27,8 @@ const Login: React.FC = () => {
   const getGoogleOauth = () => {
     const rootUrl = "https://accounts.google.com/o/oauth2/v2/auth?";
     const options = {
-      redirect_uri: "http://localhost:8011/api/auth/google/callback",
-      client_id:
-        "74310907898-vnmrbmvbipc734086n3e65jblppl4c9n.apps.googleusercontent.com",
+      redirect_uri: REDIRECT_URI,
+      client_id: CLIENT_ID,
       access_type: "offline",
       response_type: "code",
       prompt: "consent",
@@ -47,7 +38,6 @@ const Login: React.FC = () => {
       ].join(" "),
     };
     const qs = new URLSearchParams(options);
-	console.log(`${rootUrl}${qs.toString()}`)
     return `${rootUrl}${qs.toString()}`;
   };
 
@@ -72,12 +62,10 @@ const Login: React.FC = () => {
       if (response.ok) {
         const data = await response.json();
         const token = data.token;
-        console.log(data);
         const decodedToken: DecodedToken = jwt_decode(token);
         localStorage.setItem("token", token);
         localStorage.setItem("nickName", decodedToken.nickName);
         localStorage.setItem("id", decodedToken.userId);
-
         console.log("login successful");
         navigate("/api/chatroom", {state: true})
       } else {

@@ -8,8 +8,6 @@ type Message = {
   messageId: string;
 };
 
-
-
 interface ChatRoomProps {
   isLoggedIn: boolean;
   socketConnection: Socket | null;
@@ -53,30 +51,19 @@ export const ChatRoom: React.FC<ChatRoomProps> = (props) => {
   };
 
   const leaveRoom = () => {
-    console.log('left bottom')
     props.socketConnection?.emit("userLeft");
     props.setRoom(null);
   };
-/*
-  useEffect(() => {
-    if (!props.isLoggedIn) {
-      console.log('chaatroom disconnect')
-      props.socketConnection?.disconnect();
-    }
 
-  }, [props, participantList, messageList, token]);
-*/
   useEffect(() => {
     props.socketConnection?.on("message", (msg: Message) => {
       setNewMessage([...messageList, msg]);
     });
    
     props.socketConnection?.on("userEntered", (msg: Array<string>) => {
-      console.log("userEntered", msg);
       setNewParticipant(msg);
     });
     props.socketConnection?.on("userLeft", (msg: Array<string>) => {
-      console.log("userLeft", msg);
       setNewParticipant(msg);
     });
   }, [props.socketConnection, messageList]);
@@ -87,10 +74,7 @@ export const ChatRoom: React.FC<ChatRoomProps> = (props) => {
     });
   }, [nickName, props.socketConnection, props.room]);
 
-  useEffect(() => {
-    console.log("message", messageList);
-  }, [messageList]);
-
+ 
   const scrollToBottom = () => {
 
     if (scrollableContainerRef.current) {
@@ -102,6 +86,7 @@ export const ChatRoom: React.FC<ChatRoomProps> = (props) => {
   useEffect(() => {
     scrollToBottom();
   }, [messageList]);
+  
   return (
     <div className="grid grid-cols-2">
       <div className="border border-2 w-40 border-black mt-1 mr-1 grid-rows-1 grid-flow-row gap-1 overflow-y-auto h-screen ">

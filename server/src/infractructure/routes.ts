@@ -1,6 +1,6 @@
 import { Router } from "express";
 import authenticate from "./middleware/auth";
-import { ChatRoomRootControllers, UserRootControllers } from "../../types";
+import { ChatRoomRootControllers, UserRootControllers } from "../types";
 
 export async function initRoutes(
   router: Router,

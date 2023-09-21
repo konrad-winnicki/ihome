@@ -31,7 +31,6 @@ export const ChatRoomList: React.FC<ChatRoomProps> = (props) => {
       if (response.ok) {
         const responseData = await response.json();
         setChatRooms(responseData);
-        console.log('response', responseData)
       } else {
         console.error("chat rooms download error");
       }
@@ -48,7 +47,6 @@ export const ChatRoomList: React.FC<ChatRoomProps> = (props) => {
 
   useEffect(() => {
     if (props.actualiseRoomList) {
-      console.log("actualize activated");
       setFetchData(true);
       props.setActualiseRoomList(false);
     }
@@ -57,13 +55,8 @@ export const ChatRoomList: React.FC<ChatRoomProps> = (props) => {
       setFetchData(false);
       getChatRoomList();
     }
-    console.log('chatssss', chatRooms)
-  }, [props, chatRooms, props.actualiseRoomList]);
-  /*
-  useEffect(() => {
-    console.log('List content changed:', chatRooms);
-  }, [chatRooms])
-*/
+  }, [props, chatRooms, props.actualiseRoomList, fetchData, getChatRoomList]);
+ 
   const handleButtonClick = (chatRoomId: string) => {
     props.setRoom(chatRoomId);
   };

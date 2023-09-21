@@ -5,11 +5,11 @@ import sanitizedConfig from "../../../config/config";
 import jwt from "jsonwebtoken";
 import { User } from "../../domain/User";
 import { v4 } from "uuid";
-import { GoogleIdToken } from "../../../types";
+import { GoogleIdToken } from "../../types";
 
 export function prepareCustomToken(userId: string, nickName: string): string {
   const token = jwt.sign({ userId, nickName }, sanitizedConfig.JWT_SECRET, {
-    expiresIn: "60s",
+    expiresIn: "1h",
   });
   return token;
 }
@@ -50,7 +50,7 @@ export const createUserWithGoogleData = async (
       registrationDate,
       null
     );
-    userService.createUser(newUser);
+    await userService.createUser(newUser)
     return { id, nickName: decodedIdToken.given_name };
   }
   return { id: user.id, nickName: user.nickName };

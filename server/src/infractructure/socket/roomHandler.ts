@@ -1,5 +1,5 @@
 import { Server, Socket } from "socket.io";
-import { CustomSocketAttributes, SocketEventMessage } from "../../../types";
+import { CustomSocketAttributes, SocketEventMessage } from "../../types";
 
 export const roomHandler = (io: Server, socket: Socket) => {
   const sendMessage = (payload: SocketEventMessage) => {

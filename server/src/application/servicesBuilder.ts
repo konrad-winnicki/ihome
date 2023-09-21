@@ -9,7 +9,7 @@ import {
 import { Connection } from "mongoose";
 import { ChatRoom } from "../domain/ChatRoom";
 import { ChatRoomService } from "./ChatRoomService";
-import { ServiceBuilderDependencias } from "../../types";
+import { ServiceBuilderDependencias } from "../types";
 
 export function buildServices(
   connection: Connection

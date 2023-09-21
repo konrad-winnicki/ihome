@@ -35,7 +35,6 @@ const Register: React.FC = () => {
 	useEffect(() => {
 		if (email.length > 0) {
 			const result = EMAIL_REGEX.test(email);
-			console.log(result)
 			setvalidEmail(result)
 		}
 
@@ -91,7 +90,6 @@ const Register: React.FC = () => {
 						Nickname
 					</label>
 					<input
-						placeholder="Anonim"
 						onChange={(e) => setNickName(e.target.value)}
 						className="w-full p-2 border rounded-md focus:outline-none focus:border-blue-500"
 						type="text"

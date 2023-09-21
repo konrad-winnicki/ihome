@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { User } from "../../domain/User";
 import { v4 } from "uuid";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import sanitizedConfig from "../../../config/config";
 import { UserService } from "../../application/UserService";
@@ -12,7 +12,7 @@ import {
   exchangeCodeToToken,
   createUserWithGoogleData,
 } from "./auxilaryFunctions";
-import { GoogleIdToken } from "../../../types";
+import { GoogleIdToken } from "../../types";
 
 export function userControllers(userService: UserService) {
   const handleLogin = async (

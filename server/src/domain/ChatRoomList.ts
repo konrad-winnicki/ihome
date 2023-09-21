@@ -1,4 +1,4 @@
-import { ChatRoomDetailsType } from "../../types";
+import { ChatRoomDetailsType } from "../types";
 import { ChatRoom } from "./ChatRoom";
 
 export class ChatRoomList {

@@ -1,5 +1,5 @@
 import cors from "cors";
-import { errorHandler } from "../src/infractructure/errorHandler";
+import { errorHandler } from "./infractructure/errorHandler";
 import { Express } from "express-serve-static-core";
 import express, { NextFunction, Request, Response, Router } from "express";
 

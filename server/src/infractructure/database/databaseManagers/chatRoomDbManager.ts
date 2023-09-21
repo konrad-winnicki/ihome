@@ -33,7 +33,6 @@ export class ChatRoomDbManager implements ChatRoomInterface {
     const chatRoomsFromDB = await this.chatRoomDocument
       .find()
       .sort({ name: 1 });
-    console.log(chatRoomsFromDB);
 
     const chatRooms = chatRoomsFromDB.map((chatRoomFromDB: ChatRoom) => {
       const chatRoom = new ChatRoom(

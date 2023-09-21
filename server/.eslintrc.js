@@ -30,7 +30,7 @@ module.exports = {
         "@typescript-eslint"
     ],
     "rules": {
-        "@typescritp-eslint/no-var-requires": "off"
+        "@typescritp-eslint/no-var-requires": "on"
     },
     "ignorePatterns": ["dist/**"]
 }

@@ -48,7 +48,7 @@ EXCHANGE_TOKEN_URI="https://oauth2.googleapis.com/token"
 REDIRECT_URL_WITH_TOKEN = 'http://localhost:5173/api/chatroom'
 ```
 
-- in `./client` you have to set up the following variables:
+- in `./client` directory in `config.ts` you have to set up the following variables:
 
 ```javascript
 const PORT = "8011";

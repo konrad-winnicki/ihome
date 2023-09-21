@@ -1,19 +1,16 @@
 import path from "path";
 import dotenv from "dotenv";
 
-// Parsing the env file.
 dotenv.config({ path: path.resolve(__dirname, "../.env") });
-//console.log(path.resolve(process.cwd(), ".env") )
 
-// Interface to load env variables
 
 interface ENV {
-  SOCKET_ORIGIN: string | undefined
-  CLIENT_ID: string|undefined;
-CLIENT_SECRET: string | undefined;
-CALLBACK_URL: string |undefined;
-EXCHANGE_TOKEN_URI: string |undefined;
-REDIRECT_URL_WITH_TOKEN: string | undefined;
+  SOCKET_ORIGIN: string | undefined;
+  CLIENT_ID: string | undefined;
+  CLIENT_SECRET: string | undefined;
+  CALLBACK_URL: string | undefined;
+  EXCHANGE_TOKEN_URI: string | undefined;
+  REDIRECT_URL_WITH_TOKEN: string | undefined;
   NODE_ENV: string | undefined;
   PORT: number | undefined;
   MONGO_URI: string | undefined;
@@ -23,31 +20,29 @@ REDIRECT_URL_WITH_TOKEN: string | undefined;
 }
 
 interface Config {
-  SOCKET_ORIGIN: string
-  CLIENT_ID: string
-CLIENT_SECRET: string
-CALLBACK_URL: string
-EXCHANGE_TOKEN_URI:string
-REDIRECT_URL_WITH_TOKEN: string
+  SOCKET_ORIGIN: string;
+  CLIENT_ID: string;
+  CLIENT_SECRET: string;
+  CALLBACK_URL: string;
+  EXCHANGE_TOKEN_URI: string;
+  REDIRECT_URL_WITH_TOKEN: string;
   NODE_ENV: string;
   PORT: number;
   MONGO_URI: string;
   DATABASE: string;
   TEST_DATABASE: string;
   JWT_SECRET: string;
-
 }
 
-// Loading process.env as ENV interface
 
 const getConfig = (): ENV => {
   return {
     SOCKET_ORIGIN: process.env.SOCKET_ORIGIN,
     CLIENT_ID: process.env.CLIENT_ID,
-CLIENT_SECRET: process.env.CLIENT_SECRET,
-CALLBACK_URL: process.env.CALLBACK_URL,
-EXCHANGE_TOKEN_URI: process.env.EXCHANGE_TOKEN_URI, 
-REDIRECT_URL_WITH_TOKEN: process.env.REDIRECT_URL_WITH_TOKEN,
+    CLIENT_SECRET: process.env.CLIENT_SECRET,
+    CALLBACK_URL: process.env.CALLBACK_URL,
+    EXCHANGE_TOKEN_URI: process.env.EXCHANGE_TOKEN_URI,
+    REDIRECT_URL_WITH_TOKEN: process.env.REDIRECT_URL_WITH_TOKEN,
     DATABASE: process.env.DATABASE,
     NODE_ENV: process.env.NODE_ENV,
     TEST_DATABASE: process.env.TEST_DATABASE,

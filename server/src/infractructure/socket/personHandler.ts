@@ -1,8 +1,9 @@
 import { Server, Socket } from "socket.io";
 import { CustomSocketAttributes } from "../../../types";
-import { roomsOccupancy } from "../../Server";
-
+import { RoomOccupancyManager } from "../../domain/RoomOccupancyManager";
 export const personHandler = (io: Server, socket: Socket) => {
+  const roomsOccupancy = new RoomOccupancyManager();
+
   const addPersonToRoomAndEmitEvent = (payload: { room: string }) => {
     if (payload.room) {
       (socket as CustomSocketAttributes).room = payload.room;

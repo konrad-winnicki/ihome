@@ -77,7 +77,7 @@ export const ChatPanel: React.FC<ChatPanelInterface> = (props) => {
 
   return (
     <div className="h-screen">
-      <div className="m-5 border-t-2 border-emerald-950 h-screen">
+      <div className="flex items-center mt-4 justify-center overflow-y-auto max-h-100">
         {!room ? (
           <ChatListController
             setRefreshChatPanel={setRefreshChatPanel}

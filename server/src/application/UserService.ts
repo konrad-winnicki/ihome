@@ -11,8 +11,7 @@ export class UserService {
     return this.userInterface.createUser(userDetails);
   }
 
-  findUserByEmail(userEmail: string): Promise<User|null> {
+  findUserByEmail(userEmail: string): Promise<User | null> {
     return this.userInterface.findUserByEmail(userEmail);
   }
-
 }

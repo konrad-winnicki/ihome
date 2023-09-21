@@ -1,0 +1,15 @@
+FROM node:18-alpine
+
+ENV MONGO_URI="mongodb://mongodb:27017"
+ENV NODE_ENV="production"
+ENV TEST_DATABASE='test'
+ENV DATABASE="chat"
+ENV PORT="8011"
+ENV JWT_SECRET="5dd0aa20-a5c7-472c-b4aa-2d7716a5a654"
+WORKDIR /server
+COPY server/package*.json .
+RUN npm install
+COPY server/ .
+RUN npm run build
+EXPOSE 8011
+CMD npm run prod

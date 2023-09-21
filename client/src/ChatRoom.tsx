@@ -24,7 +24,6 @@ export const ChatRoom: React.FC<ChatRoomProps> = (props) => {
     message: "",
   });
 
-  const token = localStorage.getItem("token");
 
   let nickName: string;
   const nameFromS = localStorage.getItem("nickName");
@@ -38,7 +37,7 @@ export const ChatRoom: React.FC<ChatRoomProps> = (props) => {
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     const messageId = v4();
-    props.socketConnection?.emit("messag", {
+    props.socketConnection?.emit("message", {
       messageId: messageId,
       message: formData.message,
     });
@@ -68,10 +67,8 @@ export const ChatRoom: React.FC<ChatRoomProps> = (props) => {
   }, [props, participantList, messageList, token]);
 */
   useEffect(() => {
-    props.socketConnection?.on("messag", (msg: Message) => {
+    props.socketConnection?.on("message", (msg: Message) => {
       setNewMessage([...messageList, msg]);
-      console.log('razy')
-      console.log("msg", msg);
     });
    
     props.socketConnection?.on("userEntered", (msg: Array<string>) => {
@@ -95,11 +92,10 @@ export const ChatRoom: React.FC<ChatRoomProps> = (props) => {
   }, [messageList]);
 
   const scrollToBottom = () => {
-   // const container = scrollableContainerRef.current as React.MutableRefObject<null>;
 
     if (scrollableContainerRef.current) {
-      scrollableContainerRef.current.scrollTop =
-        scrollableContainerRef.current.scrollHeight;
+      (scrollableContainerRef.current as HTMLElement).scrollTop =
+        (scrollableContainerRef.current as HTMLElement).scrollHeight;
     }
   };
 

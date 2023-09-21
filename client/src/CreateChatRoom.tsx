@@ -25,17 +25,18 @@ const navigate = useNavigate()
 
       const response = await createChatRoom(token, user_id, inputField);
       if (response.ok) {
-        if (response.ok) {
           alert("Room created");
           props.setNewRoom(true);
-        } else {
-          alert("Room name already in use");
-        }
-        if (response.status == 401) {
-          props.setIsLoggedIn(false);
-          localStorage.clear();
-          navigate('/api/login')
-        }
+       
+      }
+      if (response.status == 409){
+        alert("Room name already in use");
+
+      }
+      if (response.status == 401) {
+        props.setIsLoggedIn(false);
+        localStorage.clear();
+        navigate('/api/login')
       }
     } catch (error) {
       console.error("an error occurred:", error);

@@ -21,6 +21,11 @@ export const errorHandler = (
       return response.status(401).send({ Error: "Authentication required" });
     case "NoToken":
       return response.status(401).send({ Error: "No token" });
+    case "Socket authentication error":
+      return response
+        .status(401)
+        .send({ Error: "Socket authentication error" });
+
     default:
       return response.status(500).json({ error: error.message });
   }

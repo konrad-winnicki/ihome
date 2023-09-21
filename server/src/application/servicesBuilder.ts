@@ -1,34 +1,30 @@
-import {
-  ChatRoomMongoDbManager,
-  UserMongoDbManager,
-} from "../infractructure/mongoDbManager";
+import { UserDbManager } from "../infractructure/database/databaseManagers/userDbManager";
+import { ChatRoomDbManager } from "../infractructure/database/databaseManagers/chatRoomDbManager";
 import { UserService } from "./UserService";
 import { User } from "../domain/User";
-import { ChatRoomSchema, UserSchema } from "../infractructure/mongoDbModel";
+import {
+  ChatRoomSchema,
+  UserSchema,
+} from "../infractructure/database/mongoDbModel";
 import { Connection } from "mongoose";
 import { ChatRoom } from "../domain/ChatRoom";
 import { ChatRoomService } from "./ChatRoomService";
+import { ServiceBuilderDependencias } from "../../types";
 
-export type Dependencias = {
-  userService: UserService;
-  chatRoomService: ChatRoomService;
-};
-
-
-
-export function buildServices(connection: Connection ): Dependencias {
-  
+export function buildServices(
+  connection: Connection
+): ServiceBuilderDependencias {
   const userDocument = connection.model<User>("User", UserSchema);
   const chatRoomDocument = connection.model<ChatRoom>(
     "ChatRoom",
     ChatRoomSchema
   );
 
-  if (!userDocument || !connection) {
+  if (!userDocument || !chatRoomDocument || !connection) {
     throw new Error("connection and documents must exist");
   }
-  const userManager = new UserMongoDbManager(userDocument);
-  const chatRoomManager = new ChatRoomMongoDbManager(chatRoomDocument);
+  const userManager = new UserDbManager(userDocument);
+  const chatRoomManager = new ChatRoomDbManager(chatRoomDocument);
   const userService = new UserService(userManager);
   const chatRoomService = new ChatRoomService(chatRoomManager);
 

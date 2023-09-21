@@ -1,4 +1,4 @@
-import { describe, test } from "@jest/globals";
+import { describe, test, expect } from "@jest/globals";
 import { ChatRoomList } from "../../src/domain/ChatRoomList";
 import { ChatRoom } from "../../src/domain/ChatRoom";
 

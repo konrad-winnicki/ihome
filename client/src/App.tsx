@@ -39,8 +39,6 @@ const App: React.FC = () => {
       setIsLoggedIn(location.state);
 
     }
-    console.log('locationstate', location.state)
-    console.log('islogged in app', isLoggedIn)
 
 
   }, [location.state]);

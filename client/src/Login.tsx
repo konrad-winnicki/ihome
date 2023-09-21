@@ -1,11 +1,9 @@
-import React, { useState, useEffect,  } from "react";
+import React, { useState } from "react";
 //import { UserContext } from './context/UserContext';
 import { useNavigate } from "react-router-dom";
 import { fetchLogin } from "./services";
 import jwt_decode from "jwt-decode";
-import { useLocation } from 'react-router-dom';
 import GoogleButton from 'react-google-button'
-import type { NavigateOptions} from "./context";
 
 
 
@@ -92,9 +90,10 @@ const Login: React.FC = () => {
   };
 
   return (
-    <>
-      <h2 className="text-2xl font-semibold mb-4">Login</h2>
+    <div className="flex items-center mt-4 justify-center">
       <form onSubmit={handleSubmit}>
+      <h2 className="text-2xl font-semibold mb-4 ">Login</h2>
+
         <div className="mb-4">
           <label
             className="block text-gray-700 text-sm font-bold mb-2"
@@ -134,18 +133,19 @@ const Login: React.FC = () => {
           Log In
         </button>
         <button
-          className="w-full mt-4 bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring focus:ring-blue-300"
+          className="w-full mt-4 bg-blue-500 text-white py-2 px-4 hover:bg-blue-600 focus:outline-none focus:ring focus:ring-blue-300"
           onClick={navigateRegistration}
         >
           Registration
         </button>
         
       
-      
+        <div  className="flex items-center mt-4 justify-center">      <GoogleButton onClick={googleLogin}></GoogleButton>
+</div>
       </form>
-      <GoogleButton onClick={googleLogin}></GoogleButton>
       
-    </>
+      
+    </div>
   );
 };
 

@@ -1,10 +1,5 @@
+import { ChatRoomDetailsType } from "../../types";
 import { ChatRoom } from "./ChatRoom";
-
-export type ChatRoomDetailsType = {
-  id: string;
-  chatRoomName: string | null;
-  chatOwner: string;
-};
 
 export class ChatRoomList {
   readonly chatRooms: Array<ChatRoomDetailsType>;

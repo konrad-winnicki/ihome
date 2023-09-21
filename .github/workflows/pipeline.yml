@@ -22,13 +22,16 @@ jobs:
 
       - name: Create .env file
         env:
+        
           MONGO_URI: "${{secrets.MONGO_URI}}"
           TEST_DATABASE: "${{secrets.TEST_DATABASE}}"
-          PORT: "${{secrets.PORT}}"
           JWT_SECRET: "${{secrets.JWT_SECRET}}"
 
         run: |
           cd server
+          echo "TEST_DATABASE"="test" >> .env
+          echo "PORT"="8011" >> .env
+          echo "SOCKET_ORIGIN"="http://localhost:5173" >> .env
           echo "MONGO_URI=${MONGO_URI}" >> .env
           echo "TEST_DATABASE"="test" >> .env
           echo "DATABASE"="" >> .env

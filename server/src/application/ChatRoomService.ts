@@ -12,7 +12,7 @@ export class ChatRoomService {
     return this.chatRoomInterface.createChatRoom(chatRoomDetails);
   }
 
-   getChatRoomList(): Promise<ChatRoomList> {
+  getChatRoomList(): Promise<ChatRoomList> {
     return this.chatRoomInterface.getChatRoomList();
   }
 }

@@ -33,7 +33,7 @@ export const ChatRoomList: React.FC<ChatRoomProps> = (props) => {
         setChatRooms(responseData);
         console.log('response', responseData)
       } else {
-        console.error("fetching games");
+        console.error("chat rooms download error");
       }
       if (response.status == 401) {
         props.setIsLoggedIn(false);

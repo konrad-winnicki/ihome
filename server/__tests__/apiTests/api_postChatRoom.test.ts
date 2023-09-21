@@ -1,6 +1,6 @@
 import request from "supertest";
 import { Application, applicationStart } from "../../src/app";
-import { describe, test, afterAll, beforeEach } from "@jest/globals";
+import { describe, test, afterAll, beforeEach, beforeAll, expect } from "@jest/globals";
 import { cleanupDatabase } from "../auxilaryFunctionsForTests/cleanup";
 import sanitizedConfig from "../../config/config";
 import { createUser } from "../auxilaryFunctionsForTests/createUser";

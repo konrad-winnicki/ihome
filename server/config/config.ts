@@ -8,6 +8,7 @@ dotenv.config({ path: path.resolve(__dirname, "../.env") });
 // Interface to load env variables
 
 interface ENV {
+  SOCKET_ORIGIN: string | undefined
   CLIENT_ID: string|undefined;
 CLIENT_SECRET: string | undefined;
 CALLBACK_URL: string |undefined;
@@ -22,6 +23,7 @@ REDIRECT_URL_WITH_TOKEN: string | undefined;
 }
 
 interface Config {
+  SOCKET_ORIGIN: string
   CLIENT_ID: string
 CLIENT_SECRET: string
 CALLBACK_URL: string
@@ -40,6 +42,7 @@ REDIRECT_URL_WITH_TOKEN: string
 
 const getConfig = (): ENV => {
   return {
+    SOCKET_ORIGIN: process.env.SOCKET_ORIGIN,
     CLIENT_ID: process.env.CLIENT_ID,
 CLIENT_SECRET: process.env.CLIENT_SECRET,
 CALLBACK_URL: process.env.CALLBACK_URL,

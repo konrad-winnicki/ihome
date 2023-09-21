@@ -1,68 +1,20 @@
-// import { PlayerDocument } from "./mongoDbModel";
 import { Request, Response, NextFunction } from "express";
-import { User } from "../domain/User";
+import { User } from "../../domain/User";
 import { v4 } from "uuid";
 import bcrypt from "bcrypt";
-import jwt, { JwtPayload } from "jsonwebtoken";
-import sanitizedConfig from "../../config/config";
-import { UserService } from "./UserService";
-import { ChatRoomService } from "./ChatRoomService";
-import { ChatRoom } from "../domain/ChatRoom";
-import qs from "qs";
-import axios from "axios";
-
-interface GoogleIdToken extends JwtPayload {
-  email: string;
-  given_name: string;
-}
+import jwt from "jsonwebtoken";
+import sanitizedConfig from "../../../config/config";
+import { UserService } from "../../application/UserService";
+import { ChatRoomService } from "../../application/ChatRoomService";
+import { ChatRoom } from "../../domain/ChatRoom";
+import {
+  prepareCustomToken,
+  exchangeCodeToToken,
+  createUserWithGoogleData,
+} from "./auxilaryFunctions";
+import { GoogleIdToken } from "../../../types";
 
 export function userControllers(userService: UserService) {
-  function prepareCustomToken(userId: string, nickName: string): string {
-    const token = jwt.sign({ userId, nickName }, sanitizedConfig.JWT_SECRET, {
-      expiresIn: "60s",
-    });
-    return token;
-  }
-
-  async function exchangeCodeToToken(code: string) {
-    const url = sanitizedConfig.EXCHANGE_TOKEN_URI;
-    const values = {
-      code,
-      client_id: sanitizedConfig.CLIENT_ID,
-      client_secret: sanitizedConfig.CLIENT_SECRET,
-      redirect_uri: sanitizedConfig.CALLBACK_URL,
-      grant_type: "authorization_code",
-    };
-
-    try {
-      const response = await axios.post(url, qs.stringify(values), {
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      });
-
-      return response.data;
-    } catch (error) {
-      throw new Error("Code exchange failed");
-    }
-  }
-
-  const createUserWithGoogleAuth = async (decodedIdToken: GoogleIdToken) => {
-    const user = await userService.findUserByEmail(decodedIdToken.email);
-    if (!user) {
-      const id = v4();
-      const registrationDate = new Date();
-      const newUser = new User(
-        id,
-        decodedIdToken.email,
-        decodedIdToken.given_name,
-        registrationDate,
-        null
-      );
-      userService.createUser(newUser);
-      return { id, nickName: decodedIdToken.given_name };
-    }
-    return { id: user.id, nickName: user.nickName };
-  };
-
   const handleLogin = async (
     req: Request,
     res: Response,
@@ -90,7 +42,7 @@ export function userControllers(userService: UserService) {
     }
   };
 
-  const handleGoogleLogin = async (
+  const handleGoogleCallback = async (
     req: Request,
     res: Response,
     next: NextFunction
@@ -99,7 +51,10 @@ export function userControllers(userService: UserService) {
       const code = req.query.code as string;
       const { id_token } = await exchangeCodeToToken(code);
       const decodedIdToken = jwt.decode(id_token) as GoogleIdToken;
-      const { id, nickName } = await createUserWithGoogleAuth(decodedIdToken);
+      const { id, nickName } = await createUserWithGoogleData(
+        userService,
+        decodedIdToken
+      );
       const customToken = prepareCustomToken(id, nickName);
       res
         .cookie("token", customToken)
@@ -143,7 +98,7 @@ export function userControllers(userService: UserService) {
   return {
     handleLogin,
     postUser,
-    handleGoogleLogin,
+    handleGoogleCallback,
   };
 }
 
@@ -156,9 +111,7 @@ export function chatRoomControllers(chatRoomService: ChatRoomService) {
     chatRoomService
       .getChatRoomList()
       .then((chatRooms) => {
-        if (chatRooms) {
-          return res.status(200).json(chatRooms.chatRooms);
-        }
+        return res.status(200).json(chatRooms.chatRooms);
       })
       .catch((err) => {
         next(err);

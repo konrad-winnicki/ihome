@@ -3,32 +3,29 @@ import TimePicker from "react-time-picker";
 import "react-time-picker/dist/TimePicker.css";
 import "react-clock/dist/Clock.css";
 import { MdOutlineSendToMobile } from "react-icons/md";
-import { CheckBox } from "./Checkbox";
-import { SwitcherOption } from "./Option";
-import { RadioExample } from "./radio";
+import { OnOffOption } from "./OnOffOption";
 import "./time.css";
 import { createTask } from "./services";
-import TaskList from "./TaskList";
 interface TimeProps {
-  setIsTime: (param: boolean) => void;
+  setShowTaskDetails: (param: boolean) => void;
   switchId: string;
 }
 
-export const Time: React.FC<TimeProps> = (props) => {
-  const [value, setValue] = useState<string >('');
+export const TaskSetter: React.FC<TimeProps> = (props) => {
+  const [time, setTime] = useState<string>("");
   const [onStatus, setOnStatus] = useState<boolean | null>(null);
   const [isDisabled, setIsDisabled] = useState<boolean>(true);
 
   useEffect(() => {
-    if (value && onStatus) {
+    if (time && onStatus != null) {
       setIsDisabled(false);
     }
 
-    console.log(value, isDisabled);
-  }, [value, onStatus, isDisabled]);
+    console.log(time, isDisabled);
+  }, [time, onStatus, isDisabled]);
 
   const addTask = async () => {
-    const [hour, minutes] = value.split(":");
+    const [hour, minutes] = time.split(":");
     const task = {
       deviceId: props.switchId,
       onStatus: onStatus,
@@ -52,40 +49,23 @@ export const Time: React.FC<TimeProps> = (props) => {
   return (
     <div className="flex flex-row rounded justify-center items-center mx-2">
       <div className="rounded justify-center items-center">
-        <TimePicker
-          onChange={setValue}
-          onClockClose={() => {
-            console.log("close");
-          }}
-          value={value}
-        />
+        <TimePicker onChange={setTime} value={time} />
       </div>
       <div className="rounded justify-center items-center">
-        <TimePicker
-          onChange={setValue}
-          onClockClose={() => {
-            console.log("close");
-          }}
-          value={value}
-        />
-      </div>
-      <div className="rounded justify-center items-center">
-        <SwitcherOption setOnStatus={setOnStatus}></SwitcherOption>
+        <OnOffOption setOnStatus={setOnStatus}></OnOffOption>
       </div>
       <div>
         <button
           onClick={() => {
             addTask();
-            props.setIsTime(false);
+            props.setShowTaskDetails(false);
           }}
           disabled={isDisabled}
           className={isDisabled ? "inactive-button" : "active-button"}
         >
           <MdOutlineSendToMobile />
         </button>
-       
       </div>
-      
     </div>
   );
 };

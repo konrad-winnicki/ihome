@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { Parameters } from "./MetersList";
 
 export type CreateMeterProps = {
-  setInstall: (param: boolean) => void;
+  setInstall: (param: string|null) => void;
   
 }
 export const CreateMeter: React.FC <CreateMeterProps>= (props) => {
@@ -64,7 +64,7 @@ export const CreateMeter: React.FC <CreateMeterProps>= (props) => {
     } catch (error) {
       console.error("an error occurred:", error);
     }
-    props.setInstall(false)
+    props.setInstall(null)
   };
 
   return (

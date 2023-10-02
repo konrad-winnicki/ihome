@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { FaTrashRestoreAlt } from "react-icons/fa";
 
-import { getMeasurement, getMeters, getSwitches } from "./services";
-import ToggleSwitch from "./ToogleSwitch";
+import { getSwitches } from "./services";
 import SwitchModule from "./SwitchModule";
 
 export interface Parameters {
@@ -19,7 +17,6 @@ export interface SwitchInterface {
 
 const SwitchesList: React.FC = () => {
   const [switches, setSwitches] = useState<SwitchInterface[]>([]);
-  const [actualMeterId, setActualMeterId] = useState<string | null>(null);
 
   async function getSwitchList() {
     const response = await getSwitches();
@@ -28,8 +25,6 @@ const SwitchesList: React.FC = () => {
       setSwitches(data);
     }
   }
-
-  
 
   
   useEffect(() => {
@@ -45,8 +40,9 @@ const SwitchesList: React.FC = () => {
       <div className="gap-2">
             {switches.map((switchDevice: SwitchInterface) => {
               return (
+                <div  key={switchDevice.id}>
                 <SwitchModule switchDevice={switchDevice}></SwitchModule>
-
+</div>
               );
             })}
         

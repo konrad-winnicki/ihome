@@ -1,16 +1,16 @@
 import React, { useEffect, useState } from "react";
 import { createSwitch } from "./services";
 import { useNavigate } from "react-router-dom";
+
+
 export type CreateSwitchProps = {
-  setInstall: (param: boolean) => void;
+  setInstall: (param: string|null) => void;
   
 }
 
 
 export const CreateSwitch: React.FC <CreateSwitchProps>= (props) => {
-  const [shouldRender, setShouldRender] = useState(true);
-
-  const [formData, setFormData] = useState({
+    const [formData, setFormData] = useState({
     name: '',
     commandOn: '',
     commandOff: ''
@@ -63,7 +63,7 @@ export const CreateSwitch: React.FC <CreateSwitchProps>= (props) => {
     } catch (error) {
       console.error("an error occurred:", error);
     }
-    props.setInstall(false)
+    props.setInstall(null)
   };
 
   return (

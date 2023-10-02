@@ -1,4 +1,5 @@
 import { PORT } from "./config/config";
+import { URL } from "./config/config";
 
 export interface FormData {
   email: string;
@@ -11,57 +12,97 @@ export interface RegistrationData {
   password: string;
 }
 
-export async function fetchLogin(data: FormData) {
-  const response = await fetch(`http://localhost:${PORT}/api/login`, {
-    method: "POST",
+export async function getMeasurement(meterId: string) {
+  const response = await fetch(`${URL}:${PORT}/runmeter/${meterId}`, {
+    method: "GET",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify(data),
   });
   return response;
 }
 
-export const fetchRegistration = async (data: RegistrationData | null) => {
-  const response = await fetch(`http://localhost:${PORT}/api/users`, {
+export async function getMeters() {
+  const response = await fetch(`${URL}:${PORT}/meters`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+  return response;
+}
+
+export async function getSwitches() {
+  const response = await fetch(`${URL}:${PORT}/switches`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+  return response;
+}
+
+export async function getTasksWhereDeviceId(deviceId:string) {
+  const response = await fetch(`${URL}:${PORT}/tasks/device/${deviceId}`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+  return response;
+}
+
+export const createMeter = async (meter: object) => {
+  const response = await fetch(`${URL}:${PORT}/devices`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify(data),
+    body: JSON.stringify(meter),
   });
   return response;
 };
 
-
-
-export const createChatRoom = async (
-  token: string | null,
-  userId: string | null,
-  chatName: string
-) => {
-  const data = { chatName: chatName, ownerId: userId };
-  const response = await fetch(`http://localhost:${PORT}/api/chatrooms`, {
+export const createSwitch = async (switchDevice: object) => {
+  const response = await fetch(`${URL}:${PORT}/devices`, {
     method: "POST",
     headers: {
-      Authorization: `Bearer ${token}`,
       "Content-Type": "application/json",
     },
-    body: JSON.stringify(data),
+    body: JSON.stringify(switchDevice),
   });
-  
   return response;
 };
 
+export const createTask = async (task: object) => {
+  const response = await fetch(`${URL}:${PORT}/tasks`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(task),
+  });
+  return response;
+};
 
+export const toggleSwitch = async (switchDeviceId: string, switchStatus: boolean) => {
+  const response = await fetch(`${URL}:${PORT}/runswitcher`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({switchDeviceId, switchOn: switchStatus }),
+  });
+  return response;
+};
 
 export const fetchChatRoomList = async (token: string | null) => {
-	const response = await fetch(`http://localhost:${PORT}/api/chatrooms`, {
-		method: "GET",
-		headers: {
-			Authorization: `Bearer ${token}`
-		}
-	})
+  const response = await fetch(`http://localhost:${PORT}/api/chatrooms`, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
 
-	return response;
-}
+  return response;
+};

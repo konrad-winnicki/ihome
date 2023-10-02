@@ -1,56 +1,41 @@
 import { useEffect, useState } from "react";
+import CreateMeter from "./CreateMeter";
 import Login from "./Login";
-import ChatPanel from "./ChatPanel";
-import { useLocation } from "react-router-dom";
-import jwt_decode from "jwt-decode";
+import Temperature from "./Temperature";
+import ToogleSwitch from "./ToogleSwitch";
+import MetersList from "./MetersList";
+import CreateSwitch from "./CreateSwitch";
+import SwitchesList from "./SwitchesList";
+import { Time } from "./time";
+import { GiClockwork } from "react-icons/gi";
+import { InstallButton } from "./InstallButton";
+import { RadioExample } from "./radio";
 
-interface DecodedToken {
-  userId: string;
-  nickName: string;
-}
 const App: React.FC = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [installMeter, setInstallMeter] = useState(false);
+  const [installSwitch, setInstallSwitch] = useState(false);
 
-  const location = useLocation();
-
-  const getCookie = (cookieName: string) => {
-    const cookies = document.cookie.split(";");
-    for (let i = 0; i < cookies.length; i++) {
-      const cookie = cookies[i].trim();
-      if (cookie.startsWith(`${cookieName}=`)) {
-        return cookie.substring(cookieName.length + 1);
-      }
-    }
-    return null;
-  };
-
-  useEffect(() => {
-    
-    const token = getCookie("token");
-    document.cookie = `token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
-    if (token) {
-      const decodedToken: DecodedToken = jwt_decode(token);
-      localStorage.setItem("token", token);
-      localStorage.setItem("nickName", decodedToken.nickName);
-      localStorage.setItem("id", decodedToken.userId);
-      setIsLoggedIn(true);
-    }else{
-      setIsLoggedIn(location.state);
-
-    }
-
-
-  }, [location.state]);
+  useEffect(() => {}, [installMeter]);
 
   return (
     <div className="App">
       <div className="max-h-100 items-center justify-center bg-color-movement ">
         <div className="app-container p-6 bg-white rounded-lg shadow-lg m-8">
-          {isLoggedIn ? (
-            <ChatPanel isLoggedIn={isLoggedIn} setIsLoggedIn={setIsLoggedIn} />
-          ) : (
-            <Login />
-          )}
+          <MetersList></MetersList>
+          <SwitchesList></SwitchesList>
+          <div className="flex flex-row m-2">
+            <InstallButton
+              name={"Meter"}
+              componentToRender={CreateMeter}
+            ></InstallButton>
+
+            <InstallButton
+              name={"Switch"}
+              componentToRender={CreateSwitch}
+            ></InstallButton>
+          </div>
+          
+
         </div>
       </div>
     </div>

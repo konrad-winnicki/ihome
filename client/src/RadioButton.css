@@ -1,0 +1,41 @@
+.radio-button-container {
+    display: inline-flex;
+    flex-direction: row;
+    margin: 5%
+  }
+  
+  .radio-button-label {
+    display: flex;
+    align-items: center;
+    margin: 8px;
+    cursor: pointer;
+  }
+  
+  .radio-button-input {
+    appearance: none;
+    width: 25px;
+    height: 25px;
+    border: 2px solid #000; /* Border style for the rectangular shape */
+    border-radius: 4px; /* Adjust as needed for the corner radius */
+    margin-right: 12px; /* Spacing between the radio button and label */
+    cursor: pointer;
+  }
+  
+  .radio-button-input:checked {
+    background-color: #2302f8; /* Color when the radio button is checked */
+  }
+  
+  .radio-button-text {
+    font-size: 16px;
+    color: #000;
+  }
+  
+  /* Hide the default radio button appearance */
+  .radio-button-input::-webkit-datetime-edit-fields-wrapper {
+    display: none;
+  }
+  
+  .radio-button-input::-webkit-inner-spin-button,
+  .radio-button-input::-webkit-outer-spin-button {
+    display: none;
+  }

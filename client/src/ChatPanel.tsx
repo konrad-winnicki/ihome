@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ChatRoom } from "./ChatRoom";
-import ChatListController from "./ChatListController";
+import ChatListController from "./Temperature";
 import io, { Socket } from "socket.io-client";
 import { PORT } from "./config/config";
 

@@ -1,11 +1,9 @@
 import path from "path";
 import dotenv from "dotenv";
 
-dotenv.config({ path: path.resolve(__dirname, "../.env") });
-
+dotenv.config({ path: path.resolve(__dirname, "../../.env") });
 
 interface ENV {
-  SOCKET_ORIGIN: string | undefined;
   CLIENT_ID: string | undefined;
   CLIENT_SECRET: string | undefined;
   CALLBACK_URL: string | undefined;
@@ -20,7 +18,6 @@ interface ENV {
 }
 
 interface Config {
-  SOCKET_ORIGIN: string;
   CLIENT_ID: string;
   CLIENT_SECRET: string;
   CALLBACK_URL: string;
@@ -37,7 +34,6 @@ interface Config {
 
 const getConfig = (): ENV => {
   return {
-    SOCKET_ORIGIN: process.env.SOCKET_ORIGIN,
     CLIENT_ID: process.env.CLIENT_ID,
     CLIENT_SECRET: process.env.CLIENT_SECRET,
     CALLBACK_URL: process.env.CALLBACK_URL,
@@ -54,6 +50,7 @@ const getConfig = (): ENV => {
 
 const getSanitizedConfig = (config: ENV): Config => {
   for (const [key, value] of Object.entries(config)) {
+    //console.log(Object.entries(config))
     if (value === undefined) {
       throw new Error(`Missing key ${key} in config.env`);
     }

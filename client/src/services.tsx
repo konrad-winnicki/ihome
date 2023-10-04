@@ -13,8 +13,8 @@ export interface RegistrationData {
 }
 
 export async function getMeasurement(meterId: string) {
-  const response = await fetch(`${URL}:${PORT}/runmeter/${meterId}`, {
-    method: "GET",
+  const response = await fetch(`${URL}:${PORT}/meters/run/${meterId}`, {
+    method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
@@ -52,6 +52,16 @@ export async function getTasksWhereDeviceId(deviceId:string) {
   return response;
 }
 
+
+export async function deleteTask(taskId:string) {
+  const response = await fetch(`${URL}:${PORT}/tasks/${taskId}`, {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+  return response;}
+
 export const createMeter = async (meter: object) => {
   const response = await fetch(`${URL}:${PORT}/devices`, {
     method: "POST",
@@ -86,12 +96,12 @@ export const createTask = async (task: object) => {
 };
 
 export const toggleSwitch = async (switchDeviceId: string, switchStatus: boolean) => {
-  const response = await fetch(`${URL}:${PORT}/runswitcher`, {
+  const response = await fetch(`${URL}:${PORT}/switches/run/${switchDeviceId}`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({switchDeviceId, switchOn: switchStatus }),
+    body: JSON.stringify({switchOn: switchStatus }),
   });
   return response;
 };

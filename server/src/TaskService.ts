@@ -11,10 +11,11 @@ export class TaskService {
   addTaskToDB(task: Task): Promise<string> {
     return this.taskInterface.addTaskToDB(task);
   }
-  /*
-  delettaskFromDB(taskId: string): Promise<boolean> {
+
+  deleteTaskFromDB(taskId: string): Promise<boolean> {
     return this.taskInterface.deleteTaskFromDB(taskId);
   }
+  /*
   getTaskListFromDB(): Promise<Task[]> {
     return this.taskInterface.getTaskListFromDB();
   }
@@ -27,12 +28,11 @@ export class TaskService {
     return this.taskInterface.findAllTask();
   }
 
-  async addTaskToCron(task:AggregatedTask): Promise<string | null> {
-   
-    return this.taskInterface.addTaskToCron(task)}
-  
-  async findTaskWhereDeviceId (deviceId: string): Promise<Task[]|null>{
-  return this.taskInterface.findTaskWhereDeviceId(deviceId)}
+  async addTaskToCron(task: AggregatedTask): Promise<string | null> {
+    return this.taskInterface.addTaskToCron(task);
+  }
 
-  
+  async findTasksForDevice(deviceId: string): Promise<Task[] | null> {
+    return this.taskInterface.findTasksForDevice(deviceId);
+  }
 }

@@ -1,7 +1,7 @@
 import { TaskInterface } from "./TaskInterface";
 import { AppCron } from "./cron";
 import { Task } from "./domain/Task";
-import  { Model, mongo } from "mongoose";
+import { Model, mongo } from "mongoose";
 import { AggregatedTask } from "./domain/AggregatedTask";
 import cron from "node-cron";
 
@@ -27,18 +27,17 @@ export class TaskManager implements TaskInterface {
       if (taskFromDB) {
         const aggreatedTask = await this.findTaskById(taskFromDB.id);
         if (aggreatedTask) {
-          try{
-          this.addTaskToCron(aggreatedTask);
-          const tasks = cron.getTasks()
-        console.log('CRON', tasks)
-        }
-          catch(err){
+          try {
+            this.addTaskToCron(aggreatedTask);
+            const tasks = cron.getTasks();
+            console.log("CRON", tasks);
+          } catch (err) {
             this.taskDocument.findByIdAndRemove(taskFromDB.id);
-          throw err;
+            throw err;
           }
         }
       }
-     
+
       return taskFromDB.id;
     } catch (err) {
       if (err instanceof mongo.MongoServerError) {
@@ -70,8 +69,6 @@ export class TaskManager implements TaskInterface {
   */
     ////
 
-
-
     const aggregatedTaskArrayFromDb = await this.taskDocument.aggregate([
       { $match: { id: taskId } },
       {
@@ -93,7 +90,7 @@ export class TaskManager implements TaskInterface {
         },
       },
     ]);
-    console.log('aggregated', aggregatedTaskArrayFromDb)
+    console.log("aggregated", aggregatedTaskArrayFromDb);
 
     if (aggregatedTaskArrayFromDb.length > 0) {
       const aggregatedTaskFromDb = aggregatedTaskArrayFromDb[0];
@@ -113,7 +110,6 @@ export class TaskManager implements TaskInterface {
   }
 
   async findAllTask(): Promise<AggregatedTask[] | null> {
-  
     const aggregatedTaskArrayFromDb = await this.taskDocument.aggregate([
       {
         $lookup: {
@@ -136,8 +132,8 @@ export class TaskManager implements TaskInterface {
     ]);
 
     if (aggregatedTaskArrayFromDb.length > 0) {
-       return aggregatedTaskArrayFromDb.map((aggregatedTask)=>{
-         return new AggregatedTask(
+      return aggregatedTaskArrayFromDb.map((aggregatedTask) => {
+        return new AggregatedTask(
           aggregatedTask.id,
           aggregatedTask.onStatus,
           aggregatedTask.scheduledTime.hour,
@@ -146,24 +142,46 @@ export class TaskManager implements TaskInterface {
           aggregatedTask.device.commandOff
         );
       });
-      
-     
     } else {
       return null;
     }
   }
 
-
-  async findTaskWhereDeviceId (deviceId: string):Promise<Task[]|null>{
-    console.log(deviceId)
-    try{
-    const tasks = await this.taskDocument.find({deviceId:deviceId})
-    return tasks}catch(err){
-      console.log(err)
-      return null
+  async findTasksForDevice(deviceId: string): Promise<Task[] | null> {
+    console.log(deviceId);
+    try {
+      const tasks = await this.taskDocument.find({ deviceId: deviceId });
+      return tasks;
+    } catch (err) {
+      console.log(err);
+      return null;
     }
   }
 
+  async deleteTaskFromDB(taskId: string): Promise<boolean> {
+    try {
+      const taskmap = cron.getTasks();
+      taskmap.delete(taskId);
+    } catch (err) {
+      console.log(err);
+      return false;
+    }
+    const isExistingTask = cron.getTasks().get(taskId);
+    console.log("TASKMAP", cron.getTasks());
+    if (!isExistingTask) {
+      try {
+        const tasks = await this.taskDocument.deleteOne({ id: taskId });
+        const result = tasks.acknowledged;
+
+        console.log("deletion result", result);
+        return true;
+      } catch (err) {
+        console.log(err);
+        return false;
+      }
+    }
+    return false;
+  }
 
   addTaskToCron(task: AggregatedTask) {
     try {
@@ -171,8 +189,8 @@ export class TaskManager implements TaskInterface {
         task.id,
         task.minutes,
         task.hour,
-        task.onStatus ? task.commandOn : task.commandOff? task.commandOff: ""
-    );
+        task.onStatus ? task.commandOn : task.commandOff ? task.commandOff : ""
+      );
       const crontask = cron.getTasks();
       console.log("crontasks:", crontask);
       return task.id;

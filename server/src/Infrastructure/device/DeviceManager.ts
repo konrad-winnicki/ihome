@@ -1,5 +1,5 @@
 import { Model, mongo } from "mongoose";
-import { DeviceMapManager } from "../../domain/DeviceMapManager";
+import { DeviceInMemory } from "../../domain/DeviceInMemory";
 import { Meter } from "../../domain/Meter";
 import { DeviceInterface } from "../../application/device/DeviceInterface";
 import { Device } from "../../domain/Device";
@@ -8,40 +8,40 @@ import { Switch } from "../../domain/Switch";
 
 export class DeviceManager implements DeviceInterface {
   private deviceDocument: Model<Device>;
-  private deviceMap: DeviceMapManager;
-  constructor(
-    deviceDocument: Model<Device>,
-    deviceMap: DeviceMapManager
-  ) {
+  private devicesInMemory: DeviceInMemory;
+  constructor(deviceDocument: Model<Device>, deviceMap: DeviceInMemory) {
     this.deviceDocument = deviceDocument;
-    this.deviceMap = deviceMap;
+    this.devicesInMemory = deviceMap;
   }
 
   addDeviceToLocalStorage(device: Device): boolean {
     try {
-      this.deviceMap.addDevice(device);
-
+      this.devicesInMemory.addDevice(device);
       return true;
     } catch (err) {
-      console.log(err);
+      console.log('LOCAL stoirage ERR',err);
       return false;
     }
   }
-  async addDeviceToDB(device: Device): Promise<string> {
+  async addDeviceToDBAndLocalStorage(device: Device): Promise<string> {
+    console.log('call times')
     try {
       const taskFromDB = await this.deviceDocument.create(device);
       if (taskFromDB) {
         try {
           this.addDeviceToLocalStorage(device);
-          const device1 = this.deviceMap.devices.get(taskFromDB.id);
+          const device1 = this.devicesInMemory.devices.get(taskFromDB.id);
           console.log("DEVICE", device1);
         } catch (err) {
           this.deviceDocument.findByIdAndRemove(taskFromDB.id);
           throw err;
         }
       }
-      return device.id;
+      console.log("TAAAAA", taskFromDB)
+      return taskFromDB.id;
     } catch (err) {
+
+      console.log('ERRRR', err)
       if (err instanceof mongo.MongoServerError) {
         this.uniqueViolationErrorHandler(err);
       }

@@ -2,7 +2,7 @@
     background-color: #f6a9a9; /* Red-500 */
     color: #FFFFFF; /* White text color */
     margin: 1rem; /* 16px margin on all sides */
-    padding: 0.5rem 1rem; /* 8px vertical padding, 16px horizontal padding */
+    padding: 0.15rem 1rem; /* 8px vertical padding, 16px horizontal padding */
     border-radius: 0.25rem; /* 4px border radius */
     display: flex;
     justify-content: center;
@@ -13,7 +13,7 @@
     background-color: #EF4444; /* Red-500 */
     color: #FFFFFF; /* White text color */
     margin: 1rem; /* 16px margin on all sides */
-    padding: 0.5rem 1rem; /* 8px vertical padding, 16px horizontal padding */
+    padding: 0.15rem 1rem; /* 8px vertical padding, 16px horizontal padding */
     border-radius: 0.25rem; /* 4px border radius */
     display: flex;
     justify-content: center;

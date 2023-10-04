@@ -2,52 +2,41 @@ import React, { useEffect, useState } from "react";
 import { createSwitch } from "./services";
 import { useNavigate } from "react-router-dom";
 
-
 export type CreateSwitchProps = {
-  setInstall: (param: string|null) => void;
-  
-}
+  setInstall: (param: string | null) => void;
+};
 
-
-export const CreateSwitch: React.FC <CreateSwitchProps>= (props) => {
-    const [formData, setFormData] = useState({
-    name: '',
-    commandOn: '',
-    commandOff: ''
+export const CreateSwitch: React.FC<CreateSwitchProps> = (props) => {
+  const [formData, setFormData] = useState({
+    name: "",
+    commandOn: "",
+    commandOff: "",
   });
 
   const navigate = useNavigate();
 
-  useEffect(()=>{
-    console.log("form data", formData)
+  useEffect(() => {
+    console.log("form data", formData);
+  });
 
-  })
-
-  
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
     setFormData((prevData) => ({
       ...prevData,
       [name]: value,
     }));
-
   };
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
 
-    
     const switchDevice = {
       deviceType: "switch",
       name: formData.name,
       commandOn: formData.commandOn,
       commandOff: formData.commandOff,
-
     };
 
-
-
-    
     try {
       const response = await createSwitch(switchDevice);
       if (response.ok) {
@@ -63,21 +52,21 @@ export const CreateSwitch: React.FC <CreateSwitchProps>= (props) => {
     } catch (error) {
       console.error("an error occurred:", error);
     }
-    props.setInstall(null)
+    props.setInstall(null);
   };
 
   return (
-    <div className=" w-full p-6 bg-white rounded-lg shadow-lg">
+    <div className=" w-full p-2 bg-white rounded-lg shadow-lg">
       <form className="form" onSubmit={handleSubmit}>
         <label
           className="block text-gray-700 text-sm font-bold mb-2"
-          htmlFor="email"
+          htmlFor="switch"
         >
-          Introduce meter details
+          Introduce switch details
         </label>
-        <div className="flex">
+        <div className="flex m-2">
           <label
-            className="block text-gray-700 text-sm font-bold mb-2"
+            className="w-1/4 block text-gray-700 text-sm font-bold mb-2"
             htmlFor="name"
           >
             Name
@@ -91,13 +80,13 @@ export const CreateSwitch: React.FC <CreateSwitchProps>= (props) => {
             onChange={handleInputChange}
           />
         </div>
-        
-        <div className="flex">
+
+        <div className="flex m-2">
           <label
-            className="block text-gray-700 text-sm font-bold mb-2"
+            className="w-1/4 block text-gray-700 text-sm font-bold mb-2"
             htmlFor="commandOn"
           >
-            CommandOn
+            Command On
           </label>
           <input
             className="w-full p-2 border rounded-md focus:outline-none focus:border-blue-500"
@@ -105,16 +94,15 @@ export const CreateSwitch: React.FC <CreateSwitchProps>= (props) => {
             id="commandOn"
             name="commandOn"
             onChange={handleInputChange}
-            
           />
         </div>
 
-        <div className="flex">
+        <div className="flex m-2">
           <label
-            className="block text-gray-700 text-sm font-bold mb-2"
+            className="w-1/4 block text-gray-700 text-sm font-bold mb-2"
             htmlFor="commandOff"
           >
-            CommandOff
+            Command Off
           </label>
           <input
             className="w-full p-2 border rounded-md focus:outline-none focus:border-blue-500"
@@ -122,16 +110,26 @@ export const CreateSwitch: React.FC <CreateSwitchProps>= (props) => {
             id="commandOff"
             name="commandOff"
             onChange={handleInputChange}
-            
           />
         </div>
 
-        <button
-          className="w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring focus:ring-blue-300"
-          type="submit"
-        >
-          Submit
-        </button>
+        <div className="w-full">
+          <button
+            className="w-1/2 items-center justify-center bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring focus:ring-blue-300"
+            type="submit"
+          >
+            Submit
+          </button>
+        </div>
+        <div className="w-full">
+          <button
+            className="w-1/2 bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring focus:ring-blue-300"
+            type="submit"
+            onClick={() => props.setInstall(null)}
+          >
+            Cancel
+          </button>
+        </div>
       </form>
     </div>
   );

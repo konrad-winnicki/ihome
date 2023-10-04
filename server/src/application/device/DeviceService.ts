@@ -9,8 +9,8 @@ export class DeviceService {
     this.deviceInterface = deviceInterface;
   }
 
-  addDeviceToDB(device: Device): Promise<string> {
-    return this.deviceInterface.addDeviceToDB(device);
+  addDeviceToDBAndLocalStorage(device: Device): Promise<string> {
+    return this.deviceInterface.addDeviceToDBAndLocalStorage(device);
   }
   addDeviceToLocalStorage(device: Device): boolean {
     return this.deviceInterface.addDeviceToLocalStorage(device);

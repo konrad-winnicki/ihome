@@ -65,16 +65,14 @@ const Meter: React.FC<MeterProps> = (props) => {
   }, [measurements]);
 
   return (
-    <div className="grid grid-cols-2 gap-4">
-      <div >
+     
         <button
-          className="w-full bg-blue-500 hover:bg-blue-600 text-lg text-white py-1 px-2 rounded-md my-1 shadow-md"
+          className="w-2/6 bg-[#B804D8] m-1 hover:bg-[#04D8B8] text-lg text-white font-semibold"
           onClick={() => meterOn()}
         >
           {props.meter.name}
         </button>
-      </div>
-    </div>
+     
   );
 };
 

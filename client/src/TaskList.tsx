@@ -43,17 +43,13 @@ const TaskList: React.FC<TaskListInterface> = (props) => {
 
   return (
     <div className="chatList flex items-center justify-center border-5 border-sky-500 m-4 p- flex flex-col rounded-lg">
-      <h1 className="w-full border-b border-black py-2 text-black  text-2l font-semibold">
+      <h1 className="w-full border-b border-black py-2 text-black text-lg font-semibold">
         Current tasks
       </h1>
-
-      <div className="gap-2">
-        
         {tasks?.map((task: TaskInterface) => {
           return <div key={task.id}><TaskModule task={task}></TaskModule></div>
         })}
         
-      </div>
     </div>
   );
 };

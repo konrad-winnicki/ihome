@@ -4,30 +4,27 @@ import { useNavigate } from "react-router-dom";
 import { Parameters } from "./MetersList";
 
 export type CreateMeterProps = {
-  setInstall: (param: string|null) => void;
-  
-}
-export const CreateMeter: React.FC <CreateMeterProps>= (props) => {
+  setInstall: (param: string | null) => void;
+};
+export const CreateMeter: React.FC<CreateMeterProps> = (props) => {
   const [formData, setFormData] = useState({
-    name: '',
-    parameterString: '',
-    unitString: '',
-    commandOn: '',
+    name: "",
+    parameterString: "",
+    unitString: "",
+    commandOn: "",
   });
 
   const navigate = useNavigate();
 
-  useEffect(()=>{
-    console.log("form data", formData)
-
-  })
+  useEffect(() => {
+    console.log("form data", formData);
+  });
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
     setFormData((prevData) => ({
       ...prevData,
       [name]: value,
     }));
-
   };
 
   const handleSubmit = async (event: React.FormEvent) => {
@@ -35,10 +32,13 @@ export const CreateMeter: React.FC <CreateMeterProps>= (props) => {
 
     const parametersList = formData.parameterString.split(",");
     const unitList = formData.unitString.split(",");
-    const parameters = parametersList.reduce((parameters: Parameters, parameterList, index) => {
-      parameters[parameterList] = unitList[index];
-      return parameters;
-    }, {});
+    const parameters = parametersList.reduce(
+      (parameters: Parameters, parameterList, index) => {
+        parameters[parameterList] = unitList[index];
+        return parameters;
+      },
+      {}
+    );
     const meter = {
       deviceType: "meter",
       name: formData.name,
@@ -46,9 +46,6 @@ export const CreateMeter: React.FC <CreateMeterProps>= (props) => {
       commandOn: formData.commandOn,
     };
 
-
-
-    
     try {
       const response = await createMeter(meter);
       if (response.ok) {
@@ -64,21 +61,21 @@ export const CreateMeter: React.FC <CreateMeterProps>= (props) => {
     } catch (error) {
       console.error("an error occurred:", error);
     }
-    props.setInstall(null)
+    props.setInstall(null);
   };
 
   return (
-    <div className=" w-full p-6 bg-white rounded-lg shadow-lg">
+    <div className=" w-full p-2 bg-white rounded-lg shadow-lg">
       <form className="form" onSubmit={handleSubmit}>
         <label
           className="block text-gray-700 text-sm font-bold mb-2"
-          htmlFor="email"
+          htmlFor="meter"
         >
           Introduce meter details
         </label>
         <div className="flex">
           <label
-            className="block text-gray-700 text-sm font-bold mb-2"
+            className="w-1/3 block text-gray-700 text-sm font-bold mr-2"
             htmlFor="name"
           >
             Name
@@ -92,12 +89,12 @@ export const CreateMeter: React.FC <CreateMeterProps>= (props) => {
             onChange={handleInputChange}
           />
         </div>
-        <div className="flex">
+        <div className="flex m-2">
           <label
-            className="block text-gray-700 text-sm font-bold mb-2"
+            className=" w-1/3  text-gray-700 text-sm font-bold mr-2"
             htmlFor="parameterString"
           >
-            Parameter name
+            Parameters name
           </label>
           <input
             className="w-full p-2 border rounded-md focus:outline-none focus:border-blue-500"
@@ -107,13 +104,13 @@ export const CreateMeter: React.FC <CreateMeterProps>= (props) => {
             onChange={handleInputChange}
           />
           <label
-            className="block text-gray-700 text-sm font-bold mb-2"
+            className="w-1/5 block text-gray-700 text-sm font-bold mr-2"
             htmlFor="unitString"
           >
             Unit
           </label>
           <input
-            className="w-full p-2 border rounded-md focus:outline-none focus:border-blue-500"
+            className="w-1/3 border rounded-md focus:outline-none focus:border-blue-500"
             type="text"
             id="unitString"
             name="unitString"
@@ -122,26 +119,36 @@ export const CreateMeter: React.FC <CreateMeterProps>= (props) => {
         </div>
         <div className="flex">
           <label
-            className="block text-gray-700 text-sm font-bold mb-2"
+            className="w-1/3 block text-gray-700 text-sm font-bold mr-2"
             htmlFor="commandOn"
           >
-            CommandOn
+            Command On
           </label>
           <input
-            className="w-full p-2 border rounded-md focus:outline-none focus:border-blue-500"
+            className="w-full border rounded-md focus:outline-none focus:border-blue-500"
             type="text"
             id="commandOn"
             name="commandOn"
             onChange={handleInputChange}
-            
           />
         </div>
-        <button
-          className="w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring focus:ring-blue-300"
-          type="submit"
-        >
-          Submit
-        </button>
+        <div className="w-full">
+          <button
+            className="w-1/2 items-center justify-center bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring focus:ring-blue-300"
+            type="submit"
+          >
+            Submit
+          </button>
+        </div>
+        <div className="w-full">
+          <button
+            className="w-1/2 bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring focus:ring-blue-300"
+            type="submit"
+            onClick={() => props.setInstall(null)}
+          >
+            Cancel
+          </button>
+        </div>
       </form>
     </div>
   );

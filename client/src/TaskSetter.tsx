@@ -12,11 +12,12 @@ interface TimeProps {
 }
 
 export const TaskSetter: React.FC<TimeProps> = (props) => {
-  const [time, setTime] = useState<string>("");
+  const [time, setTime] = useState<string|null>(null);
   const [onStatus, setOnStatus] = useState<boolean | null>(null);
   const [isDisabled, setIsDisabled] = useState<boolean>(true);
 
   useEffect(() => {
+    console.log(time)
     if (time && onStatus != null) {
       setIsDisabled(false);
     }
@@ -24,8 +25,10 @@ export const TaskSetter: React.FC<TimeProps> = (props) => {
     console.log(time, isDisabled);
   }, [time, onStatus, isDisabled]);
 
+ 
+
   const addTask = async () => {
-    const [hour, minutes] = time.split(":");
+    const [hour, minutes] = time? time.split(":"): ""
     const task = {
       deviceId: props.switchId,
       onStatus: onStatus,
@@ -48,8 +51,8 @@ export const TaskSetter: React.FC<TimeProps> = (props) => {
 
   return (
     <div className="flex flex-row rounded justify-center items-center mx-2">
-      <div className="rounded justify-center items-center">
-        <TimePicker onChange={setTime} value={time} />
+      <div className="rounded justify-center items-center mx-2">
+      <TimePicker onChange={(value:string|null)=>setTime(value)} value={time} />
       </div>
       <div className="rounded justify-center items-center">
         <OnOffOption setOnStatus={setOnStatus}></OnOffOption>

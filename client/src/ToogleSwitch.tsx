@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import ReactSwitch from "react-switch";
 import { toggleSwitch } from "./services";
 
@@ -7,24 +7,18 @@ const ToggleSwitch: React.FC<{ switchId: string }> = (props) => {
 
   const handleChange = (val: boolean) => {
     setChecked(val);
-  };
-  const firstRender = React.useRef(true);
-  useEffect(() => {
-    if (!firstRender.current) {
-      toggleSwitch(props.switchId, checked);
-    } else {
-      firstRender.current = false;
-    }
-  }, [checked, props]);
+    toggleSwitch(props.switchId, checked);
 
+  };
+  
   return (
       <ReactSwitch
-        offColor="#00F"
+        offColor='#6366F1'
         onColor="#D00"
-        handleDiameter={30}
-        height={35}
-        width={80}
-        borderRadius={60}
+        handleDiameter={20}
+        height={25}
+        width={60}
+        borderRadius={50}
         checked={checked}
         onChange={handleChange}
       />

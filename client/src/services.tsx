@@ -62,6 +62,15 @@ export async function deleteTask(taskId:string) {
   });
   return response;}
 
+  export async function deleteDevice(taskId:string) {
+    const response = await fetch(`${URL}:${PORT}/devices/${taskId}`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    return response;}
+
 export const createMeter = async (meter: object) => {
   const response = await fetch(`${URL}:${PORT}/devices`, {
     method: "POST",

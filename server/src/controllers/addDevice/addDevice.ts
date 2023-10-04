@@ -32,7 +32,7 @@ export async function addDevice(ctx: Koa.Context) {
   }
 
   if (device) {
-    const result = await deviceService.addDeviceToDBAndLocalStorage(device);
+    const result = await deviceService.addDevice(device);
     ctx.status = 201;
     return (ctx.body = { deviceId: result });
   }

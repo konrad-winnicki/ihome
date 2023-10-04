@@ -19,6 +19,10 @@ export class DeviceInMemory {
     this._devices.set(device.id, device);
   }
 
+  public deleteDevice(deviceId: string) {
+    this._devices.delete(deviceId);
+  }
+
   get devices(): Map<string, Device> {
     return this._devices;
   }

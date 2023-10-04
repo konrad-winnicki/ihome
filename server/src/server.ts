@@ -26,6 +26,9 @@ import { AggregatedTask } from "./domain/AggregatedTask";
 import { addDevice } from "./controllers/addDevice/addDevice";
 import { runMeter } from "./controllers/runDevices/runMeter";
 import { runSwitch } from "./controllers/runDevices/runSwitch";
+import { MongoDeviceManager } from "./Infrastructure/device/MongoDeviceManager";
+import { InMemoryDeviceManager } from "./Infrastructure/device/InMemoryDeviceManager";
+import { deleteDevice } from "./controllers/deleteDevice/deleteDevice";
 const execAsync = util.promisify(exec);
 
 class AppServer {
@@ -61,7 +64,7 @@ appRouter.post("/devices", addDevice);
 appRouter.get("/meters", getMeters);
 appRouter.get("/switches", getSwitches);
 appRouter.get("/tasks/device/:id", getTasksForDevice);
-appRouter.delete("/task/:id", deleteTask);
+appRouter.delete("/devices/:id", deleteDevice);
 
 const myServer = new AppServer(appRouter);
 
@@ -87,10 +90,17 @@ export const database = new MongoDatabase(
 );
 const taskDoc = database.createTaskerDoc();
 const deviceDoc = database.createDeviceDoc();
-export const devicesInMemory = DeviceInMemory.getInstance()
+export const devicesInMemory = DeviceInMemory.getInstance();
 
-const deviceManager = new DeviceManager(deviceDoc, devicesInMemory);
-export const deviceService = new DeviceService(deviceManager);
+const inMemoryDeviceMenager = new InMemoryDeviceManager(devicesInMemory)
+const mongoDeviceManager = new MongoDeviceManager(inMemoryDeviceMenager, deviceDoc)
+const deviceManager = new DeviceManager(mongoDeviceManager);
+
+
+export const deviceService = new DeviceService(deviceManager, deviceManager);
+
+
+
 
 const appCorn = new AppCron();
 
@@ -217,5 +227,3 @@ class Singleton {
 
 const singleton1 = Singleton.getInstance("ala ma kota");
 console.log(singleton1.getData()); // Outputs: This is the singleton instance.
-
-

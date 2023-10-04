@@ -4,6 +4,8 @@ import { RiDeleteBack2Line } from "react-icons/ri";
 import ToggleSwitch from "./ToogleSwitch";
 import { TaskSetter } from "./TaskSetter";
 import TaskList from "./TaskList";
+import { FaTrashRestoreAlt } from "react-icons/fa";
+import { deleteDevice } from "./services";
 
 export interface Parameters {
   [key: string]: string;
@@ -46,6 +48,14 @@ export const SwitchModule: React.FC<{ switchDevice: SwitchInterface }> = (
           >
             {!showTaskDetails ? <BiTask /> : <RiDeleteBack2Line />}
           </button>
+        </div>
+        <div className="flex justify-center items-center">
+        {! showTaskDetails? <button
+          onClick={() => {deleteDevice(props.switchDevice.id)}}
+          className="bg-red-500 px-0.5 py-0.5 text-white m-2 rounded"
+        >
+          <FaTrashRestoreAlt />
+        </button>: ''}
         </div>
       </div>
 

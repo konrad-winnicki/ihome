@@ -5,17 +5,17 @@ export class ScheduleTime {
     const parsedHour = parseFloat(hour)
     const parsedMinutes = parseFloat(minutes)
     if (isNaN(parsedHour) || isNaN(parsedMinutes)) {
-      throw new Error("Hour and minutes must be numbers");
+      throw new Error("String may contain only digits");
     }
     if (parsedHour % 1 !== 0 || parsedMinutes % 1 !== 0) {
-      throw new Error("Hour and minutes must be integers");
+      throw new Error("Strings must be convertable to integers");
     }
 
     if (parsedHour >= 0 && parsedHour <= 23 && parsedMinutes >= 0 && parsedMinutes <=59) {
       this.hour = hour;
       this.minutes = minutes;
     } else {
-      throw new Error("Wrong format of time");
+      throw new Error("Hours must be in range 0-23 and minutes 0-59");
     }
   }
 }

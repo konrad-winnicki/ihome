@@ -2,28 +2,31 @@ import { DeviceInterface } from "./DeviceInterface";
 import { Device } from "../../domain/Device";
 import { Meter } from "../../domain/Meter";
 import { Switch } from "../../domain/Switch";
+import { DeviceListingInterface } from "./DeviceListingInterface";
 
 export class DeviceService {
-  private deviceInterface: DeviceInterface;
-  constructor(deviceInterface: DeviceInterface) {
+  private deviceInterface: DeviceInterface ;
+  private deviceListingInterface: DeviceListingInterface;
+
+  constructor(deviceInterface: DeviceInterface, deviceListingInterface: DeviceListingInterface) {
     this.deviceInterface = deviceInterface;
+    this.deviceListingInterface = deviceListingInterface
   }
 
-  addDeviceToDBAndLocalStorage(device: Device): Promise<string> {
-    return this.deviceInterface.addDeviceToDBAndLocalStorage(device);
+  addDevice(device: Device): Promise<string> {
+    return this.deviceInterface.addDevice(device);
   }
-  addDeviceToLocalStorage(device: Device): boolean {
-    return this.deviceInterface.addDeviceToLocalStorage(device);
+ 
+  
+  deleteDevice(deviceId: string): Promise<string> {
+    return this.deviceInterface.deleteDevice(deviceId);
   }
-  /*
-  deleteSwitcher(switchDeviceId: string): Promise<boolean> {
-    return this.switchInterface.deleteSwitcher(switchDeviceId);
-  }
-  */
+  
+ 
   getMeterList(): Promise<Meter[]> {
-    return this.deviceInterface.getMeterList();
+    return this.deviceListingInterface.getMeterList();
   }
   getSwitchList(): Promise<Switch[]> {
-    return this.deviceInterface.getSwitchList();
-  }
+    return this.deviceListingInterface.getSwitchList();
+  }  
 }

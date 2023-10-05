@@ -11,13 +11,11 @@ export class InMemoryDeviceManager implements DeviceInterface {
 
   
   async addDevice(device: Device): Promise<string> {
-    console.log("call times");
     try {
       this.devicesInMemory.addDevice(device);
       return Promise.resolve("Success")
     } catch (err) {
-      console.log("LOCAL stoirage ERR", err);
-      return Promise.reject(err)
+      return Promise.reject(`Device not added to cache due error: ${err}`)
     }
   }
 
@@ -30,9 +28,9 @@ export class InMemoryDeviceManager implements DeviceInterface {
         return Promise.resolve("Succes")
 
       }
-      return Promise.reject(`Device with ${deviceId} not exists`)
+      return Promise.reject(`MemoryError: Device with ${deviceId} not exists`)
     } catch (err) {
-      return Promise.reject(err)
+      return Promise.reject(`MemoryError: Error during deletion from cache: ${err}`)
     }
 
       }

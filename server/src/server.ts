@@ -7,9 +7,9 @@ import cron from "node-cron";
 
 import { exec } from "child_process";
 import util from "util";
-import { TaskService } from "./TaskService";
+import { TaskService } from "./application/task/TaskService";
 
-import { TaskManager } from "./TaskManager";
+import { TaskManager } from "./Infrastructure/task/TaskManager";
 import { Switch } from "./domain/Switch";
 import { v4 } from "uuid";
 import { DeviceInMemory } from "./domain/DeviceInMemory";
@@ -17,18 +17,20 @@ import { DeviceRunManager } from "./Infrastructure/device/DeviceRunManager";
 import { DeviceRunService } from "./application/device/DeviceRunService";
 import { Task } from "./domain/Task";
 import { MongoDatabase } from "./Infrastructure/databse/DataBase";
-import { AppCron } from "./cron";
+import { AppCron } from "./domain/AppCron";
 import { DeviceManager } from "./Infrastructure/device/DeviceManager";
 import { DeviceService } from "./application/device/DeviceService";
 import { Meter } from "./domain/Meter";
-import { AggregatedTask } from "./domain/AggregatedTask";
-
 import { addDevice } from "./controllers/addDevice/addDevice";
 import { runMeter } from "./controllers/runDevices/runMeter";
 import { runSwitch } from "./controllers/runDevices/runSwitch";
 import { MongoDeviceManager } from "./Infrastructure/device/MongoDeviceManager";
 import { InMemoryDeviceManager } from "./Infrastructure/device/InMemoryDeviceManager";
 import { deleteDevice } from "./controllers/deleteDevice/deleteDevice";
+import { EventEmitter } from "node:events";
+import { CronTaskManager } from "./Infrastructure/task/CronTaskManager";
+import { MongoTaskManager } from "./Infrastructure/task/MongoTaskManager";
+
 const execAsync = util.promisify(exec);
 
 class AppServer {
@@ -68,22 +70,6 @@ appRouter.delete("/devices/:id", deleteDevice);
 
 const myServer = new AppServer(appRouter);
 
-/*
-export async function executeForeignScriptAndReadLinePrint(
-  command: string
-): Promise<string> {
-  try {
-    console.log("command", command);
-    const { stdout } = await execAsync(command);
-    return Promise.resolve(stdout);
-  } catch (err) {
-    console.log("Standard out error", err);
-    return Promise.reject(`No valid data to present`);
-  }
-}
-
-*/
-
 export const database = new MongoDatabase(
   sanitizedConfig.MONGO_URI,
   sanitizedConfig.DATABASE
@@ -92,19 +78,22 @@ const taskDoc = database.createTaskerDoc();
 const deviceDoc = database.createDeviceDoc();
 export const devicesInMemory = DeviceInMemory.getInstance();
 
-const inMemoryDeviceMenager = new InMemoryDeviceManager(devicesInMemory)
-const mongoDeviceManager = new MongoDeviceManager(inMemoryDeviceMenager, deviceDoc)
+const inMemoryDeviceMenager = new InMemoryDeviceManager(devicesInMemory);
+const mongoDeviceManager = new MongoDeviceManager(
+  inMemoryDeviceMenager,
+  deviceDoc
+);
 const deviceManager = new DeviceManager(mongoDeviceManager);
 
-
-export const deviceService = new DeviceService(deviceManager, deviceManager);
-
-
-
+export const deviceService = new DeviceService(deviceManager);
 
 const appCorn = new AppCron();
+export const eventEmitter = new EventEmitter();
 
-const taskManager = new TaskManager(taskDoc, appCorn);
+const mongoTaskManager = new MongoTaskManager(taskDoc);
+const cronTaskManager = new CronTaskManager(mongoTaskManager, appCorn);
+const taskManager = new TaskManager(cronTaskManager, eventEmitter);
+
 const taskService = new TaskService(taskManager);
 
 (async function fillDeviceInMemoryWithData() {
@@ -117,13 +106,15 @@ const taskService = new TaskService(taskManager);
     devicesInMemory.addDevice(switchDevice);
   });
 })();
+//
+export async function fillCronInMemoryWithData() {
+  //const tasks = await taskService.findAllTask();
+  //tasks?.forEach((task: AggregatedTask) => {
+  taskService.addTaskToCron();
+  //});
+}
 
-(async function fillCronInMemoryWithData() {
-  const tasks = await taskService.findAllTask();
-  tasks?.forEach((task: AggregatedTask) => {
-    taskService.addTaskToCron(task);
-  });
-})();
+fillCronInMemoryWithData();
 
 async function createTask(ctx: Koa.Context) {
   console.log("bef");
@@ -146,7 +137,7 @@ async function createTask(ctx: Koa.Context) {
     data.scheduledTime
   );
   console.log(task);
-  const result = await taskService.addTaskToDB(task);
+  const result = await taskService.transformTaskFromDbToCron(task);
 
   if (result) {
     console.log(cron.getTasks());
@@ -227,3 +218,43 @@ class Singleton {
 
 const singleton1 = Singleton.getInstance("ala ma kota");
 console.log(singleton1.getData()); // Outputs: This is the singleton instance.
+
+
+
+async function f1(param:string){
+  if (param ==='a'){
+    return Promise.resolve('resolved f1')
+  }
+return Promise.reject('Not added to casche')
+}
+
+async function f2 (){
+
+  try{
+    
+    const res = await f1('v')
+    console.log('before mongo')
+    let param1 = "c"
+  if(param1 ==='a'){
+    throw new Error('mongo error')
+  }
+    return Promise.resolve(res)
+  
+  }catch(err){
+    console.log('from error')
+    if(err=="not error"){
+     
+    const e= provideMongoError(err as unknown as string)
+    return Promise.reject(e)
+
+  }
+
+  return Promise.reject(`Not added to mongodue error: ${err}`)
+}
+}
+
+f2().then((res)=>console.log(res)).catch((r)=>console.log(r))
+
+function provideMongoError(err:string){
+  return `error from provder`
+}

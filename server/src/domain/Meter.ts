@@ -12,7 +12,7 @@ export class Meter extends Device {
     id: string,
     deviceType: string,
     name: string,
-    parameters :MeterParameters,
+    parameters: MeterParameters,
     commandOn: string,
   ) {
     super(id, deviceType, name, commandOn);

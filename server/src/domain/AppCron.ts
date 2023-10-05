@@ -10,9 +10,7 @@ export class AppCron {
       cronString,
       () => {
         try {
-            console.log(command
-                );
-
+          console.log(command);
           exec(command);
         } catch (err) {
           console.log(err);

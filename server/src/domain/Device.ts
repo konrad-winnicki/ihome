@@ -11,4 +11,6 @@ export class Device {
     this.name = name;
     this.commandOn = commandOn;
   }
+
+  
 }

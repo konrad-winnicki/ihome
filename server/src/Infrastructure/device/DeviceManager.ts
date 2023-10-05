@@ -18,10 +18,9 @@ export class DeviceManager implements DeviceInterface, DeviceListingInterface {
   async addDevice(device: Device): Promise<string> {
     try {
       const result = this.delegate.addDevice(device);
-      console.log("call times");
-      return result;
+      return result
     } catch (err) {
-      return `Adding failed due to error: ${err}`;
+      return `Add device failed due to error: ${err}`
     }
   }
 

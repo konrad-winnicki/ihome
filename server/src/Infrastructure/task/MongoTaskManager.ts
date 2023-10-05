@@ -1,21 +1,19 @@
-import { TaskInterface } from "./TaskInterface";
-import { AppCron } from "./cron";
-import { Task } from "./domain/Task";
+import { DBTaskInterface } from "../../application/task/DBTaskInterface";
+import { Task } from "../../domain/Task";
 import { Model, mongo } from "mongoose";
-import { AggregatedTask } from "./domain/AggregatedTask";
+import { AggregatedTask } from "../../domain/AggregatedTask";
 import cron from "node-cron";
+import { database, fillCronInMemoryWithData } from "../../server";
 
 //const appCron = new AppCron();
 
-export class TaskManager implements TaskInterface {
-  private appCron: AppCron;
+export class MongoTaskManager implements DBTaskInterface {
   private taskDocument: Model<Task>;
-  constructor(taskDocument: Model<Task>, appCron: AppCron) {
+  constructor(taskDocument: Model<Task>) {
     this.taskDocument = taskDocument;
-    this.appCron = appCron;
   }
 
-  async addTaskToDB(task: Task): Promise<string> {
+  async addTask(task: Task): Promise<string> {
     const newTask = {
       id: task.id,
       deviceId: task.deviceId,
@@ -24,26 +22,13 @@ export class TaskManager implements TaskInterface {
     };
     try {
       const taskFromDB = await this.taskDocument.create(newTask);
-      if (taskFromDB) {
-        const aggreatedTask = await this.findTaskById(taskFromDB.id);
-        if (aggreatedTask) {
-          try {
-            this.addTaskToCron(aggreatedTask);
-            const tasks = cron.getTasks();
-            console.log("CRON", tasks);
-          } catch (err) {
-            this.taskDocument.findByIdAndRemove(taskFromDB.id);
-            throw err;
-          }
-        }
-      }
-
-      return taskFromDB.id;
+      return Promise.resolve(taskFromDB.id);
     } catch (err) {
       if (err instanceof mongo.MongoServerError) {
         this.uniqueViolationErrorHandler(err);
+        return Promise.reject(`Task not added due to error: ${err}`);
       }
-      throw err;
+      return Promise.reject(`Task not added due to error: ${err}`);
     }
   }
 
@@ -90,7 +75,6 @@ export class TaskManager implements TaskInterface {
         },
       },
     ]);
-    console.log("aggregated", aggregatedTaskArrayFromDb);
 
     if (aggregatedTaskArrayFromDb.length > 0) {
       const aggregatedTaskFromDb = aggregatedTaskArrayFromDb[0];
@@ -158,31 +142,39 @@ export class TaskManager implements TaskInterface {
     }
   }
 
-  async deleteTaskFromDB(taskId: string): Promise<boolean> {
+  async handleEvent(deviceId: string) {
+    const tasks = await this.taskDocument.find({ deviceId: deviceId });
+    tasks.forEach((task: Task) => cron.getTasks().delete(task.id));
+    const session = await database.connection.startSession();
+    session.startTransaction();
     try {
-      const taskmap = cron.getTasks();
-      taskmap.delete(taskId);
+      tasks.forEach(
+        async (task: Task) => await this.taskDocument.deleteOne({ id: task.id })
+      );
+      await session.commitTransaction();
     } catch (err) {
-      console.log(err);
-      return false;
+      fillCronInMemoryWithData();
+      await session.abortTransaction();
+      session.endSession();
     }
-    const isExistingTask = cron.getTasks().get(taskId);
-    console.log("TASKMAP", cron.getTasks());
-    if (!isExistingTask) {
-      try {
-        const tasks = await this.taskDocument.deleteOne({ id: taskId });
-        const result = tasks.acknowledged;
 
-        console.log("deletion result", result);
-        return true;
-      } catch (err) {
-        console.log(err);
-        return false;
-      }
-    }
-    return false;
+    console.log("task after deletion", cron.getTasks());
   }
 
+  async deleteTask(taskId: string): Promise<string> {
+    try {
+      const tasks = await this.taskDocument.deleteOne({ id: taskId });
+      const result = tasks.acknowledged;
+
+      console.log("deletion result", result);
+      return Promise.resolve("Success");
+    } catch (err) {
+      console.log(err);
+      return Promise.reject(`Task not deleted due to error: ${err}`);
+    }
+  }
+
+  /*
   addTaskToCron(task: AggregatedTask) {
     try {
       this.appCron.installTask(
@@ -199,4 +191,6 @@ export class TaskManager implements TaskInterface {
       return null;
     }
   }
+
+  */
 }

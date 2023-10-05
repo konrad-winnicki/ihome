@@ -1,10 +1,13 @@
 import { Device } from "./Device";
 
+
+
 export class DeviceInMemory {
   private static instance: DeviceInMemory | null = null;
   private _devices: Map<string, Device>;
   private constructor() {
     this._devices = new Map<string, Device>();
+
   }
 
   public static getInstance(){

@@ -3,6 +3,21 @@ import { DeviceSchema, TaskSchema } from "./mongoDbModel";
 import { Task } from "../../domain/Task";
 import { Device } from "../../domain/Device";
 
+
+
+/*
+type DeviceInterface = {
+ id: string;
+  deviceType: string;
+  name: string;
+  commandOn: string;
+  commandOff?:string;
+  parameters?: {[key: string]:string}
+
+}
+
+*/
+
 export class MongoDatabase {
   private url: string;
   private dbName: string;
@@ -23,6 +38,9 @@ export class MongoDatabase {
       throw error;
     }
   }
+
+
+
 
   public createDeviceDoc() {
     const deviceDocument = this.connection.model<Device>(

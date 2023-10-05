@@ -4,64 +4,81 @@ import { DeviceInterface } from "../../application/device/DeviceInterface";
 import { Device } from "../../domain/Device";
 import { Switch } from "../../domain/Switch";
 import { DeviceListingInterface } from "../../application/device/DeviceListingInterface";
+import { eventEmitter } from "../../server";
+
 //const appCron = new AppCron();
 
-export class MongoDeviceManager implements DeviceInterface, DeviceListingInterface {
+export class MongoDeviceManager
+  implements DeviceInterface, DeviceListingInterface
+{
   private deviceDocument: Model<Device>;
   delegate: DeviceInterface;
 
-  constructor(
-    delegate: DeviceInterface,
-    deviceDocument: Model<Device>,
-  ) {
+  constructor(delegate: DeviceInterface, deviceDocument: Model<Device>) {
     this.deviceDocument = deviceDocument;
     this.delegate = delegate;
   }
 
   async addDevice(device: Device): Promise<string> {
-    await this.delegate.addDevice(device);
     try {
-      const taskFromDB = await this.deviceDocument.create(device);
-      return taskFromDB.id;
+      const deviceFromDB = await this.deviceDocument.create(device);
+      await this.delegate.addDevice(device);
+
+      return Promise.resolve(deviceFromDB.id);
     } catch (err) {
-      console.log("ERRRR", err);
       if (err instanceof mongo.MongoServerError) {
-        this.uniqueViolationErrorHandler(err);
+        return Promise.reject(
+          `Unique violation error ${this.uniqueViolationErrorHandler(err)}`
+        );
       }
-      throw err;
+      this.deleteDevice(device.id);
+
+      return Promise.reject(`Device not added to database due error ${err}`);
     }
   }
 
   uniqueViolationErrorHandler(err: mongo.MongoServerError) {
     const isUniqueViolation = err.code === 11000;
     if (isUniqueViolation && err.errmsg.includes("email")) {
-      throw new Error("EmailConflictError");
+      //throw new Error("EmailConflictError");
+      return `EmailConflictError`;
     }
     if (isUniqueViolation && err.errmsg.includes("name")) {
-      throw new Error("NameConflictError");
+      //throw new Error("NameConflictError");
+      return "NameConflictError";
     }
-    throw err;
+    return err;
   }
 
-
-  async deleteDevice(deviceId:string):Promise<string> {
-    await this.delegate.deleteDevice(deviceId)
+  async deleteDevice(deviceId: string): Promise<string> {
     try {
+      await this.delegate.deleteDevice(deviceId);
       const tasks = await this.deviceDocument.deleteOne({ id: deviceId });
       const result = tasks.acknowledged;
       console.log("deletion result", result);
-      if(result){
-        return Promise.resolve("Succes")
-      }
-      return Promise.reject(`Deletion failed`)
 
-      //add reverse delete from devicesInMemory
+      eventEmitter.emit("deviceDeleted", deviceId);
+      return Promise.resolve("Succes");
     } catch (err) {
-      console.log(err);
-      return Promise.reject(`Deletion failed due error: ${err}`)
-    }
+      if (typeof err === "string" && err.includes("MemoryError")) {
+        return Promise.reject(`Deletion failed due error: ${err}`);
       }
 
+      try {
+        const device = await this.deviceDocument.findOne({ id: deviceId });
+        if (!device) {
+          return Promise.reject(
+            `Device not found in data base to restore device in cache`
+          );
+        }
+        this.delegate.addDevice(device);
+      } catch (err) {
+        return Promise.reject(`Device not restored in cache due err: ${err}`);
+      }
+
+      return Promise.reject(`Deletion failed due error: ${err}`);
+    }
+  }
 
   async getMeterList(): Promise<Meter[]> {
     const devicesFromDb = (await this.deviceDocument.find({
@@ -81,3 +98,17 @@ export class MongoDeviceManager implements DeviceInterface, DeviceListingInterfa
     return devicesFromDb;
   }
 }
+
+/*
+class EventListener {
+  constructor() {
+    eventEmitter.on('deviceDeleted', this.handleEvent);
+  }
+
+  handleEvent(msg:string) {
+    console.log(`Event received with data: ${msg}`);
+  }
+}
+
+const listenet = new EventListener
+*/

@@ -5,7 +5,7 @@ export class ScheduleTime {
     const parsedHour = parseFloat(hour)
     const parsedMinutes = parseFloat(minutes)
     if (isNaN(parsedHour) || isNaN(parsedMinutes)) {
-      throw new Error("String may contain only digits");
+      throw new Error("Strings must contain only digits");
     }
     if (parsedHour % 1 !== 0 || parsedMinutes % 1 !== 0) {
       throw new Error("Strings must be convertable to integers");

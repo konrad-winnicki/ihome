@@ -5,12 +5,10 @@ import { Switch } from "../../domain/Switch";
 import { DeviceListingInterface } from "./DeviceListingInterface";
 
 export class DeviceService {
-  private deviceInterface: DeviceInterface ;
-  private deviceListingInterface: DeviceListingInterface;
+  private deviceInterface: DeviceInterface & DeviceListingInterface
 
-  constructor(deviceInterface: DeviceInterface, deviceListingInterface: DeviceListingInterface) {
-    this.deviceInterface = deviceInterface;
-    this.deviceListingInterface = deviceListingInterface
+  constructor(deviceInterface: DeviceInterface & DeviceListingInterface) {
+    this.deviceInterface = deviceInterface
   }
 
   addDevice(device: Device): Promise<string> {
@@ -24,9 +22,9 @@ export class DeviceService {
   
  
   getMeterList(): Promise<Meter[]> {
-    return this.deviceListingInterface.getMeterList();
+    return this.deviceInterface.getMeterList();
   }
   getSwitchList(): Promise<Switch[]> {
-    return this.deviceListingInterface.getSwitchList();
+    return this.deviceInterface.getSwitchList();
   }  
 }

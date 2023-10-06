@@ -5,7 +5,6 @@ import EventEmitter from "node:events";
 import cron from "node-cron";
 import { CronTaskInterface } from "../../application/task/CronTaskInterface";
 
-
 export class TaskManager implements DBTaskInterface, CronTaskInterface {
   delegate: DBTaskInterface & CronTaskInterface;
   constructor(
@@ -36,15 +35,9 @@ export class TaskManager implements DBTaskInterface, CronTaskInterface {
   async handleEvent(deviceId: string) {
     //TODO what if device deleted but task failed?
 
-   await this.findTasksForDevice(deviceId)
+    await this.findTasksForDevice(deviceId)
       .then((tasks) => {
-        Promise.all([
-          tasks.map((task) => {
-            this.deleteTask(task.id)
-              .then((result) => Promise.resolve(result))
-              .catch((error) => Promise.reject(error));
-          }),
-        ])
+        Promise.all(tasks.map((task) => this.deleteTask(task.id)))
           .then((result) => console.log(result))
           .catch((err) => console.log(err));
       })

@@ -11,8 +11,6 @@ import { DeviceRunManager } from "./Infrastructure/device/DeviceRunManager";
 import { DeviceRunService } from "./application/device/DeviceRunService";
 import { MongoDatabase } from "./Infrastructure/databse/DataBase";
 import { AppCron } from "./domain/AppCron";
-import { DeviceManager } from "./Infrastructure/device/DeviceManager";
-import { DeviceService } from "./application/device/DeviceService";
 import { Meter } from "./domain/Meter";
 import { addDevice } from "./controllers/addDevice/addDevice";
 import { runMeter } from "./controllers/runDevices/runMeter";
@@ -69,16 +67,20 @@ export const database = new MongoDatabase(
   sanitizedConfig.DATABASE
 );
 const taskDoc = database.createTaskerDoc();
-const deviceDoc = database.createDeviceDoc();
-export const devicesInMemory = DeviceInMemory.getInstance();
 
+export const devicesInMemory = DeviceInMemory.getInstance();
 const inMemoryDeviceManager = new InMemoryDeviceManager(devicesInMemory);
-const mongoDeviceManager = new MongoDeviceManager(
+
+const deviceDoc = database.createDeviceDoc();
+export const deviceService = new MongoDeviceManager(
   inMemoryDeviceManager,
   deviceDoc
 );
-const deviceManager = new DeviceManager(mongoDeviceManager);
-export const deviceService = new DeviceService(deviceManager);
+
+// TODO: remove these 2 classes
+// const deviceManager = new DeviceManager(mongoDeviceManager);
+// export const deviceService = mongoDeviceManager
+//new DeviceService(deviceManager);
 
 const appCorn = new AppCron();
 export const eventEmitter = new EventEmitter();

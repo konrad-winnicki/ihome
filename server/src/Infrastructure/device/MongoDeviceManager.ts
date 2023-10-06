@@ -28,40 +28,24 @@ export class MongoDeviceManager
         this.deviceDocument
           .create(device)
           .then((device) => device.id)
-          .catch((err) => {
-            return this.compensateDeviceAdditionFromMemory(device.id)
-              .then(() =>
-                Promise.reject()
-              )
-              .catch(() => {
-                if (err instanceof mongo.MongoServerError) {
-                  return Promise.reject(
-                    `Unique violation error: ${this.uniqueViolationErrorHandler(
-                      err
-                    )}`
-                  );
-                }
-                return Promise.reject(`Device not added due to error: ${err}`);
-              });
-          })
+          .catch((dbError) =>
+            this.compensateDeviceAdditionFromMemory(device.id).then(() => {
+              console.log("Compensation succeeded.");
+              return Promise.reject(dbError);
+            })
+          )
+          .catch((dbError) => this.translateDbError(dbError))
       );
-    /*
-    try {
-      const deviceFromDB = await this.deviceDocument.create(device);
-      await this.delegate.addDevice(device);
 
-      return Promise.resolve(deviceFromDB.id);
-    } catch (err) {
-      if (err instanceof mongo.MongoServerError) {
-        return Promise.reject(
-          `Unique violation error: ${this.uniqueViolationErrorHandler(err)}`
-        );
-      }
-      this.deleteDevice(device.id);
+  
+  }
 
-      return Promise.reject(`Device not added to database due error ${err}`);
-    }
-*/
+  private translateDbError(dbError: Error) {
+    return dbError instanceof mongo.MongoServerError
+      ? Promise.reject(
+          `Unique violation error: ${this.uniqueViolationErrorHandler(dbError)}`
+        )
+      : Promise.reject(`Device not added due to error: ${dbError}`);
   }
 
   private async compensateDeviceAdditionFromMemory(
@@ -120,13 +104,17 @@ export class MongoDeviceManager
   }
 
   async getMeterList(): Promise<Meter[]> {
-   return this.deviceDocument.find({deviceType: "meter"})
-    .then((devices)=> {
-      const meters = devices as unknown as Meter[]
-      return Promise.resolve(meters)})
-    .catch((err) => Promise.reject(`Getting meter list failed due error: ${err}`)) 
+    return this.deviceDocument
+      .find({ deviceType: "meter" })
+      .then((devices) => {
+        const meters = devices as unknown as Meter[];
+        return Promise.resolve(meters);
+      })
+      .catch((err) =>
+        Promise.reject(`Getting meter list failed due error: ${err}`)
+      );
 
-/*
+    /*
     const devicesFromDb = (await this.deviceDocument.find({
       deviceType: "meter",
     })) as Meter[];
@@ -137,11 +125,14 @@ export class MongoDeviceManager
   }
 
   async getSwitchList(): Promise<Switch[]> {
-    return this.deviceDocument.find({deviceType: "switch"})
-    .then((devices)=> {
-      const switches = devices as unknown as Switch[]
-      return Promise.resolve(switches)})
-    .catch((err) => Promise.reject(`Getting meter list failed due error: ${err}`)) 
-    
+    return this.deviceDocument
+      .find({ deviceType: "switch" })
+      .then((devices) => {
+        const switches = devices as unknown as Switch[];
+        return Promise.resolve(switches);
+      })
+      .catch((err) =>
+        Promise.reject(`Getting meter list failed due error: ${err}`)
+      );
   }
 }

@@ -65,29 +65,27 @@ export class MongoTaskManager implements DBTaskInterface {
       .catch((error) =>
         Promise.reject(`Fetching all tasks failed due error: ${error}`)
       );
-
   }
 
   async findAllTask(): Promise<AggregatedTask[]> {
     return this.taskDocument
       .aggregate(taskDeviceAggregationPipeline())
-      .then((aggregatedTasks) => {
-        return aggregatedTasks.map((aggregatedTask) => {
-          return new AggregatedTask(
-            aggregatedTask.id,
-            aggregatedTask.onStatus,
-            aggregatedTask.scheduledTime.hour,
-            aggregatedTask.scheduledTime.minutes,
-            aggregatedTask.device.commandOn,
-            aggregatedTask.device.commandOff
-          );
-        });
-      })
+      .then((aggregatedTasks) =>
+        aggregatedTasks.map(
+          (task) =>
+            new AggregatedTask(
+              task.id,
+              task.onStatus,
+              task.scheduledTime.hour,
+              task.scheduledTime.minutes,
+              task.device.commandOn,
+              task.device.commandOff
+            )
+        )
+      )
       .catch((error) =>
         Promise.reject(`Fetching all tasks failed due error: ${error}`)
       );
-    //dlaczego jak nie zrobie promise reject promise resolve with passed error string
-    //dlaczego jak mma promise rejected tyoescript dont show error that not return task list
   }
 
   async findTasksForDevice(deviceId: string): Promise<Task[]> {
@@ -103,13 +101,11 @@ export class MongoTaskManager implements DBTaskInterface {
     //TODO: issue with "taskId" to analyse
     return this.taskDocument
       .deleteOne({ id: taskId })
-      .then((response) => {
-        if (response.acknowledged) {
-          return Promise.resolve(`Task ${taskId} deleted`);
-        }
-        return Promise.reject(`Task not deleted`);
-      })
+      .then((response) =>
+        response.acknowledged && response.deletedCount == 1
+          ? Promise.resolve(`Task ${taskId} deleted`)
+          : Promise.reject(`Task not deleted`)
+      )
       .catch((error) => Promise.reject(`Task not deleted due error: ${error}`));
   }
-
 }

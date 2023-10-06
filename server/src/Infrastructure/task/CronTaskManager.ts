@@ -109,7 +109,6 @@ export class CronTaskManager implements CronTaskInterface {
     if (isDeletedFromMemory) {
       return this.delegate
         .deleteTask(taskId)
-        .then((response) => response)
         .catch((error) =>
           this.compensateTaskDeletionFromMemory(taskId)
             .then(() =>

@@ -17,34 +17,54 @@ export class CronTaskManager implements CronTaskInterface {
   }
 
   async transformTaskFromDbToCron() {
-    try {
-      const tasks = await this.findAllTask();
-      tasks?.forEach((task: AggregatedTask) => {
-        this.appCron.installTask(
-          task.id,
-          task.minutes,
-          task.hour,
-          task.onStatus
-            ? task.commandOn
-            : task.commandOff
-            ? task.commandOff
-            : ""
-        );
-      });
-
-      const crontask = cron.getTasks();
-      console.log("crontasks:", crontask);
-      return "id";
-    } catch (err) {
-      console.log("cronarror:", err);
-      return null;
-    }
+    return this.findAllTask()
+      .then((tasks) => {
+        tasks.forEach((task: AggregatedTask) => {
+          this.appCron.installTask(
+            task.id,
+            task.minutes,
+            task.hour,
+            task.onStatus
+              ? task.commandOn
+              : task.commandOff
+              ? task.commandOff
+              : ""
+          );
+        });
+        return Promise.resolve("Task transfered from database to cron");
+      })
+      .catch((error) =>
+        Promise.reject(`Task not transfered to cron due error: ${error}`)
+      );
   }
 
   async addTask(task: Task): Promise<string> {
+    return this.delegate
+      .addTask(task)
+      .catch((error) => Promise.reject(error))
+      .then((response) => {
+        return this.findTaskById(task.id)
+          .catch(() => Promise.reject(`Task not added`))
+          .then((aggregatedTask) => {
+            this.appCron.installTask(
+              aggregatedTask.id,
+              aggregatedTask.minutes,
+              aggregatedTask.hour,
+              aggregatedTask.onStatus
+                ? aggregatedTask.commandOn
+                : aggregatedTask.commandOff
+                ? aggregatedTask.commandOff
+                : ""
+            );
+            console.log("ACTUAL TASK", cron.getTasks());
+            return Promise.resolve(response);
+          });
+      });
+    /*
     try {
       await this.delegate.addTask(task);
       const aggreatedTask = await this.findTaskById(task.id);
+      console.log('AGGGRE', aggreatedTask)
       if (aggreatedTask) {
         try {
           this.appCron.installTask(
@@ -56,7 +76,7 @@ export class CronTaskManager implements CronTaskInterface {
               : aggreatedTask.commandOff
               ? aggreatedTask.commandOff
               : ""
-          );
+          )
           const tasks = cron.getTasks();
           console.log("CRON", tasks);
           return Promise.resolve("Succes");
@@ -69,53 +89,58 @@ export class CronTaskManager implements CronTaskInterface {
     } catch (err) {
       return Promise.reject(`Task not aded to cron due error: ${err}`);
     }
+    */
   }
-  async findTaskById(taskId: string): Promise<AggregatedTask | null> {
+  async findTaskById(taskId: string): Promise<AggregatedTask> {
     return await this.delegate.findTaskById(taskId);
   }
-  async findAllTask(): Promise<AggregatedTask[] | null> {
+  async findAllTask(): Promise<AggregatedTask[]> {
     return await this.delegate.findAllTask();
   }
 
-  async findTasksForDevice(deviceId: string): Promise<Task[] | null> {
-    return await this.delegate.findTasksForDevice(deviceId);
+  async findTasksForDevice(deviceId: string): Promise<Task[]> {
+    return this.delegate.findTasksForDevice(deviceId);
   }
-
-  /*
-  async handleEvent(msg: string) {
-    console.log("event msg", msg, typeof msg);
-    console.log("task before deletion", cron.getTasks());
-
-    const tasks = await this.taskDocument.find({ deviceId: msg });
-    tasks.forEach((task: Task) => cron.getTasks().delete(task.id));
-    const session = await database.connection.startSession();
-    session.startTransaction();
-    try {
-      tasks.forEach(
-        async (task: Task) => await this.taskDocument.deleteOne({ id: task.id })
-      );
-      await session.commitTransaction();
-    } catch (err) {
-      fillCronInMemoryWithData();
-      await session.abortTransaction();
-      session.endSession();
-    }
-
-    console.log("task after deletion", cron.getTasks());
-  }
-
-  */
 
   async deleteTask(taskId: string): Promise<string> {
-    try {
-      await this.delegate.deleteTask(taskId);
-      const taskmap = cron.getTasks();
-      taskmap.delete(taskId);
-      console.log("task after deletio:", cron.getTasks());
-      return Promise.resolve("Success");
-    } catch (err) {
-      console.log(err);
-      return Promise.resolve(`Deletion ended with err:${err}`);
+    const memoryTaskList = cron.getTasks();
+    const isDeletedFromMemory = memoryTaskList.delete(taskId);
+
+    if (isDeletedFromMemory) {
+      return this.delegate
+        .deleteTask(taskId)
+        .then((response) => response)
+        .catch((error) =>
+          this.compensateTaskDeletionFromMemory(taskId)
+            .then(() =>
+              Promise.reject(`Task deletion failed de to error ${error}`)
+            )
+            .catch(() =>
+              Promise.reject(`Task deletion failed de to error ${error}`)
+            )
+        );
+    } else {
+      return Promise.reject(`Task with id ${taskId} doesn't exist.`);
     }
+  }
+
+  compensateTaskDeletionFromMemory(taskId: string) {
+    return this.findTaskById(taskId)
+      .then((task) => {
+        this.appCron.installTask(
+          task.id,
+          task.minutes,
+          task.hour,
+          task.onStatus
+            ? task.commandOn
+            : task.commandOff
+            ? task.commandOff
+            : ""
+        );
+        Promise.resolve("Task restoration in memory succeded");
+      })
+      .catch((err) =>
+        Promise.reject(`Task restoration in memory failed due ${err}`)
+      );
   }
 }

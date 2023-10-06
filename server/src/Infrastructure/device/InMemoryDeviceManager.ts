@@ -9,29 +9,29 @@ export class InMemoryDeviceManager implements DeviceInterface {
     this.devicesInMemory = deviceMap;
   }
 
-  
   async addDevice(device: Device): Promise<string> {
-    try {
+    return new Promise((resolve) => {
       this.devicesInMemory.addDevice(device);
-      return Promise.resolve("Success")
-    } catch (err) {
-      return Promise.reject(`Device not added to cache due error: ${err}`)
-    }
+      resolve(`Device ${device.id} added`);
+    });
   }
 
-  async deleteDevice(deviceId:string):Promise<string> {
+  async deleteDevice(deviceId: string): Promise<string> {
     try {
-      const devicesList = this.devicesInMemory.devices
-      const isExistingDevice = devicesList.get(deviceId)
-      if (isExistingDevice){
-        this.devicesInMemory.deleteDevice(deviceId)
-        return Promise.resolve("Succes")
-
+      const devicesList = this.devicesInMemory.devices;
+      const isExistingDevice = devicesList.get(deviceId);
+      if (!isExistingDevice) {
+        return Promise.reject(
+          `MemoryError: Device with ${deviceId} not exists`
+        );
       }
-      return Promise.reject(`MemoryError: Device with ${deviceId} not exists`)
+      this.devicesInMemory.deleteDevice(deviceId);
+      console.log("DEVICE DELETION SUCCES");
+      return Promise.resolve("Succes");
     } catch (err) {
-      return Promise.reject(`MemoryError: Error during deletion from cache: ${err}`)
+      return Promise.reject(
+        `MemoryError: Error during deletion from cache: ${err}`
+      );
     }
-
-      }
+  }
 }

@@ -3,10 +3,8 @@ import { Task } from "../../domain/Task";
 import { AggregatedTask } from "../../domain/AggregatedTask";
 import EventEmitter from "node:events";
 import cron from "node-cron";
-import { database } from "../../server";
 import { CronTaskInterface } from "../../application/task/CronTaskInterface";
 
-//const appCron = new AppCron();
 
 export class TaskManager implements DBTaskInterface, CronTaskInterface {
   delegate: DBTaskInterface & CronTaskInterface;
@@ -23,35 +21,54 @@ export class TaskManager implements DBTaskInterface, CronTaskInterface {
     return this.delegate.addTask(task);
   }
 
-  async findTaskById(taskId: string): Promise<AggregatedTask | null> {
+  async findTaskById(taskId: string): Promise<AggregatedTask> {
     return this.delegate.findTaskById(taskId);
   }
 
-  async findAllTask(): Promise<AggregatedTask[] | null> {
+  async findAllTask(): Promise<AggregatedTask[]> {
     return this.delegate.findAllTask();
   }
 
-  async findTasksForDevice(deviceId: string): Promise<Task[] | null> {
+  async findTasksForDevice(deviceId: string): Promise<Task[]> {
     return this.delegate.findTasksForDevice(deviceId);
   }
 
-  async handleEvent(msg: string) {
-    console.log("event msg", msg, typeof msg);
-    console.log("task before deletion", cron.getTasks());
+  async handleEvent(deviceId: string) {
+    //TODO what if device deleted but task failed?
 
-    const tasks = await this.findTasksForDevice(msg);
-    tasks?.forEach((task: Task) => cron.getTasks().delete(task.id));
+   await this.findTasksForDevice(deviceId)
+      .then((tasks) => {
+        Promise.all([
+          tasks.map((task) => {
+            this.deleteTask(task.id)
+              .then((result) => Promise.resolve(result))
+              .catch((error) => Promise.reject(error));
+          }),
+        ])
+          .then((result) => console.log(result))
+          .catch((err) => console.log(err));
+      })
+      .catch((err) => console.log(err));
+    /*
+    const tasks = await this.findTasksForDevice(deviceId);
     const session = await database.connection.startSession();
     session.startTransaction();
     try {
-      tasks?.forEach(async (task: Task) => await this.deleteTask(task.id));
+      tasks.forEach(async (task: Task) => {
+        try {
+          await this.deleteTask(task.id);
+        } catch (err) {
+          console.log(err);
+        }
+      });
+
       await session.commitTransaction();
     } catch (err) {
       this.transformTaskFromDbToCron();
       await session.abortTransaction();
       session.endSession();
     }
-
+*/
     console.log("task after deletion", cron.getTasks());
   }
 
@@ -59,7 +76,7 @@ export class TaskManager implements DBTaskInterface, CronTaskInterface {
     return this.delegate.deleteTask(taskId);
   }
 
-  transformTaskFromDbToCron() {
+  async transformTaskFromDbToCron() {
     return this.delegate.transformTaskFromDbToCron();
   }
 }

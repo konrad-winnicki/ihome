@@ -10,7 +10,7 @@ export class TaskService {
     this.taskInterface = taskInterface;
   }
 
-  transformTaskFromDbToCron(task: Task): Promise<string> {
+  addTask(task: Task): Promise<string> {
     return this.taskInterface.addTask(task);
   }
 
@@ -23,18 +23,18 @@ export class TaskService {
   }
 */
 
-  async findTaskById(taskId: string): Promise<AggregatedTask | null> {
+  async findTaskById(taskId: string): Promise<AggregatedTask> {
     return this.taskInterface.findTaskById(taskId);
   }
-  async findAllTask(): Promise<AggregatedTask[] | null> {
+  async findAllTask(): Promise<AggregatedTask[]> {
     return this.taskInterface.findAllTask();
   }
 
-  async addTaskToCron(): Promise<string | null> {
+  async transformTaskFromDbToCron(): Promise<string | null> {
     return this.taskInterface.transformTaskFromDbToCron();
   }
 
-  async findTasksForDevice(deviceId: string): Promise<Task[] | null> {
+  async findTasksForDevice(deviceId: string): Promise<Task[]> {
     return this.taskInterface.findTasksForDevice(deviceId);
   }
 }

@@ -5,6 +5,7 @@ import { Device } from "../../domain/Device";
 import { Switch } from "../../domain/Switch";
 import { DeviceListingInterface } from "../../application/device/DeviceListingInterface";
 import { eventEmitter } from "../../server";
+import { DeviceInMemory } from "../../domain/DeviceInMemory";
 
 //const appCron = new AppCron();
 
@@ -20,6 +21,31 @@ export class MongoDeviceManager
   }
 
   async addDevice(device: Device): Promise<string> {
+    return this.delegate
+      .addDevice(device)
+      .catch((err) => Promise.reject(`Device not added due to error: ${err}`))
+      .then(() =>
+        this.deviceDocument
+          .create(device)
+          .then((device) => device.id)
+          .catch((err) => {
+            return this.compensateDeviceAdditionFromMemory(device.id)
+              .then(() =>
+                Promise.reject()
+              )
+              .catch(() => {
+                if (err instanceof mongo.MongoServerError) {
+                  return Promise.reject(
+                    `Unique violation error: ${this.uniqueViolationErrorHandler(
+                      err
+                    )}`
+                  );
+                }
+                return Promise.reject(`Device not added due to error: ${err}`);
+              });
+          })
+      );
+    /*
     try {
       const deviceFromDB = await this.deviceDocument.create(device);
       await this.delegate.addDevice(device);
@@ -28,87 +54,94 @@ export class MongoDeviceManager
     } catch (err) {
       if (err instanceof mongo.MongoServerError) {
         return Promise.reject(
-          `Unique violation error ${this.uniqueViolationErrorHandler(err)}`
+          `Unique violation error: ${this.uniqueViolationErrorHandler(err)}`
         );
       }
       this.deleteDevice(device.id);
 
       return Promise.reject(`Device not added to database due error ${err}`);
     }
+*/
+  }
+
+  private async compensateDeviceAdditionFromMemory(
+    deviceId: string
+  ): Promise<string> {
+    return this.delegate
+      .deleteDevice(deviceId)
+      .then((device) => Promise.resolve(`Device ${device} deletet from memory`))
+      .catch((err) =>
+        Promise.reject(`Device not deleted from memory due err: ${err}`)
+      );
   }
 
   uniqueViolationErrorHandler(err: mongo.MongoServerError) {
     const isUniqueViolation = err.code === 11000;
     if (isUniqueViolation && err.errmsg.includes("email")) {
-      //throw new Error("EmailConflictError");
       return `EmailConflictError`;
     }
     if (isUniqueViolation && err.errmsg.includes("name")) {
-      //throw new Error("NameConflictError");
       return "NameConflictError";
     }
     return err;
   }
 
   async deleteDevice(deviceId: string): Promise<string> {
-    try {
-      await this.delegate.deleteDevice(deviceId);
-      const tasks = await this.deviceDocument.deleteOne({ id: deviceId });
-      const result = tasks.acknowledged;
-      console.log("deletion result", result);
+    const device = DeviceInMemory.getInstance().devices.get(deviceId) as Device;
 
-      eventEmitter.emit("deviceDeleted", deviceId);
-      return Promise.resolve("Succes");
-    } catch (err) {
-      if (typeof err === "string" && err.includes("MemoryError")) {
-        return Promise.reject(`Deletion failed due error: ${err}`);
-      }
+    return this.delegate
+      .deleteDevice(deviceId)
+      .catch((err) => Promise.reject(`Deletion failed due error: ${err}`))
+      .then(() =>
+        this.deviceDocument
+          .deleteOne({ id: deviceId })
+          .catch((err) =>
+            this.compensateDeviceDelationFromMemory(device)
+              .then(() => Promise.reject(`Deletion failed due error: ${err}`))
+              .catch(() => Promise.reject(`Deletion failed due error: ${err}`))
+          )
+          .then((dbResult) => {
+            console.log("deletion result", dbResult.acknowledged);
+            eventEmitter.emit("deviceDeleted", deviceId);
+            return Promise.resolve("Success");
+          })
+      );
+  }
 
-      try {
-        const device = await this.deviceDocument.findOne({ id: deviceId });
-        if (!device) {
-          return Promise.reject(
-            `Device not found in data base to restore device in cache`
-          );
-        }
-        this.delegate.addDevice(device);
-      } catch (err) {
-        return Promise.reject(`Device not restored in cache due err: ${err}`);
-      }
-
-      return Promise.reject(`Deletion failed due error: ${err}`);
-    }
+  private async compensateDeviceDelationFromMemory(
+    device: Device
+  ): Promise<string> {
+    return this.delegate
+      .addDevice(device)
+      .then((device) => Promise.resolve(`Deleted ${device} restored`))
+      .catch((err) =>
+        Promise.reject(`Device not restored in cache due err: ${err}`)
+      );
   }
 
   async getMeterList(): Promise<Meter[]> {
+   return this.deviceDocument.find({deviceType: "meter"})
+    .then((devices)=> {
+      const meters = devices as unknown as Meter[]
+      return Promise.resolve(meters)})
+    .catch((err) => Promise.reject(`Getting meter list failed due error: ${err}`)) 
+
+/*
     const devicesFromDb = (await this.deviceDocument.find({
       deviceType: "meter",
     })) as Meter[];
 
     console.log(devicesFromDb);
     return devicesFromDb;
+    */
   }
 
   async getSwitchList(): Promise<Switch[]> {
-    const devicesFromDb = (await this.deviceDocument.find({
-      deviceType: "switch",
-    })) as Switch[];
-
-    console.log(devicesFromDb);
-    return devicesFromDb;
+    return this.deviceDocument.find({deviceType: "switch"})
+    .then((devices)=> {
+      const switches = devices as unknown as Switch[]
+      return Promise.resolve(switches)})
+    .catch((err) => Promise.reject(`Getting meter list failed due error: ${err}`)) 
+    
   }
 }
-
-/*
-class EventListener {
-  constructor() {
-    eventEmitter.on('deviceDeleted', this.handleEvent);
-  }
-
-  handleEvent(msg:string) {
-    console.log(`Event received with data: ${msg}`);
-  }
-}
-
-const listenet = new EventListener
-*/

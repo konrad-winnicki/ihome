@@ -1,0 +1,21 @@
+import Router from "koa-router";
+import { runMeter } from "../controllers/runDevices/runMeter";
+import { createTask } from "../controllers/addTask/addTask";
+import { deleteTask } from "../controllers/deleteTask/deleteTask";
+import { runSwitch } from "../controllers/runDevices/runSwitch";
+import { addDevice } from "../controllers/addDevice/addDevice";
+import { getMeters } from "../controllers/getDeviceList/getMeters";
+import { deleteDevice } from "../controllers/deleteDevice/deleteDevice";
+import { getSwitches } from "../controllers/getDeviceList/getSwitches";
+import { getTasksForDevice } from "../controllers/getTasks/getTasks";
+
+export const appRouter = new Router();
+appRouter.post("/meters/run/:id", runMeter);
+appRouter.post("/tasks", createTask);
+appRouter.delete("/tasks/:id", deleteTask);
+appRouter.post("/switches/run/:id", runSwitch);
+appRouter.post("/devices", addDevice);
+appRouter.get("/meters", getMeters);
+appRouter.get("/switches", getSwitches);
+appRouter.get("/tasks/device/:id", getTasksForDevice);
+appRouter.delete("/devices/:id", deleteDevice);

@@ -1,5 +1,5 @@
 import Koa from "koa";
-import { deviceService } from "../../server";
+import { deviceService } from "../../dependencias";
 
 export async function getMeters(ctx: Koa.Context) {
     return deviceService

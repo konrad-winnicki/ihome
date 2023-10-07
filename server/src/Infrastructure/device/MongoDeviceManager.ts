@@ -4,7 +4,7 @@ import { DeviceInterface } from "../../application/device/DeviceInterface";
 import { Device } from "../../domain/Device";
 import { Switch } from "../../domain/Switch";
 import { DeviceListingInterface } from "../../application/device/DeviceListingInterface";
-import { eventEmitter } from "../../server";
+import { eventEmitter } from "../../dependencias";
 import { DeviceInMemory } from "../../domain/DeviceInMemory";
 
 //const appCron = new AppCron();

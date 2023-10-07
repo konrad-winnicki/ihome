@@ -1,5 +1,5 @@
 import Koa from "koa";
-import { taskService } from "../../server";
+import { taskService } from "../../dependencias";
 
 export async function deleteTask(ctx: Koa.Context) {
     const taskId = ctx.params.id

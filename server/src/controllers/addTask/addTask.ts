@@ -1,5 +1,5 @@
 import Koa from "koa";
-import { taskService } from "../../server";
+import { taskService } from "../../dependencias";
 import { Task } from "../../domain/Task";
 import { v4 } from "uuid";
 

@@ -27,6 +27,7 @@ const taskDeviceAggregationPipeline = (taskId?: string) => [
 
 export class MongoTaskManager implements DBTaskInterface {
   private taskDocument: Model<Task>;
+  
   constructor(taskDocument: Model<Task>) {
     this.taskDocument = taskDocument;
   }

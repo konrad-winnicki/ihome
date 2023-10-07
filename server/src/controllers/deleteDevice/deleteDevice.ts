@@ -1,5 +1,5 @@
 import Koa from "koa";
-import { deviceService } from "../../server";
+import { deviceService } from "../../dependencias";
 
 export async function deleteDevice(ctx: Koa.Context) {
   const deviceId = ctx.params.id;

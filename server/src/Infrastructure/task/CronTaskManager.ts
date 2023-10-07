@@ -106,9 +106,10 @@ export class CronTaskManager implements CronTaskInterface {
     const memoryTaskList = cron.getTasks();
     const isDeletedFromMemory = memoryTaskList.delete(taskId);
 
-    if (isDeletedFromMemory) {
-      return this.delegate
+   return isDeletedFromMemory ? 
+      this.delegate
         .deleteTask(taskId)
+        .then((response) => response)
         .catch((error) =>
           this.compensateTaskDeletionFromMemory(taskId)
             .then(() =>
@@ -117,10 +118,10 @@ export class CronTaskManager implements CronTaskInterface {
             .catch(() =>
               Promise.reject(`Task deletion failed de to error ${error}`)
             )
-        );
-    } else {
-      return Promise.reject(`Task with id ${taskId} doesn't exist.`);
-    }
+        )
+    :
+       Promise.reject(`Task with id ${taskId} doesn't exist.`);
+    
   }
 
   compensateTaskDeletionFromMemory(taskId: string) {

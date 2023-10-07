@@ -1,5 +1,5 @@
 import Koa from "koa";
-import { devicesInMemory, deviceRunService } from "../../server";
+import { devicesInMemory, deviceRunService } from "../../dependencias";
 import { Switch } from "../../domain/Switch";
 import { runSwitchGuardFunction } from "../guardFunctions";
 

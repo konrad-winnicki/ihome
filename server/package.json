@@ -6,9 +6,9 @@
   "scripts": {
     "build": "npx tsc",
     "eslint": "npx eslint .",
-    "prod": "cross-env DEBUG=* NODE_DEBUG=http,net NODE_ENV=production node ./dist/src/server.js",
-    "prodOld": "cross-env NODE_ENV=production node ./dist/src/server.js",
-    "dev": "concurrently \"tsc -w\" \"nodemon ./dist/src/server.js\"",
+    "prod": "cross-env DEBUG=* NODE_DEBUG=http,net NODE_ENV=production node ./dist/src/startServer.js",
+    "prodOld": "cross-env NODE_ENV=production node ./dist/src/startServer.js",
+    "dev": "concurrently \"tsc -w\" \"nodemon ./dist/src/startServer.js\"",
     "test_domain": "npx jest --silent --runInBand --testPathPattern=./__tests__/domain",
     "test_api": "cross-env NODE_ENV=test npx jest --silent --runInBand --testPathPattern=./__tests__/apiTests"
   },

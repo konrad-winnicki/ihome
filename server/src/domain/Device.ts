@@ -1,4 +1,3 @@
-
 export class Device {
   readonly id: string;
   readonly deviceType: string;
@@ -11,6 +10,4 @@ export class Device {
     this.name = name;
     this.commandOn = commandOn;
   }
-
-  
 }

@@ -1,5 +1,5 @@
 import Koa from "koa";
-import { devicesInMemory, deviceRunService } from "../../server";
+import { devicesInMemory, deviceRunService } from "../../dependencias";
 
 export async function runMeter(ctx: Koa.Context) {
   const meterId = await ctx.params.id;

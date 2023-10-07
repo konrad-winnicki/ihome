@@ -14,7 +14,6 @@ export class DeviceInMemory {
     if(!DeviceInMemory.instance){
       DeviceInMemory.instance = new DeviceInMemory()
     }
-
     return DeviceInMemory.instance
   }
 

@@ -1,18 +1,18 @@
 import { Device} from "./Device";
 
 
-export interface MeterParameters {
+export interface ParametersUnits {
        [key: string]: string;
    }
 
 
 export class Meter extends Device {
-  readonly parameters :MeterParameters
+  readonly parameters: ParametersUnits
   constructor(
     id: string,
     deviceType: string,
     name: string,
-    parameters: MeterParameters,
+    parameters: ParametersUnits,
     commandOn: string,
   ) {
     super(id, deviceType, name, commandOn);

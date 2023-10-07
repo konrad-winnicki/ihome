@@ -17,21 +17,18 @@ export class InMemoryDeviceManager implements DeviceInterface {
   }
 
   async deleteDevice(deviceId: string): Promise<string> {
-    try {
-      const devicesList = this.devicesInMemory.devices;
-      const isExistingDevice = devicesList.get(deviceId);
+   return  new Promise((resolve, reject)=>{
+      const devicesList = this.devicesInMemory.devices
+      const isExistingDevice = devicesList.get(deviceId)
       if (!isExistingDevice) {
-        return Promise.reject(
+        reject(
           `MemoryError: Device with ${deviceId} not exists`
         );
       }
       this.devicesInMemory.deleteDevice(deviceId);
-      console.log("DEVICE DELETION SUCCES");
-      return Promise.resolve("Succes");
-    } catch (err) {
-      return Promise.reject(
-        `MemoryError: Error during deletion from cache: ${err}`
-      );
-    }
+      resolve(`Device ${deviceId} deleted`)
+    })
+
   }
+  
 }

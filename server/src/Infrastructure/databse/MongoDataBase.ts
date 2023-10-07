@@ -27,20 +27,19 @@ export class MongoDatabase {
     this.dbName = dbName;
     this.connection = this.connectDatabase();
   }
+
   connectDatabase() {
     try {
       const options = { dbName: this.dbName };
       const connection = mongoose.createConnection(this.url, options);
       console.log("Connected to the database 🌱");
       return connection;
+    
     } catch (error) {
       console.error("Error connecting to the database:", error);
       throw error;
     }
   }
-
-
-
 
   public createDeviceDoc() {
     const deviceDocument = this.connection.model<Device>(

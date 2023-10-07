@@ -100,3 +100,46 @@ export function runSwitchGuardFunction(reqBody: RunSwitchRequestBody) {
     typeof reqBody.switchOn === "boolean"
   );
 }
+
+
+export function isMeterGuardFunctionPromises(maybeMeter: Meter) {
+  const expectedParameters = ["deviceType", "name", "parameters", "commandOn"];
+  function checkIfNotExceededParams() {
+    for (const key in maybeMeter) {
+      if (!expectedParameters.includes(key)) {
+        return Promise.reject(`${key} not exists in Meter. Request must contain deviceType, name, parameters and commandOn params.`)
+      }
+    }
+    return Promise.resolve
+  }
+
+  function checkIfNotMissingParams() {
+    for (const param of expectedParameters) {
+      if (!maybeMeter.hasOwnProperty(param)) {
+        return Promise.reject(`Request not contain ${param}.`)
+      }
+    }
+
+    return Promise.resolve()
+  }
+
+  function chackIfParameterObjectValid() {
+    for (const key in maybeMeter.parameters) {
+      if (
+        typeof key !== "string" ||
+        typeof maybeMeter.parameters[key] !== "string"
+      ) {
+        return Promise.reject()
+      }
+    }
+    return true;
+  }
+
+  return (
+    checkIfNotExceededParams() &&
+    checkIfNotMissingParams() &&
+    chackIfParameterObjectValid() &&
+    typeof maybeMeter.name === "string" &&
+    typeof maybeMeter.commandOn === "string"
+  );
+}

@@ -1,3 +1,24 @@
+export class Task {
+  readonly id: string;
+  readonly deviceId: string;
+  readonly onStatus: boolean
+  readonly scheduledTime: ScheduleTime;
+
+  constructor(
+    id: string,
+    deviceId: string,
+    onStatus:boolean,
+    scheduledTime: ScheduleTime
+  ) {
+    this.id = id;
+    this.deviceId = deviceId;
+    this.onStatus = onStatus;
+    this.scheduledTime = new ScheduleTime(scheduledTime.hour, scheduledTime.minutes);
+  }
+ 
+}
+
+
 export class ScheduleTime {
   readonly hour:string;
   readonly minutes: string;
@@ -18,24 +39,4 @@ export class ScheduleTime {
       throw new Error("Hours must be in range 0-23 and minutes 0-59");
     }
   }
-}
-
-export class Task {
-  readonly id: string;
-  readonly deviceId: string;
-  readonly onStatus: boolean
-  readonly scheduledTime: ScheduleTime;
-
-  constructor(
-    id: string,
-    deviceId: string,
-    onStatus:boolean,
-    scheduledTime: ScheduleTime
-  ) {
-    this.id = id;
-    this.deviceId = deviceId;
-    this.onStatus = onStatus;
-    this.scheduledTime = new ScheduleTime(scheduledTime.hour, scheduledTime.minutes);
-  }
- 
 }

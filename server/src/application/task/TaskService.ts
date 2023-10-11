@@ -28,11 +28,7 @@ export class TaskService {
   deleteTaskFromDB(taskId: string): Promise<string> {
     return this.taskInterface.deleteTask(taskId);
   }
-  /*
-  getTaskListFromDB(): Promise<Task[]> {
-    return this.taskInterface.getTaskListFromDB();
-  }
-*/
+ 
 
   async findTaskById(taskId: string): Promise<AggregatedTask> {
     return this.taskInterface.findTaskById(taskId);
@@ -41,7 +37,7 @@ export class TaskService {
     return this.taskInterface.findAllTask();
   }
 
-  async transformTaskFromDbToCron(): Promise<string | null> {
+  async transformTaskFromDbToCron(): Promise<string> {
     return this.taskInterface.transformTaskFromDbToCron();
   }
 

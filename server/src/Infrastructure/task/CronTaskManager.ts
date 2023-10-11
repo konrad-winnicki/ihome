@@ -16,7 +16,7 @@ export class CronTaskManager implements CronTaskInterface {
     this.appCron = appCron;
   }
 
-  async transformTaskFromDbToCron() {
+  async transformTaskFromDbToCron():Promise<string> {
     return this.findAllTask()
       .then((tasks) => {
         tasks.forEach((task: AggregatedTask) => {
@@ -63,36 +63,7 @@ export class CronTaskManager implements CronTaskInterface {
             return Promise.resolve(response);
           });
       });
-    /*
-    try {
-      await this.delegate.addTask(task);
-      const aggreatedTask = await this.findTaskById(task.id);
-      console.log('AGGGRE', aggreatedTask)
-      if (aggreatedTask) {
-        try {
-          this.appCron.installTask(
-            aggreatedTask.id,
-            aggreatedTask.minutes,
-            aggreatedTask.hour,
-            aggreatedTask.onStatus
-              ? aggreatedTask.commandOn
-              : aggreatedTask.commandOff
-              ? aggreatedTask.commandOff
-              : ""
-          )
-          const tasks = cron.getTasks();
-          console.log("CRON", tasks);
-          return Promise.resolve("Succes");
-        } catch (err) {
-          this.delegate.deleteTask(task.id);
-          return Promise.reject(`Task not aded to cron due error: ${err}`);
-        }
-      }
-      return Promise.reject(`Task with id ${task.id} is not in database `);
-    } catch (err) {
-      return Promise.reject(`Task not aded to cron due error: ${err}`);
-    }
-    */
+  
   }
   async findTaskById(taskId: string): Promise<AggregatedTask> {
     return await this.delegate.findTaskById(taskId);

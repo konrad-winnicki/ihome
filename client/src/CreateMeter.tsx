@@ -45,18 +45,19 @@ export const CreateMeter: React.FC<CreateMeterProps> = (props) => {
       parameters,
       commandOn: formData.commandOn,
     };
+    const token = localStorage.getItem("token");
 
     try {
-      const response = await createMeter(meter);
+      const response = await createMeter(meter, token);
       if (response.ok) {
         alert("Meter created");
         console.log(await response.json());
       }
       if (response.status == 409) {
-        alert("Room name already in use");
+        alert("Name already in use");
       }
-      if (response.status == 401) {
-        navigate("/api/login");
+      if (response.status == 403) {
+        navigate("/login");
       }
     } catch (error) {
       console.error("an error occurred:", error);

@@ -36,18 +36,19 @@ export const CreateSwitch: React.FC<CreateSwitchProps> = (props) => {
       commandOn: formData.commandOn,
       commandOff: formData.commandOff,
     };
+    const token = localStorage.getItem("token");
 
     try {
-      const response = await createSwitch(switchDevice);
+      const response = await createSwitch(switchDevice, token);
       if (response.ok) {
-        alert("Meter created");
+        alert("Switch created");
         console.log(await response.json());
       }
       if (response.status == 409) {
-        alert("Room name already in use");
+        alert("Name already in use");
       }
-      if (response.status == 401) {
-        navigate("/api/login");
+      if (response.status == 403) {
+        navigate("/login");
       }
     } catch (error) {
       console.error("an error occurred:", error);

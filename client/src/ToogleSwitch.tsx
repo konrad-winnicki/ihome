@@ -4,16 +4,17 @@ import { toggleSwitch } from "./services";
 
 const ToggleSwitch: React.FC<{ switchId: string }> = (props) => {
   const [checked, setChecked] = useState(false);
+  const token = localStorage.getItem("token");
 
   const handleChange = (val: boolean) => {
     setChecked(val);
-    toggleSwitch(props.switchId, checked);
-
+    console.log('val', val, checked)
+    toggleSwitch(props.switchId, val, token)
   };
   
   return (
       <ReactSwitch
-        offColor='#6366F1'
+        offColor='#0F28FA'
         onColor="#D00"
         handleDiameter={20}
         height={25}

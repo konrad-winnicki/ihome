@@ -1,6 +1,6 @@
 .radio-button-container {
     display: inline-flex;
-    flex-direction: row;
+    flex-direction: column;
     margin: 5%
   }
   

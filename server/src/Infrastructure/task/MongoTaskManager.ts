@@ -27,7 +27,7 @@ const taskDeviceAggregationPipeline = (taskId?: string) => [
 
 export class MongoTaskManager implements DBTaskInterface {
   private taskDocument: Model<Task>;
-  
+
   constructor(taskDocument: Model<Task>) {
     this.taskDocument = taskDocument;
   }
@@ -59,8 +59,8 @@ export class MongoTaskManager implements DBTaskInterface {
           aggregatedTask.onStatus,
           aggregatedTask.scheduledTime.hour,
           aggregatedTask.scheduledTime.minutes,
-          aggregatedTask.commandOn,
-          aggregatedTask.commandOff
+          aggregatedTask.device.commandOn,
+          aggregatedTask.device.commandOff
         );
       })
       .catch((error) =>
@@ -99,7 +99,6 @@ export class MongoTaskManager implements DBTaskInterface {
   }
 
   async deleteTask(taskId: string): Promise<string> {
-    //TODO: issue with "taskId" to analyse
     return this.taskDocument
       .deleteOne({ id: taskId })
       .then((response) =>

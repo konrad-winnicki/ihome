@@ -1,19 +1,21 @@
-import ReactDOM from 'react-dom/client'
-import App from './App.tsx'
-import './index.css'
-import { BrowserRouter as Router, Route, Routes} from 'react-router-dom'; 
+import ReactDOM from "react-dom/client";
 
+import "./index.css";
+import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import App from "./App.tsx";
+import { StrictMode } from "react";
 
 export const AppRoutes = () => (
   <Routes>
-    <Route path="/api/app" element={<App/>} />
-    <Route path="/api/chatroom" element={<App/>} />
+    <Route path="/" element={<App />} />
+    <Route path="/api/login" element={<App />} />
   </Routes>
 );
 
-ReactDOM.createRoot(document.getElementById('root')!).render(
+ReactDOM.createRoot(document.getElementById("root")!).render(
+  <StrictMode>
     <Router>
-    <AppRoutes
-    />
+      <AppRoutes />
     </Router>
-)
+  </StrictMode>
+);

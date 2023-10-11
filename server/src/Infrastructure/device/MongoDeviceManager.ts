@@ -5,9 +5,8 @@ import { Device } from "../../domain/Device";
 import { Switch } from "../../domain/Switch";
 import { DeviceListingInterface } from "../../application/device/DeviceListingInterface";
 import { eventEmitter } from "../../dependencias";
-import { DeviceInMemory } from "../../domain/DeviceInMemory";
+import { InMemoryDeviceStorage } from "../../domain/InMemoryDeviceStorage";
 
-//const appCron = new AppCron();
 
 export class MongoDeviceManager
   implements DeviceInterface, DeviceListingInterface
@@ -28,16 +27,17 @@ export class MongoDeviceManager
         this.deviceDocument
           .create(device)
           .then((device) => device.id)
-          .catch((dbError) =>
-            this.compensateDeviceAdditionFromMemory(device.id).then(() => {
-              console.log("Compensation succeeded.");
-              return Promise.reject(dbError);
-            })
-          )
+          .catch((dbError) => {
+            console.log(dbError);
+            return this.compensateDeviceAdditionFromMemory(device.id).then(
+              () => {
+                console.log("Compensation succeeded.");
+                return Promise.reject(dbError);
+              }
+            );
+          })
           .catch((dbError) => this.translateDbError(dbError))
       );
-
-  
   }
 
   private translateDbError(dbError: Error) {
@@ -71,7 +71,9 @@ export class MongoDeviceManager
   }
 
   async deleteDevice(deviceId: string): Promise<string> {
-    const device = DeviceInMemory.getInstance().devices.get(deviceId) as Device;
+    const device = InMemoryDeviceStorage.getInstance().devices.get(
+      deviceId
+    ) as Device;
 
     return this.delegate
       .deleteDevice(deviceId)
@@ -114,14 +116,6 @@ export class MongoDeviceManager
         Promise.reject(`Getting meter list failed due error: ${err}`)
       );
 
-    /*
-    const devicesFromDb = (await this.deviceDocument.find({
-      deviceType: "meter",
-    })) as Meter[];
-
-    console.log(devicesFromDb);
-    return devicesFromDb;
-    */
   }
 
   async getSwitchList(): Promise<Switch[]> {
@@ -134,5 +128,16 @@ export class MongoDeviceManager
       .catch((err) =>
         Promise.reject(`Getting meter list failed due error: ${err}`)
       );
+  }
+
+  getDeviceById(deviceId: string): Promise<boolean> {
+    return this.deviceDocument
+      .findOne({ id: deviceId })
+      .then((device) =>
+        device
+          ? Promise.resolve(true)
+          : Promise.reject(`Device with id ${deviceId} does not exist.`)
+      )
+      .catch((error) => Promise.reject(error));
   }
 }

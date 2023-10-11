@@ -6,8 +6,9 @@ import { MdOutlineSendToMobile } from "react-icons/md";
 import { OnOffOption } from "./OnOffOption";
 import "./time.css";
 import { createTask } from "./services";
+import { SwitchInterface } from "./SwitchesList";
 interface TimeProps {
-  setShowTaskDetails: (param: boolean) => void;
+  setShowTaskDetails: (param: SwitchInterface | null) => void;
   switchId: string;
 }
 
@@ -34,9 +35,10 @@ export const TaskSetter: React.FC<TimeProps> = (props) => {
       onStatus: onStatus,
       scheduledTime: { hour, minutes },
     };
+    const token = localStorage.getItem("token");
 
     try {
-      const response = await createTask(task);
+      const response = await createTask(task, token);
       if (response.ok) {
         alert("Task created");
         console.log(await response.json());
@@ -51,7 +53,7 @@ export const TaskSetter: React.FC<TimeProps> = (props) => {
 
   return (
     <div className="flex flex-row rounded justify-center items-center mx-2">
-      <div className="rounded justify-center items-center mx-2">
+      <div className="rounded justify-center items-center mx-1">
       <TimePicker onChange={(value:string|null)=>setTime(value)} value={time} />
       </div>
       <div className="rounded justify-center items-center">
@@ -61,7 +63,7 @@ export const TaskSetter: React.FC<TimeProps> = (props) => {
         <button
           onClick={() => {
             addTask();
-            props.setShowTaskDetails(false);
+            props.setShowTaskDetails(null);
           }}
           disabled={isDisabled}
           className={isDisabled ? "inactive-button" : "active-button"}

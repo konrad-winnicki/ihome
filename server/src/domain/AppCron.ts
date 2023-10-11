@@ -6,7 +6,7 @@ export class AppCron {
   installTask(taskId: string, minutes: number, hours: number, command: string) {
     const cronString = `${minutes} ${hours} * * * `;
 
-    const schedule = cron.schedule(
+    cron.schedule(
       cronString,
       () => {
         try {
@@ -16,8 +16,8 @@ export class AppCron {
           console.log(err);
         }
       },
-      { name: taskId, scheduled: false, timezone: "Europe/Warsaw" }
+      { name: taskId, scheduled: true, timezone: "Europe/Warsaw" }
     );
-    schedule.start();
+    //schedule.start();
   }
 }

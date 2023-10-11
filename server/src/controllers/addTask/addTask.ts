@@ -5,13 +5,16 @@ import { v4 } from "uuid";
 
 export async function createTask(ctx: Koa.Context) {
   const data = (await ctx.request.body) as Task;
-  //TODO: add guard function for incoming task
   const task = new Task(v4(), data.deviceId, data.onStatus, data.scheduledTime);
+
+  // 1. deviceService - sprawdzic
+  // 2. 
+
   return taskService
     .addTask(task)
     .then((response) => {
       ctx.status = 201;
-      ctx.body = response;
+      ctx.body = {taskId: response};
     })
     .catch((error) => {
       ctx.status = 500;

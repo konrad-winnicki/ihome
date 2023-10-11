@@ -1,21 +1,19 @@
-import { Device} from "./Device";
+import { Device } from "./Device";
 
-
-export interface ParametersUnits {
-       [key: string]: string;
-   }
-
+export interface ParametersWithUnits {
+  [key: string]: string;
+}
 
 export class Meter extends Device {
-  readonly parameters: ParametersUnits
+  readonly parameters: ParametersWithUnits;
   constructor(
     id: string,
     deviceType: string,
     name: string,
-    parameters: ParametersUnits,
-    commandOn: string,
+    parameters: ParametersWithUnits,
+    commandOn: string
   ) {
     super(id, deviceType, name, commandOn);
-    this.parameters = parameters
+    this.parameters = parameters;
   }
 }

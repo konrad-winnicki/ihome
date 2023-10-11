@@ -44,8 +44,11 @@ export class CronTaskManager implements CronTaskInterface {
       .catch((error) => Promise.reject(error))
       .then((response) => {
         return this.findTaskById(task.id)
-          .catch(() => Promise.reject(`Task not added`))
+          .catch((error) => {
+            console.log(`Task not added die to error; ${error}`)
+            return Promise.reject(`Task not added`)})
           .then((aggregatedTask) => {
+            console.log("Aggregated task", aggregatedTask)
             this.appCron.installTask(
               aggregatedTask.id,
               aggregatedTask.minutes,

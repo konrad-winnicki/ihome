@@ -27,10 +27,11 @@ const Meter: React.FC<MeterProps> = (props) => {
   const isInitialRender = useRef(true);
 
   const meterId = props.meter.id
-  
+  const token = localStorage.getItem("token");
+
   async function meterOn() {
     props.setDisplayData(['Waiting'])
-    const response = await getMeasurement(meterId);
+    const response = await getMeasurement(meterId, token);
     console.log("run meter");
     if (response.ok) {
       const data = await response.json();

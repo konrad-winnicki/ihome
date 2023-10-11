@@ -13,7 +13,8 @@ export interface TaskInterface {
 }
 
 export const TaskModule: React.FC<{ task: TaskInterface }> = (props) => {
-  
+  const token = localStorage.getItem("token");
+
   return (
     <div
       className="flex flex-row justify-center items-center"
@@ -24,7 +25,7 @@ export const TaskModule: React.FC<{ task: TaskInterface }> = (props) => {
         {props.task.onStatus ? "ON" : "OFF"}
       </h1>
         <button
-          onClick={() => {deleteTask(props.task.id)}}
+          onClick={() => {deleteTask(props.task.id, token)}}
           className="bg-red-500 px-1 py-1 text-white m-2 rounded"
         >
           <FaTrashRestoreAlt />

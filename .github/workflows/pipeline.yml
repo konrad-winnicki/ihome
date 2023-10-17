@@ -1,4 +1,4 @@
-name: CHAT
+name: PI_MANAGER
 
 on:
   push:
@@ -13,39 +13,30 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    environment: CHAT
+    environment: PI_MANAGER
 
     steps:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0
 
-      - name: Create .env file
-        env:
-          MONGO_URI: "${{secrets.MONGO_URI}}"
-          TEST_DATABASE: "${{secrets.TEST_DATABASE}}"
-          JWT_SECRET: "${{secrets.JWT_SECRET}}"
-
+      - name: Create test.env file
+       
         run: |
           cd server
-          echo "TEST_DATABASE"="test" >> .env
-          echo "PORT"="8011" >> .env
-          echo "SOCKET_ORIGIN"="http://localhost:5173" >> .env
-          echo "MONGO_URI=${MONGO_URI}" >> .env
-          echo "TEST_DATABASE"="test" >> .env
-          echo "DATABASE"="" >> .env
-          echo "JWT_SECRET=${JWT_SECRET}" >> .env
-          echo "CLIENT_ID"="" >> .env
-          echo "CLIENT_SECRET"="" >> .env
-          echo "CALLBACK_URL"="" >> .env
-          echo "EXCHANGE_TOKEN_URI"="" >> .env
-          echo "REDIRECT_URL_WITH_TOKEN"="" >> .env
+          echo "MONGO_URI"="mongodb://localhost:27017" >> test.env
+          echo "DATABASE"="raspberrypi_test" >> test.env
+          echo "NODE_ENV"="test" >> test.env
+          echo "PORT"="4001" >> test.env
+          echo "PAIR_PASSWORD"="testPassword" >> test.env
+          echo "JWT_SECRET"="74310907898vnmrbmvbipc734086n3e65jblppl4c9n" >> .env
+
          
 
       - name: Print .env file
         run: |
-          echo "Printing .env:"
-          cat server/.env
+          echo "Printing test.env:"
+          cat server/test.env
 
       - name: Install Node.js
         uses: actions/setup-node@v3

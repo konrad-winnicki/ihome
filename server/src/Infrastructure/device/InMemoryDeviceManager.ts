@@ -13,7 +13,7 @@ export class InMemoryDeviceManager implements DeviceInterface {
     return new Promise<string>((resolve) => {
       this.devicesInMemory.addDevice(device);
       resolve(`Device ${device.id} added`);
-    }).catch(() => Promise.reject("kkk"));
+    }).catch((err) => Promise.reject(`MemoryError: Device not added due to error: ${err}`));
   }
 
   async deleteDevice(deviceId: string): Promise<string> {

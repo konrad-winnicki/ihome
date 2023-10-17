@@ -7,7 +7,7 @@ import util from "util";
 const execAsync = util.promisify(exec);
 
 export class DeviceRunManager implements DeviceRunInterface {
-  switchOn(device: Device) {
+   switchOn(device: Device) {
     return this.executeScriptAndCollectSdtout(device.commandOn)
   }
 
@@ -24,20 +24,23 @@ async executeScriptAndCollectSdtout(
       console.log("Running command:", command);
       const { stdout } = await execAsync(command)
       return Promise.resolve(stdout? stdout: "Acomplished succesfuly but not data collected")
+
     }
 
     const timeoutPromise = new Promise<string>((resolve) => {
-      setTimeout(() => {
+     setTimeout(() => {
+
         resolve('Timeout: Proccess not ended. Not waiting more for stdout.');
       }, 60000)})
     
+      
     try {
       
-      return  Promise.race([collectStdOut(), timeoutPromise])
+      return await Promise.race([collectStdOut(), timeoutPromise])
+
     } catch (err) {
 
-      console.log("Standard out error", err);
-      return Promise.reject(`Acomplished with error`);
+      return Promise.reject(`Acomplished with error: ${err}`);
     }
   }
 

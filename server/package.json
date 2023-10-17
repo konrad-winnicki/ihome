@@ -6,11 +6,11 @@
   "scripts": {
     "build": "npx tsc",
     "eslint": "npx eslint .",
-    "prod": "cross-env DEBUG=* NODE_DEBUG=http,net NODE_ENV=production node ./dist/src/startServer.js",
-    "prodOld": "cross-env NODE_ENV=production node ./dist/src/startServer.js",
-    "dev": "concurrently \"tsc -w\" \"nodemon ./dist/src/startServer.js\"",
-    "test_domain": "npx jest --silent --runInBand --testPathPattern=./__tests__/domain",
-    "test_api": "cross-env NODE_ENV=test npx jest --silent --runInBand --testPathPattern=./__tests__/apiTests"
+    "prod": "cross-env NODE_ENV=production node ./dist/src/server.js",
+    "prodOld": "cross-env NODE_ENV=production node ./dist/src/server.js",
+    "dev": "cross-env NODE_ENV=development concurrently \"tsc -w\" \"nodemon ./dist/src/server.js\"",
+    "test_domain": "npx jest --runInBand --coverage --testPathPattern=./__tests__/domain",
+    "test_api": "cross-env NODE_ENV=test npx jest --silent  --runInBand --coverage --testPathPattern=./__tests__/apiTests"
   },
   "author": "Konrad Winnicki",
   "license": "ISC",
@@ -43,6 +43,7 @@
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
     "googleapis": "^126.0.1",
+    "jest-mock": "^29.7.0",
     "jsonwebtoken": "^9.0.2",
     "koa": "^2.14.2",
     "koa-bodyparser": "^4.4.1",

@@ -11,7 +11,7 @@ interface DecodedToken {
 type LoginType = {
   setIsLoggedIn: (param: boolean) => void;
 };
-export const PairPassword: React.FC<LoginType> = (props) => {
+export const Login: React.FC<LoginType> = (props) => {
   const [formData, setFormData] = useState({
     password: "",
   });
@@ -105,4 +105,4 @@ export const PairPassword: React.FC<LoginType> = (props) => {
   );
 };
 
-export default PairPassword;
+export default Login;

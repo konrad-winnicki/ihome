@@ -8,8 +8,8 @@ export class DeviceRunService implements DeviceRunService {
     this.deviceRunInterface = deviceRunService;
   }
 
-  switchOn(device: Device): Promise<string> {
-    return this.deviceRunInterface.switchOn(device);
+ switchOn(device: Device): Promise<string> {
+    return  this.deviceRunInterface.switchOn(device);
   }
 
   switchOff(device: Switch): Promise<string> {

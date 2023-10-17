@@ -1,9 +1,12 @@
-import { RunSwitchRequestBody } from "../../../../controllers/runDevices/runSwitch";
 import {
   checkIfNotExceededParams,
   checkIfNotMissingParams,
 } from "./guardFunctionHelpers";
 
+
+export type RunSwitchRequestBody = {
+  switchOn: boolean;
+};
 export function isRunSwitch(reqBody: RunSwitchRequestBody): boolean {
   const expectedParameters = ["switchOn"];
 

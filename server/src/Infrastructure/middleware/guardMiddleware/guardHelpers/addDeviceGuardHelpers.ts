@@ -25,7 +25,8 @@ export function isMeter(maybeMeter: Meter) {
     checkIfNotMissingParams(maybeMeter, expectedParameters) &&
     chackIfParametersObjectValid() &&
     typeof maybeMeter.name === "string" &&
-    typeof maybeMeter.commandOn === "string"
+    typeof maybeMeter.commandOn === "string" &&
+    typeof maybeMeter.parameters === "object"
   );
 }
 

@@ -8,14 +8,13 @@ const authenticate = async (ctx: Koa.Context, next: Next) => {
   const token = data?.replace("Bearer ", "");
   if (!token) {
     ctx.status = 401;
-    return (ctx.body = "Token reqired");
+    return (ctx.body = {"Error": "Token reqired"});
   }
   return tokenValidation(token)
     .then(() => next())
     .catch((error) => {
-      console.log('token validation error:',  error)
       ctx.status = 401;
-      return (ctx.body = error);
+      return (ctx.body = {"Token validation error": error});
     });
 
   /*

@@ -1,12 +1,14 @@
-import { appRouter } from "./Infrastructure/routes";
-import { AppServer } from "./Infrastructure/AppServer";
+import { initializeDependencias } from "./dependencias";
 
 
 
-const appServer = new AppServer(appRouter);
+//const appServer = new AppServer(appRouter);
 
 
-appServer.startServer();
+//appServer.startServer().then((res)=> console.log('succes', res)).catch((err)=>console.log('error', err))
+
+
+export const app =  initializeDependencias()
 
 /*
 class Singleton {

@@ -19,6 +19,6 @@ export async function addTaskGuardMiddleware(ctx: Koa.Context, next: Next) {
   }
 
   ctx.status = 400;
-  return (ctx.body = `Task request must contain following parameters:\n 
-  {deviceId: string, onStatus:boolean, scheduledTime:{hour: sting, minutes:string}`);
+  return (ctx.body = {BadRequest:`Task request must contain following parameters:\n 
+  {deviceId: string, onStatus:boolean, scheduledTime:{hour: sting, minutes:string}`});
 }

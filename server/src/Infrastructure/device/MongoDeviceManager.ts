@@ -4,19 +4,21 @@ import { DeviceInterface } from "../../application/device/DeviceInterface";
 import { Device } from "../../domain/Device";
 import { Switch } from "../../domain/Switch";
 import { DeviceListingInterface } from "../../application/device/DeviceListingInterface";
-import { eventEmitter } from "../../dependencias";
 import { InMemoryDeviceStorage } from "../../domain/InMemoryDeviceStorage";
+import { EventEmitter } from "node:events";
 
 
 export class MongoDeviceManager
   implements DeviceInterface, DeviceListingInterface
 {
   private deviceDocument: Model<Device>;
+  private eventEmitter: EventEmitter
   delegate: DeviceInterface;
 
-  constructor(delegate: DeviceInterface, deviceDocument: Model<Device>) {
+  constructor(delegate: DeviceInterface, deviceDocument: Model<Device>, eventEmitter:EventEmitter ) {
     this.deviceDocument = deviceDocument;
     this.delegate = delegate;
+    this.eventEmitter = eventEmitter
   }
 
   async addDevice(device: Device): Promise<string> {
@@ -28,7 +30,6 @@ export class MongoDeviceManager
           .create(device)
           .then((device) => device.id)
           .catch((dbError) => {
-            console.log(dbError);
             return this.compensateDeviceAdditionFromMemory(device.id).then(
               () => {
                 console.log("Compensation succeeded.");
@@ -36,7 +37,10 @@ export class MongoDeviceManager
               }
             );
           })
-          .catch((dbError) => this.translateDbError(dbError))
+          .catch((dbError) => 
+             this.translateDbError(dbError)
+            
+          )
       );
   }
 
@@ -88,7 +92,7 @@ export class MongoDeviceManager
           )
           .then((dbResult) => {
             console.log("deletion result", dbResult.acknowledged);
-            eventEmitter.emit("deviceDeleted", deviceId);
+            this.eventEmitter.emit("deviceDeleted", deviceId);
             return Promise.resolve("Success");
           })
       );

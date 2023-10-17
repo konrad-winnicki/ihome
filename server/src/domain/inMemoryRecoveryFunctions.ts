@@ -1,12 +1,19 @@
-import { deviceService, devicesInMemory, taskService } from "../dependencias";
+import { MongoDeviceManager } from "../Infrastructure/device/MongoDeviceManager";
+import { TaskService } from "../application/task/TaskService";
+import { InMemoryDeviceStorage } from "./InMemoryDeviceStorage";
 import { Meter } from "./Meter";
 import { Switch } from "./Switch";
 
-export  function fillDeviceInMemoryWithData() {
-  const meters = deviceService.getMeterList();
-  const switches = deviceService.getSwitchList();
 
-  Promise.all([meters, switches])
+
+export async function recoveryInMemoryDeviceStorage(
+  deviceService: MongoDeviceManager,
+  devicesInMemory: InMemoryDeviceStorage
+) {
+  const meters = await deviceService.getMeterList();
+  const switches = await deviceService.getSwitchList();
+
+  return Promise.all([meters, switches])
     .then((promises) => {
       const [meters, switches] = promises;
       meters.forEach((meter: Meter) => {
@@ -19,10 +26,12 @@ export  function fillDeviceInMemoryWithData() {
     .catch((error) => console.log(error));
 }
 
-export function fillCronInMemoryWithData() {
-  taskService
+
+export async function fillCronInMemoryWithData(taskService:TaskService) {
+   return taskService
     .transformTaskFromDbToCron()
-    .then((result:string) => console.log(result))
-    .catch((error:string) => console.log(error));
+    .then((result: string) => console.log(result))
+    .catch((error: string) => console.log(error));
   //TODO: what when server restart but this fails?
+  
 }

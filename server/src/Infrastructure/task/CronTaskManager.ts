@@ -48,7 +48,6 @@ export class CronTaskManager implements CronTaskInterface {
             console.log(`Task not added die to error; ${error}`)
             return Promise.reject(`Task not added`)})
           .then((aggregatedTask) => {
-            console.log("Aggregated task", aggregatedTask)
             this.appCron.installTask(
               aggregatedTask.id,
               aggregatedTask.minutes,
@@ -59,7 +58,6 @@ export class CronTaskManager implements CronTaskInterface {
                 ? aggregatedTask.commandOff
                 : ""
             );
-            console.log("ACTUAL TASK", cron.getTasks());
             return Promise.resolve(response);
           });
       });
@@ -69,7 +67,7 @@ export class CronTaskManager implements CronTaskInterface {
     return await this.delegate.findTaskById(taskId);
   }
   async findAllTask(): Promise<AggregatedTask[]> {
-    return await this.delegate.findAllTask();
+    return this.delegate.findAllTask();
   }
 
   async findTasksForDevice(deviceId: string): Promise<Task[]> {
@@ -114,7 +112,7 @@ export class CronTaskManager implements CronTaskInterface {
         Promise.resolve("Task restoration in memory succeded");
       })
       .catch((err) =>
-        Promise.reject(`Task restoration in memory failed due ${err}`)
+      Promise.reject(`Task restoration in memory failed due ${err}`)
       );
   }
 }

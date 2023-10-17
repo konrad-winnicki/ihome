@@ -32,8 +32,8 @@ export async function addDeviceGuardMiddleware(ctx: Koa.Context, next: Next) {
   }
 
   ctx.status = 400;
-  return (ctx.body = `For meters request must contain following parameters:\n 
+  return (ctx.body = {"BadRequest":`For meters request must contain following parameters:\n 
   {deviceType: string, name:string, parameters:{[key:string]: sting}, commandOn:string}\n
   For switches request must contain following parameters:\n 
-  {deviceType: string, name:string, commandOn:string, commandOff: string}`);
+  {deviceType: string, name:string, commandOn:string, commandOff: string}`});
 }

@@ -3,7 +3,7 @@ import { Task } from "../../domain/Task";
 import { Model } from "mongoose";
 import { AggregatedTask } from "../../domain/AggregatedTask";
 
-const taskDeviceAggregationPipeline = (taskId?: string) => [
+export const taskDeviceAggregationPipeline = (taskId?: string) => [
   taskId ? { $match: { id: taskId } } : { $match: {} },
   {
     $lookup: {
@@ -42,7 +42,7 @@ export class MongoTaskManager implements DBTaskInterface {
 
     return this.taskDocument
       .create(newTask)
-      .then((task) => Promise.resolve(`Task ${task.id} added`))
+      .then((task) => Promise.resolve(task.id))
       .catch((error) =>
         Promise.reject(`Task not added due to error: ${error}`)
       );

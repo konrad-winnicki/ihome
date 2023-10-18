@@ -13,8 +13,7 @@ describe("API RUN METER TEST", () => {
   let token: string;
   let meterId: string;
   let meterWithNonExistingScriptId: string;
-  const timeOutPromiseDelay = 60000;
-  //const manipulationTimeInMS = 10000
+
   beforeAll(async () => {
     app = await initializeDependencias();
     token = await loginUser(requestUri, "testPassword");
@@ -27,7 +26,7 @@ describe("API RUN METER TEST", () => {
       "meter",
       "meter1",
       { temperature: "oC", humidity: "%" },
-      "./src/__tests__/apiTests/shellScripts/runMeter.sh"
+      ". ./src/__tests__/apiTests/shellScripts/runMeter.sh"
     );
     meterWithNonExistingScriptId = await addMeter(
       requestUri,
@@ -37,15 +36,12 @@ describe("API RUN METER TEST", () => {
       { temperature: "oC", humidity: "%" },
       ". ./src/__tests__/apiTests/shellScripts/notExisting.sh"
     );
-    jest.useFakeTimers();
   });
 
   afterAll(() => {
-    jest.useRealTimers();
   });
 
   test("Should run command on script:", async () => {
-    jest.advanceTimersByTime(timeOutPromiseDelay);
     const responseFromMeter = await request(requestUri)
       .post(`/meters/run/${meterId}`)
       .set("Authorization", token)
@@ -58,7 +54,6 @@ describe("API RUN METER TEST", () => {
   });
 
   test("Should return error if file not exists:", async () => {
-    jest.advanceTimersByTime(timeOutPromiseDelay);
     const responseFromMeter = await request(requestUri)
       .post(`/meters/run/${meterWithNonExistingScriptId}`)
       .set("Authorization", token)

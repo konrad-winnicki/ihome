@@ -6,6 +6,9 @@ import { Application } from "../../dependencias";
 import { cleanupDatabase } from "./auxilaryFunctionsForTests/cleanup";
 import { loginUser } from "./auxilaryFunctionsForTests/loginUser";
 import { addSwitch } from "./auxilaryFunctionsForTests/addSwitch";
+import { exec } from "node:child_process";
+import util from "util";
+
 const requestUri = `http://localhost:${sanitizedConfig.PORT}`;
 
 describe("API RUN SWITCH TEST", () => {
@@ -13,10 +16,8 @@ describe("API RUN SWITCH TEST", () => {
   let token: string;
   let switchId: string;
   let switchWithNonExistingScriptId: string;
-  //let listeningSwitch: string
+  let listeningSwitch: string;
   let switchWithNoPrint: string;
-  const timeOutPromiseDelay = 60000;
-
   beforeAll(async () => {
     app = await initializeDependencias();
     await cleanupDatabase(app.databaseInstance.connection);
@@ -39,7 +40,14 @@ describe("API RUN SWITCH TEST", () => {
       ". ./src/__tests__/apiTests/shellScripts/nonExisiting.sh",
       ". ./src/__tests__/apiTests/shellScripts/nonExisting.sh"
     );
-    //listeningSwitch = await addSwitch(requestUri, token, "switch", "switch3", ". ./src/__tests__/apiTests/shellScripts/runSwitchWithDelay.sh", ". ./src/__tests__/apiTests/shellScripts/runSwitchOff.sh")
+    listeningSwitch = await addSwitch(
+      requestUri,
+      token,
+      "switch",
+      "switch3",
+      ". ./src/__tests__/apiTests/shellScripts/runSwitchWithDelay.sh",
+      ". ./src/__tests__/apiTests/shellScripts/runSwitchOff.sh"
+    );
     switchWithNoPrint = await addSwitch(
       requestUri,
       token,
@@ -48,17 +56,9 @@ describe("API RUN SWITCH TEST", () => {
       ". ./src/__tests__/apiTests/shellScripts/runSwitchWithNoPrint.sh",
       ". ./src/__tests__/apiTests/shellScripts/runSwitchOff.sh"
     );
-
-    jest.useFakeTimers();
-  });
-
-  afterAll(() => {
-    jest.useRealTimers();
   });
 
   test("Should run command on script:", async () => {
-    jest.advanceTimersByTime(timeOutPromiseDelay);
-
     const responseFromSwitch = await request(requestUri)
       .post(`/switches/run/${switchId}`)
       .set("Authorization", token)
@@ -70,8 +70,6 @@ describe("API RUN SWITCH TEST", () => {
   });
 
   test("Should run command off script:", async () => {
-    jest.advanceTimersByTime(timeOutPromiseDelay);
-
     const responseFromSwitch = await request(requestUri)
       .post(`/switches/run/${switchId}`)
       .set("Authorization", token)
@@ -83,8 +81,6 @@ describe("API RUN SWITCH TEST", () => {
   });
 
   test("Switch on should return error if file not exists:", async () => {
-    jest.advanceTimersByTime(timeOutPromiseDelay);
-
     const responseFromSwitch = await request(requestUri)
       .post(`/switches/run/${switchWithNonExistingScriptId}`)
       .set("Authorization", token)
@@ -96,7 +92,6 @@ describe("API RUN SWITCH TEST", () => {
   });
 
   test("Switch off should return error if file not exists:", async () => {
-    jest.advanceTimersByTime(timeOutPromiseDelay);
     const responseFromMeter = await request(requestUri)
       .post(`/switches/run/${switchWithNonExistingScriptId}`)
       .set("Authorization", token)
@@ -108,27 +103,35 @@ describe("API RUN SWITCH TEST", () => {
     expect(responseFromMeter.text).toMatch("Acomplished with error:");
   });
 
-  /*
   test("Should resolve promise even if process not ended:", async () => {
-//jest.useRealTimers()
-jest.advanceTimersByTime(timeOutPromiseDelay+10000);
+    //jest.useFakeTimers()
+    // jest.advanceTimersByTime(10)
 
-
-    const responseFromMeter =  await request(requestUri)
+    const execAsync = util.promisify(exec);
+    const responseFromMeter = await request(requestUri)
       .post(`/switches/run/${listeningSwitch}`)
       .set("Authorization", token)
-      .send({switchOn:true})
+      .send({ switchOn: true })
       .expect(200)
       .expect("Content-Type", /text\/plain/);
-
-   console.log('listening',responseFromMeter.text)
-   expect(responseFromMeter.text).toMatch('Proccess not ended. Not waiting more for stdout.')
-  });
-  
+/*
+    try {
+      const { stdout } = await execAsync(`pgrep -f runSwitchWithDelay.sh`);
+      console.log(stdout);
+      await execAsync(`kill -TERM ${stdout}`);
+      // const responseFromMeter = await responseFromMeterPromise;
+      
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
 */
-  test("Should resolve promise even if process not printed message:", async () => {
-    jest.advanceTimersByTime(timeOutPromiseDelay);
+    expect(responseFromMeter.text).toMatch(
+      "Proccess not ended. Not waiting more for stdout."
+    );
+  });
 
+  test("Should resolve promise even if process not printed message:", async () => {
     const responseFromMeter = await request(requestUri)
       .post(`/switches/run/${switchWithNoPrint}`)
       .set("Authorization", token)

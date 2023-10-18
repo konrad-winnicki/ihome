@@ -4,9 +4,6 @@
 #chmod 755 "$file_or_directory"
 
 
-# Print the string to the console
-while true; do
-sleep 5
-done
-#echo 'switch on sound detector'
+sleep 3
+
 #kill $!

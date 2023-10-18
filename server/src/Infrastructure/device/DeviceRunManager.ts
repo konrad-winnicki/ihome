@@ -1,3 +1,5 @@
+import sanitizedConfig from "../../../config/config";
+
 import { exec } from "child_process";
 import { DeviceRunInterface } from "../../application/device/DeviceRunInterface";
 import { Switch } from "../../domain/Switch";
@@ -31,12 +33,15 @@ async executeScriptAndCollectSdtout(
      setTimeout(() => {
 
         resolve('Timeout: Proccess not ended. Not waiting more for stdout.');
-      }, 60000)})
+      }, sanitizedConfig.NODE_ENV==='test'? 500: 60000)})
     
       
     try {
       
-      return await Promise.race([collectStdOut(), timeoutPromise])
+      const scriptPromise = collectStdOut()
+      const result = await Promise.race([scriptPromise, timeoutPromise])
+
+      return result;
 
     } catch (err) {
 

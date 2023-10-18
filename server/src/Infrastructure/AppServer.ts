@@ -6,7 +6,7 @@ import cors from "koa-cors";
 import * as httpLibrary from "http";
 
 export class AppServer {
-  private serverConfig: Koa;
+  public serverConfig: Koa;
   private appRouter: Router;
   public server: httpLibrary.Server | undefined;
 

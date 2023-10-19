@@ -85,15 +85,15 @@ export class MongoDeviceManager
       .then(() =>
         this.deviceDocument
           .deleteOne({ id: deviceId })
-          .catch((err) =>
+          .catch(() =>
             this.compensateDeviceDelationFromMemory(device)
-              .then(() => Promise.reject(`Deletion failed due error: ${err}`))
-              .catch(() => Promise.reject(`Deletion failed due error: ${err}`))
+              .then((err) => Promise.reject(`Deletion failed due error: ${err}`))
+              .catch((err) => Promise.reject(`Deletion failed due error: ${err}`))
           )
           .then((dbResult) => {
-            console.log("deletion result", dbResult.acknowledged);
+            console.log("deletion result", dbResult);
             this.eventEmitter.emit("deviceDeleted", deviceId);
-            return Promise.resolve("Success");
+            return Promise.resolve("Device deleted succesfully.");
           })
       );
   }
@@ -103,10 +103,13 @@ export class MongoDeviceManager
   ): Promise<string> {
     return this.delegate
       .addDevice(device)
-      .then((device) => Promise.resolve(`Deleted ${device} restored`))
+      .then((device) => {
+        console.log("Delete device compensation succeeded")
+        return Promise.resolve(`Delete device compensation succeeded. Deleted ${device} restored`)})
       .catch((err) =>
-        Promise.reject(`Device not restored in cache due err: ${err}`)
-      );
+      {console.log('Delete device compensation failed.')
+        return Promise.reject(`Delete compensation failed: Device not restored in cache due err: ${err}`)
+  });
   }
 
   async getMeterList(): Promise<Meter[]> {

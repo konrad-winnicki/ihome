@@ -1,28 +1,10 @@
 import { describe } from "@jest/globals";
-import { MongoDeviceManager } from "../../Infrastructure/device/MongoDeviceManager";
-import { Device } from "../../domain/Device";
-import { Model, mongo } from "mongoose";
-import { EventEmitter } from "node:events";
-import { InMemoryDeviceManager } from "../../Infrastructure/device/InMemoryDeviceManager";
-import { InMemoryDeviceStorage } from "../../domain/InMemoryDeviceStorage";
 import { SpiedFunction } from "jest-mock";
 import { expect, jest, test } from "@jest/globals";
-
-describe("MongoDeviceManager CLASS TEST", () => {
+import { InMemoryDeviceStorage } from "../../domain/InMemoryDeviceStorage";
+import { setMongoDeviceManagerTestConditions } from "./auxilaryFunction";
+describe("MongoDeviceManager CLASS TEST - delete device", () => {
   const inMemoryStorageMock = InMemoryDeviceStorage.getInstance();
-
-  const mockAddDeviceToStorage = jest.fn((device: Device) => {});
-
-  const mockDeleteDeviceFromStorage = jest.fn();
-
-  const databaseCreateMock = jest.fn();
-
-  const databaseDeleteOneMock = jest.fn();
-
-  const deviceDokument = {
-    create: databaseCreateMock,
-    deleteOne: databaseDeleteOneMock,
-  } as unknown as Model<Device>;
 
   let consoleSpy: SpiedFunction;
 
@@ -41,25 +23,11 @@ describe("MongoDeviceManager CLASS TEST", () => {
   });
 
   test("Should delete device", async () => {
-    mockDeleteDeviceFromStorage.mockImplementation(() => {
-      Promise.resolve("Deleted from storage");
-    });
-    inMemoryStorageMock.addDevice = mockAddDeviceToStorage;
-    inMemoryStorageMock.deleteDevice = mockDeleteDeviceFromStorage;
-    const inMemoryDeviceManager = new InMemoryDeviceManager(
-      inMemoryStorageMock
-    );
-
-    databaseDeleteOneMock.mockImplementation(() =>
-      Promise.resolve("Deleted from database")
-    );
-
-    const eventEmitter = new EventEmitter();
-
-    const mongoDeviceManager = new MongoDeviceManager(
-      inMemoryDeviceManager,
-      deviceDokument,
-      eventEmitter
+    const mongoDeviceManager = setMongoDeviceManagerTestConditions(
+      true,
+      true,
+      true,
+      true
     );
 
     try {
@@ -76,25 +44,11 @@ describe("MongoDeviceManager CLASS TEST", () => {
   });
 
   test("Should not delete device if deletion from database failed", async () => {
-    mockDeleteDeviceFromStorage.mockImplementation(() => {
-      Promise.resolve("Deleted from storage");
-    });
-    inMemoryStorageMock.addDevice = mockAddDeviceToStorage;
-    inMemoryStorageMock.deleteDevice = mockDeleteDeviceFromStorage;
-    const inMemoryDeviceManager = new InMemoryDeviceManager(
-      inMemoryStorageMock
-    );
-
-    databaseDeleteOneMock.mockImplementation(() =>
-      Promise.reject("NOT deleted from database")
-    );
-
-    const eventEmitter = new EventEmitter();
-
-    const mongoDeviceManager = new MongoDeviceManager(
-      inMemoryDeviceManager,
-      deviceDokument,
-      eventEmitter
+    const mongoDeviceManager = setMongoDeviceManagerTestConditions(
+      true,
+      true,
+      true,
+      false
     );
 
     try {
@@ -112,36 +66,18 @@ describe("MongoDeviceManager CLASS TEST", () => {
   });
 
   test("Should not delete device if deletion from memory failed", async () => {
-    mockDeleteDeviceFromStorage.mockImplementation(() => {
-      throw new Error("deletion from storage failed");
-    });
-
-    inMemoryStorageMock.addDevice = mockAddDeviceToStorage;
-    inMemoryStorageMock.deleteDevice = mockDeleteDeviceFromStorage;
-    const inMemoryDeviceManager = new InMemoryDeviceManager(
-      inMemoryStorageMock
-    );
-
-    databaseCreateMock.mockImplementation(() =>
-      Promise.resolve("Added to database")
-    );
-    databaseDeleteOneMock.mockImplementation(() =>
-      Promise.resolve("Deleted from database")
-    );
-
-    const eventEmitter = new EventEmitter();
-
-    const mongoDeviceManager = new MongoDeviceManager(
-      inMemoryDeviceManager,
-      deviceDokument,
-      eventEmitter
+    const mongoDeviceManager = setMongoDeviceManagerTestConditions(
+      true,
+      false,
+      true,
+      true
     );
 
     try {
       const result = await mongoDeviceManager.deleteDevice("12345");
     } catch (err) {
       expect(err).toMatch(
-        "Deletion failed due error: Error: deletion from storage failed"
+        "Deletion failed due error: Error: Deletion from storage failed"
       );
     }
 
@@ -151,35 +87,13 @@ describe("MongoDeviceManager CLASS TEST", () => {
   });
 
   test("Compensation failed if addition to memory not succeded", async () => {
-    mockAddDeviceToStorage.mockImplementation((device: Device) => {
-      throw new Error("Adding to storage failed");
-    });
-
-    mockDeleteDeviceFromStorage.mockImplementation(() => {
-      Promise.resolve("Deleted from storage");
-    });
-    inMemoryStorageMock.addDevice = mockAddDeviceToStorage;
-    inMemoryStorageMock.deleteDevice = mockDeleteDeviceFromStorage;
-
-    const inMemoryDeviceManager = new InMemoryDeviceManager(
-      inMemoryStorageMock
+    const mongoDeviceManager = setMongoDeviceManagerTestConditions(
+      false,
+      true,
+      false,
+      false
     );
 
-    databaseCreateMock.mockImplementation(() =>
-      Promise.reject("Adding to database failed")
-    );
-
-    databaseDeleteOneMock.mockImplementation(() =>
-      Promise.reject("NOT deleted from database")
-    );
-
-    const eventEmitter = new EventEmitter();
-
-    const mongoDeviceManager = new MongoDeviceManager(
-      inMemoryDeviceManager,
-      deviceDokument,
-      eventEmitter
-    );
     try {
       const result = await mongoDeviceManager.deleteDevice("12345");
     } catch (err) {
@@ -194,31 +108,13 @@ describe("MongoDeviceManager CLASS TEST", () => {
   });
 
   test("Should not delete if deletion from memory failed", async () => {
-    mockDeleteDeviceFromStorage.mockImplementation(() => {
-      throw new Error("Deletion from storage failed");
-    });
-    inMemoryStorageMock.addDevice = mockAddDeviceToStorage;
-    inMemoryStorageMock.deleteDevice = mockDeleteDeviceFromStorage;
-
-    const inMemoryDeviceManager = new InMemoryDeviceManager(
-      inMemoryStorageMock
+    const mongoDeviceManager = setMongoDeviceManagerTestConditions(
+      true,
+      false,
+      false,
+      false
     );
 
-    databaseCreateMock.mockImplementation(() =>
-      Promise.reject("Adding to database failed")
-    );
-
-    databaseDeleteOneMock.mockImplementation(() =>
-      Promise.reject("NOT deleted from database")
-    );
-
-    const eventEmitter = new EventEmitter();
-
-    const mongoDeviceManager = new MongoDeviceManager(
-      inMemoryDeviceManager,
-      deviceDokument,
-      eventEmitter
-    );
     try {
       const result = await mongoDeviceManager.deleteDevice("12345");
     } catch (err) {

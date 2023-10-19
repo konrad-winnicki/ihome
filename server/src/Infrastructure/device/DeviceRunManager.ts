@@ -38,10 +38,8 @@ async executeScriptAndCollectSdtout(
       
     try {
       
-      const scriptPromise = collectStdOut()
-      const result = await Promise.race([scriptPromise, timeoutPromise])
-
-      return result;
+      
+      return await Promise.race([collectStdOut(), timeoutPromise])
 
     } catch (err) {
 

@@ -4,6 +4,6 @@
 #chmod 755 "$file_or_directory"
 
 
-sleep 3
+sleep 2
 
 #kill $!

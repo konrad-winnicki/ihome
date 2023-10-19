@@ -6,8 +6,6 @@ import { Application } from "../../dependencias";
 import { cleanupDatabase } from "./auxilaryFunctionsForTests/cleanup";
 import { loginUser } from "./auxilaryFunctionsForTests/loginUser";
 import { addSwitch } from "./auxilaryFunctionsForTests/addSwitch";
-import { exec } from "node:child_process";
-import util from "util";
 
 const requestUri = `http://localhost:${sanitizedConfig.PORT}`;
 
@@ -104,28 +102,14 @@ describe("API RUN SWITCH TEST", () => {
   });
 
   test("Should resolve promise even if process not ended:", async () => {
-    //jest.useFakeTimers()
-    // jest.advanceTimersByTime(10)
-
-    const execAsync = util.promisify(exec);
+   
     const responseFromMeter = await request(requestUri)
       .post(`/switches/run/${listeningSwitch}`)
       .set("Authorization", token)
       .send({ switchOn: true })
       .expect(200)
       .expect("Content-Type", /text\/plain/);
-/*
-    try {
-      const { stdout } = await execAsync(`pgrep -f runSwitchWithDelay.sh`);
-      console.log(stdout);
-      await execAsync(`kill -TERM ${stdout}`);
-      // const responseFromMeter = await responseFromMeterPromise;
-      
-    } catch (error) {
-      console.log(error);
-      throw error;
-    }
-*/
+
     expect(responseFromMeter.text).toMatch(
       "Proccess not ended. Not waiting more for stdout."
     );

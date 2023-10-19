@@ -106,6 +106,6 @@ export class MongoTaskManager implements DBTaskInterface {
           ? Promise.resolve(`Task ${taskId} deleted`)
           : Promise.reject(`Task not deleted`)
       )
-      .catch((error) => Promise.reject(`Task not deleted due error: ${error}`));
+      .catch((error) => Promise.reject(`Task not deleted due database error: ${error}`));
   }
 }

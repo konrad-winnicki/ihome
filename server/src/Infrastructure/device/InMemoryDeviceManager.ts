@@ -21,7 +21,7 @@ export class InMemoryDeviceManager implements DeviceInterface {
       const devicesList = this.devicesInMemory.devices;
       const isExistingDevice = devicesList.get(deviceId);
       if (!isExistingDevice) {
-        reject(`MemoryError: Device with ${deviceId} not exists`);
+        reject(`MemoryError: Device with ${deviceId} not exists.`);
       }
       this.devicesInMemory.deleteDevice(deviceId);
       resolve(`Device ${deviceId} deleted`);

@@ -109,10 +109,12 @@ export class CronTaskManager implements CronTaskInterface {
             ? task.commandOff
             : ""
         );
-        Promise.resolve("Task restoration in memory succeded");
+        console.log("Task restoration in memory succeded")
+        return Promise.resolve("Task restoration in memory succeded");
       })
-      .catch((err) =>
-      Promise.reject(`Task restoration in memory failed due ${err}`)
-      );
+      .catch((err) =>{
+        console.log(`Task restoration in memory failed due ${err}`)
+      return Promise.reject(`Task restoration in memory failed due ${err}`)
+  });
   }
 }

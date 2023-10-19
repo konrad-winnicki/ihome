@@ -28,7 +28,7 @@ export class MongoDatabase {
     this.connection = this.connectDatabase();
   }
 
-  connectDatabase() {
+  private connectDatabase() {
     try {
       const options = { dbName: this.dbName };
       const connection = mongoose.createConnection(this.url, options);

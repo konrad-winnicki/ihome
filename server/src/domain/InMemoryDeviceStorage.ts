@@ -1,6 +1,7 @@
 import { Device } from "./Device";
 
 export class InMemoryDeviceStorage {
+  
   private static instance: InMemoryDeviceStorage | null = null;
   private _devices: Map<string, Device>;
   private constructor() {

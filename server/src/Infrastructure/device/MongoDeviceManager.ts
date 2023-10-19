@@ -7,18 +7,21 @@ import { DeviceListingInterface } from "../../application/device/DeviceListingIn
 import { InMemoryDeviceStorage } from "../../domain/InMemoryDeviceStorage";
 import { EventEmitter } from "node:events";
 
-
 export class MongoDeviceManager
   implements DeviceInterface, DeviceListingInterface
 {
   private deviceDocument: Model<Device>;
-  private eventEmitter: EventEmitter
+  private eventEmitter: EventEmitter;
   delegate: DeviceInterface;
 
-  constructor(delegate: DeviceInterface, deviceDocument: Model<Device>, eventEmitter:EventEmitter ) {
+  constructor(
+    delegate: DeviceInterface,
+    deviceDocument: Model<Device>,
+    eventEmitter: EventEmitter
+  ) {
     this.deviceDocument = deviceDocument;
     this.delegate = delegate;
-    this.eventEmitter = eventEmitter
+    this.eventEmitter = eventEmitter;
   }
 
   async addDevice(device: Device): Promise<string> {
@@ -32,22 +35,21 @@ export class MongoDeviceManager
           .catch((dbError) => {
             return this.compensateDeviceAdditionFromMemory(device.id).then(
               () => {
-                console.log("Compensation succeeded.");
+                console.log("Add device compensation succeeded.");
                 return Promise.reject(dbError);
               }
             );
           })
-          .catch((dbError) => 
-             this.translateDbError(dbError)
-            
-          )
+          .catch((dbError) => {
+            return this.translateDbError(dbError);
+          })
       );
   }
 
   private translateDbError(dbError: Error) {
     return dbError instanceof mongo.MongoServerError
       ? Promise.reject(
-          `Unique violation error: ${this.uniqueViolationErrorHandler(dbError)}`
+          `Device not added due error: MongoServerError: ${this.uniqueViolationErrorHandler(dbError)}`
         )
       : Promise.reject(`Device not added due to error: ${dbError}`);
   }
@@ -57,19 +59,17 @@ export class MongoDeviceManager
   ): Promise<string> {
     return this.delegate
       .deleteDevice(deviceId)
-      .then((device) => Promise.resolve(`Device ${device} deletet from memory`))
-      .catch((err) =>
-        Promise.reject(`Device not deleted from memory due err: ${err}`)
-      );
+      .then((device) => Promise.resolve(`Device ${device} deleted from memory`))
+      .catch((err) => {
+        console.log("Adding device compensation failed.");
+        return Promise.reject(`Compensation failed. Device not deleted from memory due err: ${err}`);
+      });
   }
 
   uniqueViolationErrorHandler(err: mongo.MongoServerError) {
     const isUniqueViolation = err.code === 11000;
-    if (isUniqueViolation && err.errmsg.includes("email")) {
-      return `EmailConflictError`;
-    }
     if (isUniqueViolation && err.errmsg.includes("name")) {
-      return "NameConflictError";
+      return "Unique violation error: NameConflictError";
     }
     return err;
   }
@@ -119,7 +119,6 @@ export class MongoDeviceManager
       .catch((err) =>
         Promise.reject(`Getting meter list failed due error: ${err}`)
       );
-
   }
 
   async getSwitchList(): Promise<Switch[]> {

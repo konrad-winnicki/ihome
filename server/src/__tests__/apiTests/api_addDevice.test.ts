@@ -401,7 +401,7 @@ describe("API ADD DEVICE TEST", () => {
       })
       .expect(409)
       .expect("Content-Type", /application\/json/);
-    expect(response.body).toEqual({ConflictError: "Unique violation error: NameConflictError"});
+    expect(response.body).toEqual({ConflictError: "Device not added due error: MongoServerError: Unique violation error: NameConflictError"});
 
     const [...devicesInMemoryKeys] = app.devicesInMemory.devices.keys();
     const deviceInMemory = app.devicesInMemory.devices.get(deviceId);

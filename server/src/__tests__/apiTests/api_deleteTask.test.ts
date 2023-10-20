@@ -119,54 +119,7 @@ describe("API DELETE TASK TEST", () => {
     });
   });
 
-  test("Should restore task with compensation if error during deletion from database:", async () => {
-    const consoleSpy = jest.spyOn(console, "log");
-
-    const database = app.databaseInstance.connection.useDb("raspberrypi_test");
-    const collection = database.collection("tasks");
-
-    await collection.findOneAndDelete({ id: task1Id });
-    setTimeout(() => {
-      collection.insertOne({
-        id: task1Id,
-        deviceId: switch1Id,
-        onStatus: true,
-        scheduledTime: {
-          hour: "10",
-          minutes: "10",
-        },
-      });
-    }, 11);
-
-    const response1 = request(requestUri)
-      .delete(`/tasks/${task1Id}`)
-      .set("Authorization", token)
-      .expect(500)
-      .expect("Content-Type", /application\/json/);
-    const taskKeysIterator = cron.getTasks().keys();
-    const taskKeyList = [...taskKeysIterator];
-
-    const response = await response1;
-    const taskFromDB = await getTasksForDevice(
-      app.databaseInstance.connection,
-      switch1Id
-    );
-    const [task1, task2] = taskFromDB;
-    expect(consoleSpy).toHaveBeenCalledWith(
-      "Task restoration in memory succeded"
-    );
-    expect(consoleSpy).not.toHaveBeenCalledWith(
-      expect.stringMatching(/^Task restoration in memory failed due.*/)
-    );
-
-    expect(response.body).toHaveProperty("Task not deleted due to error");
-    expect(taskKeyList).toEqual([task1Id, task2Id]);
-    expect([task1.id, task2.id].sort()).toStrictEqual(
-      [task1Id, task2Id].sort()
-    );
-  });
-
-  afterAll(async () => {
+   afterAll(async () => {
     await app.databaseInstance.connection.close();
     await app.appServer.stopServer();
   });

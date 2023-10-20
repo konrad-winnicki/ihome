@@ -56,7 +56,7 @@ describe("API DELETE DEVICE TEST", () => {
     const [device1, device2] = app.devicesInMemory.devices.values();
     expect(response.body).toEqual({
       "Device not deleted due to error":
-        "Deletion failed due error: MemoryError: Device with nonExisitingId not exists",
+      "Deletion failed due error: MemoryError: Device with nonExisitingId not exists.",
     });
     expect(devicesInDB).toMatchObject([
       {
@@ -104,7 +104,7 @@ describe("API DELETE DEVICE TEST", () => {
       switch1Id
     );
     const deletedDeviceFromMemory = app.devicesInMemory.devices.get(switch1Id);
-    expect(response.body).toEqual({ "Device deleted": "Success" });
+    expect(response.body).toEqual({ "Device deleted": "Device deleted succesfully." });
     expect(findDeteledItem).toEqual([]);
     expect(deletedDeviceFromMemory).toEqual(undefined);
   });

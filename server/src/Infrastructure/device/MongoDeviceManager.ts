@@ -31,7 +31,8 @@ export class MongoDeviceManager
       .then(() =>
         this.deviceDocument
           .create(device)
-          .then((device) => device.id)
+          .then((device) => {
+            return device.id})
           .catch((dbError) => {
             return this.compensateDeviceAdditionFromMemory(device.id).then(
               () => {

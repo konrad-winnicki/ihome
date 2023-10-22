@@ -20,4 +20,12 @@ export class AppCron {
     );
     //schedule.start();
   }
+
+  deleteTask(taskId: string): Promise<string> {
+    const memoryTaskList = cron.getTasks();
+    const isDeletedFromMemory = memoryTaskList.delete(taskId);
+    return isDeletedFromMemory
+      ? Promise.resolve("Task deleted")
+      : Promise.reject(`Task with id ${taskId} doesn't exist.`);
+  }
 }

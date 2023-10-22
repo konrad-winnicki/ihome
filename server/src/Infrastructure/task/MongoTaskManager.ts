@@ -53,7 +53,10 @@ export class MongoTaskManager implements DBTaskInterface {
     return this.taskDocument
       .aggregate(taskDeviceAggregationPipeline(taskId))
       .then((aggregatedTasksList) => {
+        
+        if(aggregatedTasksList.length === 1){
         const aggregatedTask = aggregatedTasksList[0];
+        
         return new AggregatedTask(
           aggregatedTask.id,
           aggregatedTask.onStatus,
@@ -61,11 +64,9 @@ export class MongoTaskManager implements DBTaskInterface {
           aggregatedTask.scheduledTime.minutes,
           aggregatedTask.device.commandOn,
           aggregatedTask.device.commandOff
-        );
+        );}
+       return Promise.reject(`Task with ${taskId} not exists`)
       })
-      .catch((error) =>
-        Promise.reject(`Fetching all tasks failed due error: ${error}`)
-      );
   }
 
   async findAllTask(): Promise<AggregatedTask[]> {
@@ -104,7 +105,7 @@ export class MongoTaskManager implements DBTaskInterface {
       .then((response) =>
         response.acknowledged && response.deletedCount == 1
           ? Promise.resolve(`Task ${taskId} deleted`)
-          : Promise.reject(`Task not deleted`)
+          : Promise.reject(`Task with ${taskId} not exists`)
       )
       .catch((error) => Promise.reject(`Task not deleted due database error: ${error}`));
   }

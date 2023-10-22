@@ -32,7 +32,7 @@ export function deviceDocumentWithMockMetods(
   addToDBStatus: string,
   deleteFromDBStatus: string
 ) {
-  const databaseCreateMock = jest.fn().mockImplementation((device:Device) => {
+  const databaseCreateMock = jest.fn().mockImplementation((device: Device) => {
     switch (addToDBStatus) {
       case "success":
         return Promise.resolve(device);
@@ -98,3 +98,5 @@ export function inMemoryStoreWithMockMethods(
 
   return inMemoryStorageMock;
 }
+
+

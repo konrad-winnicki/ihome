@@ -2,7 +2,6 @@ import { DBTaskInterface } from "../../application/task/DBTaskInterface";
 import { AppCron } from "../../domain/AppCron";
 import { Task } from "../../domain/Task";
 import { AggregatedTask } from "../../domain/AggregatedTask";
-import cron from "node-cron";
 import { CronTaskInterface } from "../../application/task/CronTaskInterface";
 
 //const appCron = new AppCron();
@@ -16,7 +15,7 @@ export class CronTaskManager implements CronTaskInterface {
     this.appCron = appCron;
   }
 
-  async transformTaskFromDbToCron():Promise<string> {
+  async transformTaskFromDbToCron(): Promise<string> {
     return this.findAllTask()
       .then((tasks) => {
         tasks.forEach((task: AggregatedTask) => {
@@ -42,11 +41,8 @@ export class CronTaskManager implements CronTaskInterface {
     return this.delegate
       .addTask(task)
       .catch((error) => Promise.reject(error))
-      .then((response) => {
+      .then((taskId) => {
         return this.findTaskById(task.id)
-          .catch((error) => {
-            console.log(`Task not added due to error; ${error}`)
-            return Promise.reject(`Task not added`)})
           .then((aggregatedTask) => {
             this.appCron.installTask(
               aggregatedTask.id,
@@ -58,10 +54,21 @@ export class CronTaskManager implements CronTaskInterface {
                 ? aggregatedTask.commandOff
                 : ""
             );
-            return Promise.resolve(response);
-          });
+            return Promise.resolve(`Task with ${taskId} added`);
+          })
+          .catch((error) =>
+            this.compensateTaskAdditionToDB(task.id)
+              .catch((compensationError) =>
+                Promise.reject(
+                  `Task not added due to error: ${error}, ${compensationError}`
+                )
+              )
+              .then((compensation) =>
+                Promise.reject(`Task not added due to error: ${error}, ${compensation}`
+                )
+              )
+          );
       });
-  
   }
   async findTaskById(taskId: string): Promise<AggregatedTask> {
     return await this.delegate.findTaskById(taskId);
@@ -75,25 +82,43 @@ export class CronTaskManager implements CronTaskInterface {
   }
 
   async deleteTask(taskId: string): Promise<string> {
-    const memoryTaskList = cron.getTasks();
-    const isDeletedFromMemory = memoryTaskList.delete(taskId);
+    return this.appCron
+      .deleteTask(taskId)
+      .catch((error) =>
+        Promise.reject(`Task not deleted due to error: ${error}`)
+      )
+      .then(() =>
+        this.delegate
+          .deleteTask(taskId)
+          .then((deletionCompleted) => deletionCompleted)
+          .catch((error) =>
+            this.compensateTaskDeletionFromMemory(taskId)
+             
+              .catch((compensationError) =>
+                Promise.reject(`Task deletion failed due to error: ${error} ${compensationError}`)
+              )
+              .then((result) =>
+              Promise.reject(
+                `Task deletion failed due to error:  ${error}, ${result}`
+              )
+            )
+          )
+      );
+  }
 
-   return isDeletedFromMemory ? 
-      this.delegate
-        .deleteTask(taskId)
-        .then((response) => response)
-        .catch((error) =>
-          this.compensateTaskDeletionFromMemory(taskId)
-            .then(() =>
-              Promise.reject(`Task deletion failed de to error ${error}`)
-            )
-            .catch(() =>
-              Promise.reject(`Task deletion failed de to error ${error}`)
-            )
-        )
-    :
-       Promise.reject(`Task with id ${taskId} doesn't exist.`);
-    
+  compensateTaskAdditionToDB(taskId: string) {
+    return this.delegate
+      .deleteTask(taskId)
+      .then((response) => {
+        console.log("Add task compensation succeded.");
+        return Promise.resolve(`Compensation succeeded: ${response}`);
+      })
+      .catch((error) => {
+        console.log("Add task compensation failed.");
+        return Promise.reject(
+          `Task add compensation failed due to error: ${error}`
+        );
+      });
   }
 
   compensateTaskDeletionFromMemory(taskId: string) {
@@ -109,12 +134,14 @@ export class CronTaskManager implements CronTaskInterface {
             ? task.commandOff
             : ""
         );
-        console.log("Task restoration in memory succeded")
-        return Promise.resolve("Task restoration in memory succeded");
+        console.log("Task restoration to cron succeded");
+        return Promise.resolve("Task restoration to cron succeded");
       })
-      .catch((err) =>{
-        console.log(`Task restoration in memory failed due ${err}`)
-      return Promise.reject(`Task restoration in memory failed due ${err}`)
-  });
+      .catch((err) => {
+        console.log(`Task restoration to cron failed.`);
+        return Promise.reject(
+          `Task restoration to cron failed due error: ${err}`
+        );
+      });
   }
 }

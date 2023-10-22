@@ -32,7 +32,8 @@ export class MongoDeviceManager
         this.deviceDocument
           .create(device)
           .then((device) => {
-            return device.id})
+            return device.id;
+          })
           .catch((dbError) => {
             return this.compensateDeviceAdditionFromMemory(device.id).then(
               () => {
@@ -50,7 +51,9 @@ export class MongoDeviceManager
   private translateDbError(dbError: Error) {
     return dbError instanceof mongo.MongoServerError
       ? Promise.reject(
-          `Device not added due error: MongoServerError: ${this.uniqueViolationErrorHandler(dbError)}`
+          `Device not added due error: MongoServerError: ${this.uniqueViolationErrorHandler(
+            dbError
+          )}`
         )
       : Promise.reject(`Device not added due to error: ${dbError}`);
   }
@@ -63,7 +66,9 @@ export class MongoDeviceManager
       .then((device) => Promise.resolve(`Device ${device} deleted from memory`))
       .catch((err) => {
         console.log("Adding device compensation failed.");
-        return Promise.reject(`Compensation failed. Device not deleted from memory due err: ${err}`);
+        return Promise.reject(
+          `Compensation failed. Device not deleted from memory due err: ${err}`
+        );
       });
   }
 
@@ -88,8 +93,12 @@ export class MongoDeviceManager
           .deleteOne({ id: deviceId })
           .catch(() =>
             this.compensateDeviceDelationFromMemory(device)
-              .then((err) => Promise.reject(`Deletion failed due error: ${err}`))
-              .catch((err) => Promise.reject(`Deletion failed due error: ${err}`))
+              .then((err) =>
+                Promise.reject(`Deletion failed due error: ${err}`)
+              )
+              .catch((err) =>
+                Promise.reject(`Deletion failed due error: ${err}`)
+              )
           )
           .then((dbResult) => {
             console.log("deletion result", dbResult);
@@ -104,13 +113,18 @@ export class MongoDeviceManager
   ): Promise<string> {
     return this.delegate
       .addDevice(device)
-      .then((device) => {
-        console.log("Delete device compensation succeeded")
-        return Promise.resolve(`Delete device compensation succeeded. Deleted ${device} restored`)})
-      .catch((err) =>
-      {console.log('Delete device compensation failed.')
-        return Promise.reject(`Delete compensation failed: Device not restored in cache due err: ${err}`)
-  });
+      .then((deviceId) => {
+        console.log("Delete device compensation succeeded");
+        return Promise.resolve(
+          `Delete device compensation succeeded. Deleted ${deviceId} restored`
+        );
+      })
+      .catch((err) => {
+        console.log("Delete device compensation failed.");
+        return Promise.reject(
+          `Delete compensation failed: Device not restored in cache due err: ${err}`
+        );
+      });
   }
 
   async getMeterList(): Promise<Meter[]> {

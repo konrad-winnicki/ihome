@@ -6,7 +6,7 @@ import {
   deviceDocumentWithMockMetods,
   inMemoryStoreWithMockMethods,
   prepareMongoDeviceManagerWithMockPerameters,
-} from "./auxilaryFunction";
+} from "./mockForMongoDeviceManager";
 
 describe("MongoDeviceManager CLASS TEST - delete device", () => {
   const inMemoryStorageMock = InMemoryDeviceStorage.getInstance();
@@ -113,15 +113,13 @@ describe("MongoDeviceManager CLASS TEST - delete device", () => {
       deviceDokumentMock
     );
 
-
     await mongoDeviceManager
-    .deleteDevice(deviceId)
-    .catch((err) =>
-      expect(err).toMatch(
-        "Deletion failed due error: Error: Deletion from storage failed"
-      )
-    );
-  
+      .deleteDevice(deviceId)
+      .catch((err) =>
+        expect(err).toMatch(
+          "Deletion failed due error: Error: Deletion from storage failed"
+        )
+      );
 
     expect(consoleSpy).not.toHaveBeenCalledWith(
       "Add device compensation succeeded."
@@ -150,13 +148,13 @@ describe("MongoDeviceManager CLASS TEST - delete device", () => {
     );
 
     await mongoDeviceManager
-    .deleteDevice(deviceId)
-    .catch((err) =>
-      expect(err).toMatch(
-        "Deletion failed due error: Delete compensation failed: Device not restored in cache due err: MemoryError: Device not added due to error: Error: Adding to storage failed"
-      )
-    );
-  
+      .deleteDevice(deviceId)
+      .catch((err) =>
+        expect(err).toMatch(
+          "Deletion failed due error: Delete compensation failed: Device not restored in cache due err: MemoryError: Device not added due to error: Error: Adding to storage failed"
+        )
+      );
+
     expect(consoleSpy).toHaveBeenCalledWith(
       "Delete device compensation failed."
     );
@@ -184,14 +182,13 @@ describe("MongoDeviceManager CLASS TEST - delete device", () => {
     );
 
     await mongoDeviceManager
-    .deleteDevice(deviceId)
-    .catch((err) =>
-      expect(err).toMatch(
-        "Deletion failed due error: Error: Deletion from storage failed"
-      )
-    );
+      .deleteDevice(deviceId)
+      .catch((err) =>
+        expect(err).toMatch(
+          "Deletion failed due error: Error: Deletion from storage failed"
+        )
+      );
 
-  
     expect(consoleSpy).not.toHaveBeenCalledWith(
       "Delete device compensation succeeded."
     );

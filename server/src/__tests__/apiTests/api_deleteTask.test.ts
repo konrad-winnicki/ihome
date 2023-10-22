@@ -108,7 +108,7 @@ describe("API DELETE TASK TEST", () => {
     });
   });
 
-  test("Should not delete device if token not provided", async () => {
+  test("Should not delete task if token not provided", async () => {
     const response = await request(requestUri)
       .delete(`/tasks/${task1Id}`)
       .expect(401)

@@ -11,7 +11,8 @@
     "dev": "cross-env NODE_ENV=development concurrently \"tsc -w\" \"nodemon ./dist/src/server.js\"",
     "test_domain": "npx jest --runInBand --coverage --testPathPattern=./__tests__/domain",
     "test_infrastructure": "npx jest --runInBand --coverage --testPathPattern=./__tests__/infrastructure",
-    "test_api": "cross-env NODE_ENV=test npx jest --silent=false --runInBand --coverage --testPathPattern=./__tests__/apiTests --detectOpenHandles"
+    "test_api": "cross-env NODE_ENV=test npx jest --silent=false --runInBand --coverage --testPathPattern=./__tests__/apiTests --detectOpenHandles",
+    "test_api_simple": "cross-env NODE_ENV=test npx jest --silent=true --runInBand --testPathPattern=./__tests__/apiTests --detectOpenHandles"
   },
   "author": "Konrad Winnicki",
   "license": "ISC",

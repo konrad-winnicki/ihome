@@ -1,4 +1,4 @@
-import { DBTaskInterface } from "../../application/task/DBTaskInterface";
+import { TaskRepository } from "../../application/task/TaskRepository";
 import { AppCron } from "../../domain/AppCron";
 import { Task } from "../../domain/Task";
 import { AggregatedTask } from "../../domain/AggregatedTask";
@@ -8,9 +8,9 @@ import { CronTaskInterface } from "../../application/task/CronTaskInterface";
 
 export class CronTaskManager implements CronTaskInterface {
   private appCron: AppCron;
-  private delegate: DBTaskInterface;
+  private delegate: TaskRepository;
 
-  constructor(delegate: DBTaskInterface, appCron: AppCron) {
+  constructor(delegate: TaskRepository, appCron: AppCron) {
     this.delegate = delegate;
     this.appCron = appCron;
   }
@@ -64,7 +64,8 @@ export class CronTaskManager implements CronTaskInterface {
                 )
               )
               .then((compensation) =>
-                Promise.reject(`Task not added due to error: ${error}, ${compensation}`
+                Promise.reject(
+                  `Task not added due to error: ${error}, ${compensation}`
                 )
               )
           );
@@ -93,15 +94,17 @@ export class CronTaskManager implements CronTaskInterface {
           .then((deletionCompleted) => deletionCompleted)
           .catch((error) =>
             this.compensateTaskDeletionFromMemory(taskId)
-             
+
               .catch((compensationError) =>
-                Promise.reject(`Task deletion failed due to error: ${error} ${compensationError}`)
+                Promise.reject(
+                  `Task deletion failed due to error: ${error} ${compensationError}`
+                )
               )
               .then((result) =>
-              Promise.reject(
-                `Task deletion failed due to error:  ${error}, ${result}`
+                Promise.reject(
+                  `Task deletion failed due to error:  ${error}, ${result}`
+                )
               )
-            )
           )
       );
   }

@@ -1,4 +1,4 @@
-import { DBTaskInterface } from "../../application/task/DBTaskInterface";
+import { TaskRepository } from "../../application/task/TaskRepository";
 import { Task } from "../../domain/Task";
 import { Model } from "mongoose";
 import { AggregatedTask } from "../../domain/AggregatedTask";
@@ -25,7 +25,7 @@ export const taskDeviceAggregationPipeline = (taskId?: string) => [
   },
 ];
 
-export class MongoTaskManager implements DBTaskInterface {
+export class MongoTaskManager implements TaskRepository {
   private taskDocument: Model<Task>;
 
   constructor(taskDocument: Model<Task>) {
@@ -53,20 +53,20 @@ export class MongoTaskManager implements DBTaskInterface {
     return this.taskDocument
       .aggregate(taskDeviceAggregationPipeline(taskId))
       .then((aggregatedTasksList) => {
-        
-        if(aggregatedTasksList.length === 1){
-        const aggregatedTask = aggregatedTasksList[0];
-        
-        return new AggregatedTask(
-          aggregatedTask.id,
-          aggregatedTask.onStatus,
-          aggregatedTask.scheduledTime.hour,
-          aggregatedTask.scheduledTime.minutes,
-          aggregatedTask.device.commandOn,
-          aggregatedTask.device.commandOff
-        );}
-       return Promise.reject(`Task with ${taskId} not exists`)
-      })
+        if (aggregatedTasksList.length === 1) {
+          const aggregatedTask = aggregatedTasksList[0];
+
+          return new AggregatedTask(
+            aggregatedTask.id,
+            aggregatedTask.onStatus,
+            aggregatedTask.scheduledTime.hour,
+            aggregatedTask.scheduledTime.minutes,
+            aggregatedTask.device.commandOn,
+            aggregatedTask.device.commandOff
+          );
+        }
+        return Promise.reject(`Task with ${taskId} not exists`);
+      });
   }
 
   async findAllTask(): Promise<AggregatedTask[]> {
@@ -107,6 +107,8 @@ export class MongoTaskManager implements DBTaskInterface {
           ? Promise.resolve(`Task ${taskId} deleted`)
           : Promise.reject(`Task with ${taskId} not exists`)
       )
-      .catch((error) => Promise.reject(`Task not deleted due database error: ${error}`));
+      .catch((error) =>
+        Promise.reject(`Task not deleted due database error: ${error}`)
+      );
   }
 }

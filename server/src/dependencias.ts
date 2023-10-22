@@ -51,7 +51,7 @@ export async function initializeDependencias() {
   const appCorn = new AppCron();
   const cronTaskManager = new CronTaskManager(mongoTaskManager, appCorn);
 
-  const taskManager = new TaskManager(cronTaskManager, eventEmitter);
+  const taskManager = new TaskManager(cronTaskManager,mongoTaskManager , eventEmitter);
   const taskService = new TaskService(taskManager, deviceService);
 
   const deviceRunManager = new DeviceRunManager();
@@ -75,7 +75,7 @@ export async function initializeDependencias() {
   const appServer = new AppServer(appRouter);
 
   await recoveryInMemoryDeviceStorage(deviceService, devicesInMemory);
-  await fillCronInMemoryWithData(taskService);
+  await fillCronInMemoryWithData(cronTaskManager);
 
   appServer
     .startServer()

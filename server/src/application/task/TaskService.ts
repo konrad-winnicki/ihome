@@ -1,18 +1,17 @@
-import { DBTaskInterface } from "./DBTaskInterface";
+import { TaskRepository } from "./TaskRepository";
 import { AggregatedTask } from "../../domain/AggregatedTask";
 import { Task } from "../../domain/Task";
-import { CronTaskInterface } from "./CronTaskInterface";
 import { DeviceListingInterface } from "../device/DeviceListingInterface";
 
 export class TaskService {
-  private taskInterface: DBTaskInterface & CronTaskInterface;
+  private taskRepository: TaskRepository;
   private deviceService: DeviceListingInterface;
 
   constructor(
-    taskInterface: DBTaskInterface & CronTaskInterface,
+    taskRepository: TaskRepository,
     deviceService: DeviceListingInterface
   ) {
-    this.taskInterface = taskInterface;
+    this.taskRepository = taskRepository;
     this.deviceService = deviceService;
   }
 
@@ -20,28 +19,22 @@ export class TaskService {
     // TODO: this.deviceService.findById(task.deviceId)
     return this.deviceService
       .getDeviceById(task.deviceId)
-      .then(() => this.taskInterface.addTask(task))
-      .catch((error)=> Promise.reject(`Error occurred: ${error}`));
-
+      .then(() => this.taskRepository.addTask(task))
+      .catch((error) => Promise.reject(`Error occurred: ${error}`));
   }
 
   deleteTaskFromDB(taskId: string): Promise<string> {
-    return this.taskInterface.deleteTask(taskId);
+    return this.taskRepository.deleteTask(taskId);
   }
- 
 
   async findTaskById(taskId: string): Promise<AggregatedTask> {
-    return this.taskInterface.findTaskById(taskId);
+    return this.taskRepository.findTaskById(taskId);
   }
   async findAllTask(): Promise<AggregatedTask[]> {
-    return this.taskInterface.findAllTask();
-  }
-
-  async transformTaskFromDbToCron(): Promise<string> {
-    return this.taskInterface.transformTaskFromDbToCron();
+    return this.taskRepository.findAllTask();
   }
 
   async findTasksForDevice(deviceId: string): Promise<Task[]> {
-    return this.taskInterface.findTasksForDevice(deviceId);
+    return this.taskRepository.findTasksForDevice(deviceId);
   }
 }

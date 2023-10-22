@@ -1,7 +1,5 @@
-import { Task } from "../../domain/Task";
+import { TaskManagerInterface } from "./TaskManagerInterface";
 
-export interface CronTaskInterface {
-    addTask: (task: Task) => Promise<string>;
-    deleteTask: (taskId: string) => Promise<string>;
-    transformTaskFromDbToCron: () => Promise<string>;
-  }
+export interface CronTaskInterface extends TaskManagerInterface {
+  transformTaskFromDbToCron: () => Promise<string>;
+}

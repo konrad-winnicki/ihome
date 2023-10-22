@@ -1,16 +1,20 @@
-import { DBTaskInterface } from "../../application/task/DBTaskInterface";
+import { TaskManagerInterface } from "../../application/task/TaskManagerInterface";
 import { Task } from "../../domain/Task";
 import { AggregatedTask } from "../../domain/AggregatedTask";
 import EventEmitter from "node:events";
-import { CronTaskInterface } from "../../application/task/CronTaskInterface";
+import { TaskRepository } from "../../application/task/TaskRepository";
 
-export class TaskManager implements DBTaskInterface, CronTaskInterface {
-  delegate: DBTaskInterface & CronTaskInterface;
+export class TaskManager implements TaskManagerInterface {
+  /*DBTaskInterface, CronTaskInterface*/
+  delegate: TaskManagerInterface;
+  taskRepository: TaskRepository;
   constructor(
-    delegate: DBTaskInterface & CronTaskInterface,
+    delegate: TaskManagerInterface,
+    taskRepository: TaskRepository,
     eventEmitter: EventEmitter
   ) {
     this.handleEvent = this.handleEvent.bind(this);
+    this.taskRepository = taskRepository;
     eventEmitter.on("deviceDeleted", this.handleEvent);
     this.delegate = delegate;
   }
@@ -20,15 +24,15 @@ export class TaskManager implements DBTaskInterface, CronTaskInterface {
   }
 
   async findTaskById(taskId: string): Promise<AggregatedTask> {
-    return this.delegate.findTaskById(taskId);
+    return this.taskRepository.findTaskById(taskId);
   }
 
   async findAllTask(): Promise<AggregatedTask[]> {
-    return this.delegate.findAllTask();
+    return this.taskRepository.findAllTask();
   }
 
   async findTasksForDevice(deviceId: string): Promise<Task[]> {
-    return this.delegate.findTasksForDevice(deviceId);
+    return this.taskRepository.findTasksForDevice(deviceId);
   }
 
   async handleEvent(deviceId: string) {
@@ -43,9 +47,5 @@ export class TaskManager implements DBTaskInterface, CronTaskInterface {
 
   async deleteTask(taskId: string): Promise<string> {
     return this.delegate.deleteTask(taskId);
-  }
-
-  async transformTaskFromDbToCron() {
-    return this.delegate.transformTaskFromDbToCron();
   }
 }

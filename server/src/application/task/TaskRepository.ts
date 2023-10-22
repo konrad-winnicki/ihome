@@ -1,11 +1,9 @@
 import { AggregatedTask } from "../../domain/AggregatedTask";
 import { Task } from "../../domain/Task";
+import { TaskManagerInterface } from "./TaskManagerInterface";
 
-export interface DBTaskInterface {
-  addTask: (task: Task) => Promise<string>;
-  deleteTask: (taskId: string) => Promise<string>;
+export interface TaskRepository extends TaskManagerInterface {
   findTaskById: (taskId: string) => Promise<AggregatedTask>;
   findTasksForDevice: (deviceId: string) => Promise<Task[]>;
   findAllTask: () => Promise<AggregatedTask[]>;
 }
-

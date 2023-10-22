@@ -1,10 +1,8 @@
 import { MongoDeviceManager } from "../Infrastructure/device/MongoDeviceManager";
-import { TaskService } from "../application/task/TaskService";
+import { CronTaskInterface } from "../application/task/CronTaskInterface";
 import { InMemoryDeviceStorage } from "./InMemoryDeviceStorage";
 import { Meter } from "./Meter";
 import { Switch } from "./Switch";
-
-
 
 export async function recoveryInMemoryDeviceStorage(
   deviceService: MongoDeviceManager,
@@ -26,12 +24,12 @@ export async function recoveryInMemoryDeviceStorage(
     .catch((error) => console.log(error));
 }
 
-
-export async function fillCronInMemoryWithData(taskService:TaskService) {
-   return taskService
+export async function fillCronInMemoryWithData(
+  cronTaskManager: CronTaskInterface
+) {
+  return cronTaskManager
     .transformTaskFromDbToCron()
     .then((result: string) => console.log(result))
     .catch((error: string) => console.log(error));
   //TODO: what when server restart but this fails?
-  
 }

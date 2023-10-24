@@ -30,7 +30,16 @@ module.exports = {
         "@typescript-eslint"
     ],
     "rules": {
-        "@typescritp-eslint/no-var-requires": "off"
+        "@typescritp-eslint/no-var-requires": "off",
+        'no-unused-vars': [
+            'warn',
+            {
+              vars: 'all',
+              args: 'none',
+              ignoreRestSiblings: true,
+              argsIgnorePattern: '^_',
+            },
+          ]
     },
     "ignorePatterns": ["dist/**"]
 }

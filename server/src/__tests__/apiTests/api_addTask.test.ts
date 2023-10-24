@@ -85,14 +85,35 @@ describe("API ADD TASK TEST", () => {
     
     const [task1, task2] = taskFromDB
 
-    expect(responseTask1.body).toEqual({ taskId: task1Id });
-    expect(responseTask2.body).toEqual({ taskId: task2Id });
+    expect(responseTask1.body).toStrictEqual({ taskId: task1Id });
+    expect(responseTask2.body).toStrictEqual({ taskId: task2Id });
     
     expect(taskKeyList).toStrictEqual([task1Id, task2Id]);
-    
     expect(task1).toMatchObject({id: task1Id, deviceId: switch1Id, onStatus: true, scheduledTime:{ hour: "10", minutes: "10" } })
     expect(task2).toMatchObject({id: task2Id, deviceId: switch1Id, onStatus: false, scheduledTime: { hour: "05", minutes: "55" } })
 
+      
+  });
+
+
+  test("Should not add task if device not exists:", async () => {
+    
+    const responseTask1 = await request(requestUri)
+      .post(`/tasks`)
+      .set("Authorization", token)
+      .send({
+        deviceId: 'notExistingId',
+        onStatus: true,
+        scheduledTime: { hour: "10", minutes: "10" },
+      })
+      .expect(500)
+      .expect("Content-Type", /application\/json/);
+
+    
+
+    expect(responseTask1.body).toStrictEqual({"Error":"Device with id notExistingId does not exist."});
+    
+  
       
   });
 
@@ -106,6 +127,7 @@ describe("API ADD TASK TEST", () => {
       })
       .expect(400)
       .expect("Content-Type", /application\/json/);
+
     expect(response.body).toEqual(badRequestResponse);
   });
 

@@ -1,5 +1,6 @@
-import { TaskManagerInterface } from "./TaskManagerInterface";
+import { ManagerResponse } from "./TaskManagerInterface";
 
-export interface CronTaskInterface extends TaskManagerInterface {
-  transformTaskFromDbToCron: () => Promise<string>;
+
+export interface CronTaskInterface {
+  transformTaskFromDbToCron: () => Promise<ManagerResponse<object|string>>;
 }

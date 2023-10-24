@@ -29,7 +29,7 @@ export async function fillCronInMemoryWithData(
 ) {
   return cronTaskManager
     .transformTaskFromDbToCron()
-    .then((result: string) => console.log(result))
-    .catch((error: string) => console.log(error));
+    .then((result) => console.log(result))
+    .catch((error) => console.log(error));
   //TODO: what when server restart but this fails?
 }

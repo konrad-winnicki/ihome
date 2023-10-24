@@ -1,16 +1,16 @@
 import { TaskManagerInterface } from "../../application/task/TaskManagerInterface";
 import { Task } from "../../domain/Task";
-import { AggregatedTask } from "../../domain/AggregatedTask";
 import EventEmitter from "node:events";
-import { TaskRepository } from "../../application/task/TaskRepository";
+import { TaskRepositoryInterface } from "../../application/task/TaskRepositoryInterface";
+import { ManagerResponse } from "../../application/task/TaskManagerInterface";
 
 export class TaskManager implements TaskManagerInterface {
   /*DBTaskInterface, CronTaskInterface*/
   delegate: TaskManagerInterface;
-  taskRepository: TaskRepository;
+  taskRepository: TaskRepositoryInterface;
   constructor(
     delegate: TaskManagerInterface,
-    taskRepository: TaskRepository,
+    taskRepository: TaskRepositoryInterface,
     eventEmitter: EventEmitter
   ) {
     this.handleEvent = this.handleEvent.bind(this);
@@ -19,24 +19,14 @@ export class TaskManager implements TaskManagerInterface {
     this.delegate = delegate;
   }
 
-  async addTask(task: Task): Promise<string> {
+  async addTask(task: Task): Promise<ManagerResponse<object|string>> {
     return this.delegate.addTask(task);
   }
 
-  async findTaskById(taskId: string): Promise<AggregatedTask> {
-    return this.taskRepository.findTaskById(taskId);
-  }
 
-  async findAllTask(): Promise<AggregatedTask[]> {
-    return this.taskRepository.findAllTask();
-  }
-
-  async findTasksForDevice(deviceId: string): Promise<Task[]> {
-    return this.taskRepository.findTasksForDevice(deviceId);
-  }
 
   async handleEvent(deviceId: string) {
-    await this.findTasksForDevice(deviceId)
+    await this.taskRepository.findTasksForDevice(deviceId)
       .then((tasks) => {
         Promise.all(tasks.map((task) => this.deleteTask(task.id)))
           .then((result) => console.log(result))
@@ -45,7 +35,7 @@ export class TaskManager implements TaskManagerInterface {
       .catch((err) => console.log(err));
   }
 
-  async deleteTask(taskId: string): Promise<string> {
+  async deleteTask(taskId: string): Promise<ManagerResponse<object|string>> {
     return this.delegate.deleteTask(taskId);
   }
 }

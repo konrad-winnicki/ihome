@@ -1,3 +1,4 @@
+/*
 import { Model, mongo } from "mongoose";
 import { Device } from "../../domain/Device";
 import { InMemoryDeviceStorage } from "../../domain/InMemoryDeviceStorage";
@@ -100,3 +101,4 @@ export function inMemoryStoreWithMockMethods(
 }
 
 
+*/

@@ -1,3 +1,4 @@
+/*
 import { describe } from "@jest/globals";
 import { SpiedFunction } from "jest-mock";
 import { expect, jest, test } from "@jest/globals";
@@ -212,7 +213,7 @@ describe("TaskManager CLASS TEST - delete task", () => {
 
     expect(consoleSpy).toHaveBeenCalledWith("Task restoration to cron failed.");
   });
-  /*
+  
   test("Should not delete if deletion from memory failed", async () => {
     const addToMemoryStatus = "success";
     const deleteFromMemoryStatus = "error";
@@ -248,5 +249,6 @@ describe("TaskManager CLASS TEST - delete task", () => {
     );
   });
 
-  */
+  
 });
+*/

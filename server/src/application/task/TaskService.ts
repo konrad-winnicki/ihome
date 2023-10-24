@@ -1,38 +1,37 @@
-import { TaskRepository } from "./TaskRepository";
-import { AggregatedTask } from "../../domain/AggregatedTask";
+import { TaskRepositoryInterface } from "./TaskRepositoryInterface";
 import { Task } from "../../domain/Task";
 import { DeviceListingInterface } from "../device/DeviceListingInterface";
+import { TaskManagerInterface } from "./TaskManagerInterface";
+import { ManagerResponse } from "./TaskManagerInterface";
+
 
 export class TaskService {
-  private taskRepository: TaskRepository;
+  private taskManager: TaskManagerInterface;
+  private taskRepository: TaskRepositoryInterface
   private deviceService: DeviceListingInterface;
 
   constructor(
-    taskRepository: TaskRepository,
+    taskManager: TaskManagerInterface,
+    taskRapository: TaskRepositoryInterface,
     deviceService: DeviceListingInterface
   ) {
-    this.taskRepository = taskRepository;
+    this.taskManager = taskManager;
+    this.taskRepository = taskRapository
     this.deviceService = deviceService;
   }
 
-  async addTask(task: Task): Promise<string> {
+  async addTask(task: Task): Promise<ManagerResponse<object|string>> {
     // TODO: this.deviceService.findById(task.deviceId)
     return this.deviceService
       .getDeviceById(task.deviceId)
-      .then(() => this.taskRepository.addTask(task))
-      .catch((error) => Promise.reject(`Error occurred: ${error}`));
+      .then(() => this.taskManager.addTask(task))
+      .catch((error) => Promise.reject(error));
   }
 
-  deleteTaskFromDB(taskId: string): Promise<string> {
-    return this.taskRepository.deleteTask(taskId);
+  deleteTaskFromDB(taskId: string): Promise<ManagerResponse<object|string>> {
+    return this.taskManager.deleteTask(taskId);
   }
 
-  async findTaskById(taskId: string): Promise<AggregatedTask> {
-    return this.taskRepository.findTaskById(taskId);
-  }
-  async findAllTask(): Promise<AggregatedTask[]> {
-    return this.taskRepository.findAllTask();
-  }
 
   async findTasksForDevice(deviceId: string): Promise<Task[]> {
     return this.taskRepository.findTasksForDevice(deviceId);

@@ -24,16 +24,16 @@ export class DeviceControllers  {
       .addDevice(ctx.device)
       .then((response) => {
         ctx.status = 201;
-        ctx.body = { deviceId: response };
+        ctx.body =  response 
       })
       .catch((error) => {
-        console.log(error);
-        if (error.includes('NameConflictError')){
+        console.log('CONTROLLER', error)
+        if (JSON.stringify(error).includes('NameConflictError')){
           ctx.status = 409;
-         return ctx.body = {"ConflictError": error};
+         return ctx.body = error
         }
         ctx.status = 500;
-        ctx.body = {"Error": error};
+        ctx.body = error;
       });
   }
 
@@ -44,11 +44,11 @@ export class DeviceControllers  {
       .deleteDevice(deviceId)
       .then((response) => {
         ctx.status = 200;
-        ctx.body = { "Device deleted": response };
+        ctx.body = response;
       })
       .catch((error) => {
         ctx.status = 500;
-        ctx.body = { "Device not deleted due to error": error };
+        ctx.body = error;
       });
   
   }

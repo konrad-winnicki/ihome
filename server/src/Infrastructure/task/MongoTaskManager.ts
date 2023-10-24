@@ -1,38 +1,18 @@
-import { TaskRepository } from "../../application/task/TaskRepository";
 import { Task } from "../../domain/Task";
 import { Model } from "mongoose";
-import { AggregatedTask } from "../../domain/AggregatedTask";
+import { TaskManagerInterface } from "../../application/task/TaskManagerInterface";
+import { ServerMessages } from "../../ServerMessages";
+import { ManagerResponse } from "../../application/task/TaskManagerInterface";
 
-export const taskDeviceAggregationPipeline = (taskId?: string) => [
-  taskId ? { $match: { id: taskId } } : { $match: {} },
-  {
-    $lookup: {
-      from: "devices",
-      localField: "deviceId",
-      foreignField: "id",
-      as: "device",
-    },
-  },
-  { $unwind: "$device" },
-  { $unwind: "$scheduledTime" },
-  {
-    $project: {
-      id: 1,
-      onStatus: 1,
-      scheduledTime: 1,
-      device: { commandOn: 1, commandOff: 1 },
-    },
-  },
-];
-
-export class MongoTaskManager implements TaskRepository {
+export class MongoTaskManager implements TaskManagerInterface {
   private taskDocument: Model<Task>;
-
-  constructor(taskDocument: Model<Task>) {
+  private serverMessages: ServerMessages;
+  constructor(taskDocument: Model<Task>, serverMessages: ServerMessages) {
     this.taskDocument = taskDocument;
+    this.serverMessages = serverMessages;
   }
 
-  async addTask(task: Task): Promise<string> {
+  async addTask(task: Task): Promise<ManagerResponse<object>> {
     const newTask = {
       id: task.id,
       deviceId: task.deviceId,
@@ -42,73 +22,35 @@ export class MongoTaskManager implements TaskRepository {
 
     return this.taskDocument
       .create(newTask)
-      .then((task) => Promise.resolve(task.id))
-      .catch((error) =>
-        Promise.reject(`Task not added due to error: ${error}`)
-      );
-  }
-
-  async findTaskById(taskId: string): Promise<AggregatedTask> {
-    //TODO: try with populate
-    return this.taskDocument
-      .aggregate(taskDeviceAggregationPipeline(taskId))
-      .then((aggregatedTasksList) => {
-        if (aggregatedTasksList.length === 1) {
-          const aggregatedTask = aggregatedTasksList[0];
-
-          return new AggregatedTask(
-            aggregatedTask.id,
-            aggregatedTask.onStatus,
-            aggregatedTask.scheduledTime.hour,
-            aggregatedTask.scheduledTime.minutes,
-            aggregatedTask.device.commandOn,
-            aggregatedTask.device.commandOff
-          );
-        }
-        return Promise.reject(`Task with ${taskId} not exists`);
+      .then((task) => {
+        const message = this.serverMessages.addTask.SUCCESS;
+        return Promise.resolve({ [message]: task.id });
+      })
+      .catch((error) => {
+        const message = this.serverMessages.addTask.FAILURE;
+        const rejectMessage = { [message]: error };
+        return Promise.reject(rejectMessage);
       });
   }
 
-  async findAllTask(): Promise<AggregatedTask[]> {
-    return this.taskDocument
-      .aggregate(taskDeviceAggregationPipeline())
-      .then((aggregatedTasks) =>
-        aggregatedTasks.map(
-          (task) =>
-            new AggregatedTask(
-              task.id,
-              task.onStatus,
-              task.scheduledTime.hour,
-              task.scheduledTime.minutes,
-              task.device.commandOn,
-              task.device.commandOff
-            )
-        )
-      )
-      .catch((error) =>
-        Promise.reject(`Fetching all tasks failed due error: ${error}`)
-      );
-  }
-
-  async findTasksForDevice(deviceId: string): Promise<Task[]> {
-    return this.taskDocument
-      .find({ deviceId: deviceId })
-      .then((tasks) => tasks)
-      .catch((error) =>
-        Promise.reject(`Fetching task for device failed due error: ${error}`)
-      );
-  }
-
-  async deleteTask(taskId: string): Promise<string> {
+  async deleteTask(taskId: string): Promise<ManagerResponse<object>> {
     return this.taskDocument
       .deleteOne({ id: taskId })
-      .then((response) =>
-        response.acknowledged && response.deletedCount == 1
-          ? Promise.resolve(`Task ${taskId} deleted`)
-          : Promise.reject(`Task with ${taskId} not exists`)
-      )
-      .catch((error) =>
-        Promise.reject(`Task not deleted due database error: ${error}`)
-      );
+      .then((response) => {
+        const messageSucces = this.serverMessages.deleteTask.SUCCESS;
+        const messageFailure = this.serverMessages.deleteTask.FAILURE;
+        const resolveMessage = { [messageSucces]: response };
+        const rejectMessage = { [messageFailure]: response };
+
+        return response.acknowledged && response.deletedCount == 1
+          ? Promise.resolve(resolveMessage)
+          : Promise.reject(rejectMessage);
+      })
+      .catch((error) => {
+        const messageFailure = this.serverMessages.deleteTask.FAILURE;
+        const rejectMessage = { [messageFailure]: error };
+
+        return Promise.reject(rejectMessage);
+      });
   }
 }

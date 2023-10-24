@@ -8,6 +8,9 @@ switch (process.env.NODE_ENV) {
     break;
   case "development":
     env = "development.env";
+    break
+  case "production":
+      env = "development.env";
     break;
 }
 dotenv.config({ path: path.resolve(process.cwd(), env) });

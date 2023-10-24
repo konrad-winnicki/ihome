@@ -22,6 +22,11 @@ import { RunDeviceControllers } from "./controllers/runDeviceControllers";
 import { TaskControllers } from "./controllers/TaskControllers";
 import { LoginControllers } from "./controllers/LoginControllers";
 import { tokenGenerator } from "./domain/tokenGenerator";
+import { TaskRepository } from "./Infrastructure/task/TaskRepositoryN";
+import { CronTaskRepository } from "./Infrastructure/task/CronTaskRepositoryN";
+import { ServerMessages } from "./ServerMessages";
+import { prepareAppProperties } from "./prepareAppProperties";
+import { properties } from "./propertyWriter";
 
 function createMongoDocs(database: MongoDatabase) {
   const deviceDoc = database.createDeviceDoc();
@@ -30,29 +35,84 @@ function createMongoDocs(database: MongoDatabase) {
 }
 
 export async function initializeDependencias() {
-  const mongoDatabase = new MongoDatabase(
-    sanitizedConfig.MONGO_URI,
-    sanitizedConfig.DATABASE
-  );
 
-  const mongoDocs = createMongoDocs(mongoDatabase);
-  const devicesInMemory = InMemoryDeviceStorage.getInstance();
-  const inMemoryDeviceManager = new InMemoryDeviceManager(devicesInMemory);
+  if (sanitizedConfig.NODE_ENV === 'production'){
+    await prepareAppProperties()
+  }
 
+  const serverMessages = new ServerMessages();
   const eventEmitter = new EventEmitter();
 
-  const deviceService = new MongoDeviceManager(
-    inMemoryDeviceManager,
-    mongoDocs.deviceDoc,
-    eventEmitter
+  const devicesInMemory = InMemoryDeviceStorage.getInstance();
+  const inMemoryDeviceManager = new InMemoryDeviceManager(
+    devicesInMemory,
+    serverMessages
   );
 
-  const mongoTaskManager = new MongoTaskManager(mongoDocs.taskDoc);
-  const appCorn = new AppCron();
-  const cronTaskManager = new CronTaskManager(mongoTaskManager, appCorn);
 
-  const taskManager = new TaskManager(cronTaskManager,mongoTaskManager , eventEmitter);
-  const taskService = new TaskService(taskManager, deviceService);
+
+
+  async function prepareDatabasePersistencia(inMemoryDeviceManager:InMemoryDeviceManager){
+    let DATABASE_URL = "";
+    let DATABASE = "";
+
+    if(properties.get('persistencia') === "mongoDatabase"){
+      DATABASE_URL = (properties.get('DATABASE_URL')) as string
+      DATABASE = (properties.get('DATABASE')) as string
+    }else{
+      DATABASE_URL = sanitizedConfig.MONGO_URI
+      DATABASE = sanitizedConfig.DATABASE
+    }
+
+    const mongoDatabase = new MongoDatabase(
+      DATABASE_URL,
+      DATABASE
+    );
+
+    const mongoDocs = createMongoDocs(mongoDatabase);
+    const deviceService = new MongoDeviceManager(
+      inMemoryDeviceManager,
+      mongoDocs.deviceDoc,
+      eventEmitter,
+      serverMessages
+    );
+  
+    const mongoTaskManager = new MongoTaskManager(
+      mongoDocs.taskDoc,
+      serverMessages
+    );
+  
+    const taskRepository = new TaskRepository(mongoDocs.taskDoc);
+  
+    return {deviceService, mongoTaskManager, taskRepository, mongoDatabase}
+  }
+  
+
+
+
+const persistencia = await prepareDatabasePersistencia(inMemoryDeviceManager)
+  
+
+
+  
+  const appCorn = new AppCron();
+  const cronTaskManager = new CronTaskManager(
+    persistencia.mongoTaskManager,
+    persistencia.taskRepository,
+    appCorn,
+    serverMessages
+  );
+
+  const taskManager = new TaskManager(
+    cronTaskManager,
+    persistencia.taskRepository,
+    eventEmitter
+  );
+  const taskService = new TaskService(
+    taskManager,
+    persistencia.taskRepository,
+    persistencia.deviceService
+  );
 
   const deviceRunManager = new DeviceRunManager();
   const deviceRunService = new DeviceRunService(deviceRunManager);
@@ -61,7 +121,7 @@ export async function initializeDependencias() {
     deviceRunService,
     devicesInMemory
   );
-  const deviceControllers = new DeviceControllers(deviceService);
+  const deviceControllers = new DeviceControllers(persistencia.deviceService);
   const taskControlles = new TaskControllers(taskService);
   const loginControllers = new LoginControllers(tokenGenerator);
 
@@ -74,15 +134,27 @@ export async function initializeDependencias() {
 
   const appServer = new AppServer(appRouter);
 
-  await recoveryInMemoryDeviceStorage(deviceService, devicesInMemory);
-  await fillCronInMemoryWithData(cronTaskManager);
+  await recoveryInMemoryDeviceStorage(persistencia.deviceService, devicesInMemory);
 
+  const cronTaskRepository = new CronTaskRepository(persistencia.taskRepository, appCorn);
+  await fillCronInMemoryWithData(cronTaskRepository);
+
+
+  const port = sanitizedConfig.NODE_ENV==='prodction'? Number(properties.get('PORT')): sanitizedConfig.PORT
   appServer
-    .startServer()
+    .startServer(port)
     .then(() => console.log("server listen succes"))
     .catch((err) => console.log("error", err));
 
-  return Application.getInstance(appServer, mongoDatabase, devicesInMemory);
+  
+
+
+  return Application.getInstance(
+    appServer,
+    persistencia.mongoDatabase,
+    devicesInMemory,
+    serverMessages
+  );
 }
 
 export class Application {
@@ -90,66 +162,47 @@ export class Application {
   public appServer: AppServer;
   public databaseInstance: MongoDatabase;
   public devicesInMemory: InMemoryDeviceStorage;
+  public serverMessages: ServerMessages;
 
   constructor(
     appServer: AppServer,
     databaseInstance: MongoDatabase,
-    devicesInMemory: InMemoryDeviceStorage
+    devicesInMemory: InMemoryDeviceStorage,
+    serverMessages: ServerMessages
   ) {
     this.appServer = appServer;
     this.databaseInstance = databaseInstance;
     this.devicesInMemory = devicesInMemory;
+    this.serverMessages = serverMessages;
   }
 
   public static getInstance(
     appServer: AppServer,
     databaseInstance: MongoDatabase,
-    devicesInMemory: InMemoryDeviceStorage
+    devicesInMemory: InMemoryDeviceStorage,
+    serverMessages: ServerMessages
   ) {
     if (!Application.instance) {
       Application.instance = new Application(
         appServer,
         databaseInstance,
-        devicesInMemory
+        devicesInMemory,
+        serverMessages
       );
     }
     return Application.instance;
   }
 }
 
-//export const databaseInstance = initializeDatabaseInstance();
-/*
-const dependencias = initializeDependencias()
-export const devicesInMemory = dependencias.devicesInMemory
-export const deviceService = dependencias.deviceService
-export const mongoTaskManager = dependencias.mongoTaskManager
-export const cronTaskManager = dependencias.cronTaskManager
-export const eventEmitter = dependencias.eventEmitter
-export const taskService = dependencias.taskService
-export const deviceRunService = dependencias.deviceRunService
-*/
-//export const devicesInMemory = InMemoryDeviceStorage.getInstance();
-//const inMemoryDeviceManager = new InMemoryDeviceManager(devicesInMemory);
+const COMPENSATION = {
+  SUCCESS: "Compensation succeded",
+  FAILURE: "Compensation failed",
+} as const;
 
-//const deviceDoc = databaseInstance.createDeviceDoc();
-//export const deviceService = new MongoDeviceManager(
-// inMemoryDeviceManager,
-// deviceDoc
-//);
+type ObjectValues<T> = T[keyof T];
 
-//const taskDoc = databaseInstance.createTaskerDoc();
-//const mongoTaskManager = new MongoTaskManager(taskDoc);
-/*
-const appCorn = new AppCron();
-const cronTaskManager = new CronTaskManager(mongoTaskManager, appCorn);
+type OptionsFlags<T> = {
+  [K in keyof T]: T[K];
+};
 
-export const eventEmitter = new EventEmitter();
-const taskManager = new TaskManager(cronTaskManager, eventEmitter);
-export const taskService = new TaskService(taskManager, deviceService);
-
-recoveryInMemoryDeviceStorage(deviceService);
-fillCronInMemoryWithData();
-
-const deviceRunManager = new DeviceRunManager();
-export const deviceRunService = new DeviceRunService(deviceRunManager);
-*/
+type Compensation = ObjectValues<typeof COMPENSATION>;

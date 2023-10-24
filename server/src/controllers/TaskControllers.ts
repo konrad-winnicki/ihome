@@ -28,9 +28,10 @@ export class TaskControllers  {
       .addTask(task)
       .then((response) => {
         ctx.status = 201;
-        ctx.body = {taskId: response};
+        ctx.body = response;
       })
       .catch((error) => {
+        console.log(typeof error)
         ctx.status = 500;
         ctx.body = error;
       });
@@ -42,11 +43,11 @@ export class TaskControllers  {
     return this.taskService.deleteTaskFromDB(taskId)
     .then((response) => {
       ctx.status = 200;
-      ctx.body = { "Task deleted": response };
+      ctx.body = response;
     })
     .catch((error) => {
       ctx.status = 500;
-      ctx.body = { "Task not deleted due to error": error };
+      ctx.body = error;
     });
   }
 
@@ -62,7 +63,7 @@ export class TaskControllers  {
       })
       .catch((error) => {
         ctx.status = 500;
-        ctx.body = { "Task not deleted due to error": error };
+        ctx.body = error;
       });
   }
 

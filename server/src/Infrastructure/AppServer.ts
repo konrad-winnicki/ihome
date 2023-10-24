@@ -1,6 +1,5 @@
 import bodyParser from "koa-bodyparser";
 import Router from "koa-router";
-import sanitizedConfig from "../../config/config";
 import Koa from "koa";
 import cors from "koa-cors";
 import * as httpLibrary from "http";
@@ -26,10 +25,10 @@ export class AppServer {
     return app;
   }
 
-   startServer() {
+   startServer(port:number) {
     return new Promise((resolve, reject)=>{
-      const server = this.serverConfig.listen(sanitizedConfig.PORT, () => {
-        console.log(`Server listen at port ${sanitizedConfig.PORT}`);
+      const server = this.serverConfig.listen(port, () => {
+        console.log(`Server listen at port ${port}`);
         this.server = server
         resolve(this.server)
 
@@ -44,7 +43,7 @@ export class AppServer {
   public stopServer() {
     return new Promise((resolve)=>{
       this.server?.close(() => {
-        console.log(`Server stops listen ${sanitizedConfig.PORT}`);
+        console.log(`Server stops listen`);
         this.server = undefined
         resolve('Server closed')
 

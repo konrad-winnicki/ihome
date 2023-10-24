@@ -1,48 +1,40 @@
-import { TaskRepository } from "../../application/task/TaskRepository";
+import { TaskRepositoryInterface } from "../../application/task/TaskRepositoryInterface";
 import { AppCron } from "../../domain/AppCron";
 import { Task } from "../../domain/Task";
-import { AggregatedTask } from "../../domain/AggregatedTask";
-import { CronTaskInterface } from "../../application/task/CronTaskInterface";
+import { TaskManagerInterface } from "../../application/task/TaskManagerInterface";
+import { ServerMessages } from "../../ServerMessages";
 
-//const appCron = new AppCron();
+type ManagerResponse<T> = {
+  [key: string]: T;
+};
 
-export class CronTaskManager implements CronTaskInterface {
+export class CronTaskManager implements TaskManagerInterface {
   private appCron: AppCron;
-  private delegate: TaskRepository;
+  private delegate: TaskManagerInterface;
+  private taskRepository: TaskRepositoryInterface;
+  private serverMessages: ServerMessages;
 
-  constructor(delegate: TaskRepository, appCron: AppCron) {
+  constructor(
+    delegate: TaskManagerInterface,
+    taskRepository: TaskRepositoryInterface,
+    appCron: AppCron,
+    serverMessages: ServerMessages
+  ) {
     this.delegate = delegate;
+    this.taskRepository = taskRepository;
     this.appCron = appCron;
+    this.serverMessages = serverMessages;
   }
 
-  async transformTaskFromDbToCron(): Promise<string> {
-    return this.findAllTask()
-      .then((tasks) => {
-        tasks.forEach((task: AggregatedTask) => {
-          this.appCron.installTask(
-            task.id,
-            task.minutes,
-            task.hour,
-            task.onStatus
-              ? task.commandOn
-              : task.commandOff
-              ? task.commandOff
-              : ""
-          );
-        });
-        return Promise.resolve("Task transfered from database to cron");
-      })
-      .catch((error) =>
-        Promise.reject(`Task not transfered to cron due error: ${error}`)
-      );
-  }
-
-  async addTask(task: Task): Promise<string> {
+  async addTask(task: Task): Promise<ManagerResponse<object|string>> {
     return this.delegate
       .addTask(task)
-      .catch((error) => Promise.reject(error))
-      .then((taskId) => {
-        return this.findTaskById(task.id)
+      .catch((error) => {
+        return Promise.reject(error);
+      })
+      .then((addingCompleted) => {
+        return this.taskRepository
+          .findTaskById(task.id)
           .then((aggregatedTask) => {
             this.appCron.installTask(
               aggregatedTask.id,
@@ -54,57 +46,70 @@ export class CronTaskManager implements CronTaskInterface {
                 ? aggregatedTask.commandOff
                 : ""
             );
-            return Promise.resolve(`Task with ${taskId} added`);
+            return Promise.resolve(addingCompleted);
           })
           .catch((error) =>
             this.compensateTaskAdditionToDB(task.id)
-              .catch((compensationError) =>
-                Promise.reject(
-                  `Task not added due to error: ${error}, ${compensationError}`
-                )
-              )
-              .then((compensation) =>
-                Promise.reject(
-                  `Task not added due to error: ${error}, ${compensation}`
-                )
-              )
+              .catch((compensationError) => {
+                const messageFailure = this.serverMessages.addTask.FAILURE;
+                const rejectMessage = {
+                  [messageFailure]: {
+                    error: error,
+                    compensationError: compensationError,
+                  },
+                };
+                return Promise.reject(rejectMessage);
+              })
+              .then((compensationResult) => {
+                const messageFailure = this.serverMessages.addTask.FAILURE;
+                const rejectMessage = {
+                  [messageFailure]: {
+                    error: error,
+                    compensationSucceded: compensationResult,
+                  },
+                };
+                return Promise.reject(rejectMessage);
+              })
           );
       });
   }
-  async findTaskById(taskId: string): Promise<AggregatedTask> {
-    return await this.delegate.findTaskById(taskId);
-  }
-  async findAllTask(): Promise<AggregatedTask[]> {
-    return this.delegate.findAllTask();
-  }
 
-  async findTasksForDevice(deviceId: string): Promise<Task[]> {
-    return this.delegate.findTasksForDevice(deviceId);
-  }
-
-  async deleteTask(taskId: string): Promise<string> {
+  async deleteTask(taskId: string): Promise<ManagerResponse<object|string>> {
     return this.appCron
       .deleteTask(taskId)
-      .catch((error) =>
-        Promise.reject(`Task not deleted due to error: ${error}`)
-      )
+      .catch((error) => {
+        const message = this.serverMessages.deleteTask.FAILURE;
+        const rejectMessage = { [message]: error };
+        Promise.reject(rejectMessage);
+      })
       .then(() =>
         this.delegate
           .deleteTask(taskId)
-          .then((deletionCompleted) => deletionCompleted)
+          .then((deletionCompleted) => 
+             Promise.resolve(deletionCompleted)
+          )
           .catch((error) =>
             this.compensateTaskDeletionFromMemory(taskId)
-
-              .catch((compensationError) =>
-                Promise.reject(
-                  `Task deletion failed due to error: ${error} ${compensationError}`
-                )
-              )
-              .then((result) =>
-                Promise.reject(
-                  `Task deletion failed due to error:  ${error}, ${result}`
-                )
-              )
+              .catch((compensationError: ManagerResponse<object>) => {
+                const messageFailure = this.serverMessages.deleteTask.FAILURE;
+                const rejectMessage = {
+                  [messageFailure]: {
+                    error: error,
+                    compensationError: compensationError,
+                  },
+                };
+                return Promise.reject(rejectMessage);
+              })
+              .then((compensationResult: ManagerResponse<string>) => {
+                const messageFailure = this.serverMessages.deleteTask.FAILURE;
+                const rejectMessage = {
+                  [messageFailure]: {
+                    error: error,
+                    compensationError: compensationResult,
+                  },
+                };
+                return Promise.reject(rejectMessage);
+              })
           )
       );
   }
@@ -113,19 +118,22 @@ export class CronTaskManager implements CronTaskInterface {
     return this.delegate
       .deleteTask(taskId)
       .then((response) => {
-        console.log("Add task compensation succeded.");
-        return Promise.resolve(`Compensation succeeded: ${response}`);
+        const message = this.serverMessages.compensation.SUCCESS;
+        const resolveMessage = { [message]: response };
+        console.log(resolveMessage);
+        return Promise.resolve(resolveMessage);
       })
       .catch((error) => {
-        console.log("Add task compensation failed.");
-        return Promise.reject(
-          `Task add compensation failed due to error: ${error}`
-        );
+        const message = this.serverMessages.compensation.FAILURE;
+        const rejectionMessage = { [message]: error };
+        console.log(rejectionMessage);
+        return Promise.reject(rejectionMessage);
       });
   }
 
   compensateTaskDeletionFromMemory(taskId: string) {
-    return this.findTaskById(taskId)
+    return this.taskRepository
+      .findTaskById(taskId)
       .then((task) => {
         this.appCron.installTask(
           task.id,
@@ -137,14 +145,16 @@ export class CronTaskManager implements CronTaskInterface {
             ? task.commandOff
             : ""
         );
-        console.log("Task restoration to cron succeded");
-        return Promise.resolve("Task restoration to cron succeded");
+        const message = this.serverMessages.compensation.SUCCESS;
+        const resolveMessage = { [message]: "Task restored to cron" };
+        console.log(resolveMessage);
+        return Promise.resolve(resolveMessage);
       })
-      .catch((err) => {
-        console.log(`Task restoration to cron failed.`);
-        return Promise.reject(
-          `Task restoration to cron failed due error: ${err}`
-        );
+      .catch((err: ManagerResponse<object>) => {
+        const message = this.serverMessages.compensation.FAILURE;
+        const rejectMessage = { [message]: err };
+        console.log(rejectMessage);
+        return Promise.reject(rejectMessage);
       });
   }
 }

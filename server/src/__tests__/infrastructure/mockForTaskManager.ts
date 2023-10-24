@@ -1,3 +1,4 @@
+/*
 import { Model } from "mongoose";
 import { Device } from "../../domain/Device";
 import { EventEmitter } from "koa";
@@ -100,3 +101,4 @@ export function taskDocumentWithMockMetods(
 
   return taskDokumentMock;
 }
+*/

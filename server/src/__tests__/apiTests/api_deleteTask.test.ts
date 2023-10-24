@@ -65,15 +65,12 @@ describe("API DELETE TASK TEST", () => {
     const taskKeysIterator = cron.getTasks().keys();
     const taskKeyList = [...taskKeysIterator];
     const deletedTaskFromMemory = cron.getTasks().get(task1Id);
-
     const taskFromDB = await getTasksForDevice(
       app.databaseInstance.connection,
       switch1Id
     );
     const [remainingTaskInDB] = taskFromDB;
-    expect(response.body).toEqual({
-      "Task deleted": `Task ${task1Id} deleted`,
-    });
+    expect(response.body).toEqual({ 'Task deleted': { acknowledged: true, deletedCount: 1 } });
     expect(taskKeyList).toEqual([task2Id]);
     expect(deletedTaskFromMemory).toEqual(undefined);
     expect(remainingTaskInDB.id).toEqual(task2Id);
@@ -89,7 +86,7 @@ describe("API DELETE TASK TEST", () => {
 
     expect(response.body).toEqual({
       "Task not deleted due to error":
-        "Task with id nonExisitingId doesn't exist.",
+        "Task not deleted due to error: Task with id nonExisitingId doesn't exist.",
     });
   });
 

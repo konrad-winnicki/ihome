@@ -27,7 +27,6 @@ import { CronTaskRepository } from "./Infrastructure/task/CronTaskRepositoryN";
 import { ServerMessages } from "./ServerMessages";
 import { prepareAppProperties } from "./prepareAppProperties";
 import { properties } from "./propertyWriter";
-
 function createMongoDocs(database: MongoDatabase) {
   const deviceDoc = database.createDeviceDoc();
   const taskDoc = database.createTaskerDoc();
@@ -206,3 +205,12 @@ type OptionsFlags<T> = {
 };
 
 type Compensation = ObjectValues<typeof COMPENSATION>;
+
+
+const device1 = {id:"15", name: "ccc", type: 'type'}
+const device2 = {id:"14", name: "c", type: 'type'}
+
+//addDeviceToFile(device1).then((res)=>console.log(res)).catch((err)=> console.log(err))
+//addDeviceToFile(device2).then((res)=>console.log(res)).catch((err)=> console.log(err))
+
+//deleteDeviceFromFile('14').then((res)=>console.log(res)).catch((err)=> console.log(err))

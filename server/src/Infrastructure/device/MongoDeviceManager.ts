@@ -9,6 +9,10 @@ import { EventEmitter } from "node:events";
 import { ServerMessages } from "../../ServerMessages";
 import { ManagerResponse } from "../../application/task/TaskManagerInterface";
 
+
+//interface devicePersistence: adddevuce, deleteDevice, getMenager, Getswitch
+//mongo lub file impelement devicePersistence intrtface
+
 export class MongoDeviceManager
   implements DeviceInterface, DeviceListingInterface
 {

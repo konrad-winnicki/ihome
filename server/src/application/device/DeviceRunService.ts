@@ -2,7 +2,7 @@ import { DeviceRunInterface as DeviceRunInterface } from "./DeviceRunInterface";
 import { Device } from "../../domain/Device";
 import { Switch } from "../../domain/Switch";
 
-export class DeviceRunService implements DeviceRunService {
+export class DeviceRunService {
   private deviceRunInterface: DeviceRunInterface;
   constructor(deviceRunService: DeviceRunInterface) {
     this.deviceRunInterface = deviceRunService;

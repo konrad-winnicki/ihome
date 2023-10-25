@@ -1,10 +1,10 @@
-import { Task } from "../../domain/Task";
+import { AggregatedTask } from "../../domain/AggregatedTask";
 
-export type ManagerResponse <T> = {
-  [key:string]: T
-}
+export type ManagerResponse<T> = {
+  [key: string]: T;
+};
 
-export interface TaskManagerInterface {
-  addTask: (task: Task) => Promise<ManagerResponse<object|string>>;
-  deleteTask: (taskId: string) => Promise<ManagerResponse<object|string>>;
+export interface TaskManager {
+  add: (aggregatedTask: AggregatedTask) => Promise<ManagerResponse<object | string>>;
+  delete: (taskId: string) => Promise<ManagerResponse<object | string>>;
 }

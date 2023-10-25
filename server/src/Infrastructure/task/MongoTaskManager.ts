@@ -1,10 +1,10 @@
 import { Task } from "../../domain/Task";
 import { Model } from "mongoose";
-import { TaskManagerInterface } from "../../application/task/TaskManagerInterface";
+import { TaskManager } from "../../application/task/TaskManagerInterface";
 import { ServerMessages } from "../../ServerMessages";
 import { ManagerResponse } from "../../application/task/TaskManagerInterface";
 
-export class MongoTaskManager implements TaskManagerInterface {
+export class MongoTaskManager implements TaskManager {
   private taskDocument: Model<Task>;
   private serverMessages: ServerMessages;
   constructor(taskDocument: Model<Task>, serverMessages: ServerMessages) {
@@ -12,7 +12,7 @@ export class MongoTaskManager implements TaskManagerInterface {
     this.serverMessages = serverMessages;
   }
 
-  async addTask(task: Task): Promise<ManagerResponse<object>> {
+  async add(task: Task): Promise<ManagerResponse<object>> {
     const newTask = {
       id: task.id,
       deviceId: task.deviceId,
@@ -33,7 +33,7 @@ export class MongoTaskManager implements TaskManagerInterface {
       });
   }
 
-  async deleteTask(taskId: string): Promise<ManagerResponse<object>> {
+  async delete(taskId: string): Promise<ManagerResponse<object>> {
     return this.taskDocument
       .deleteOne({ id: taskId })
       .then((response) => {

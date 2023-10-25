@@ -55,7 +55,7 @@ describe("InMemoryDeviceStorage class test", () => {
     },
   ])("Should add device to storage", ({ key, value }) => {
     const inMemoryDeviceStorage = InMemoryDeviceStorage.getInstance();
-    inMemoryDeviceStorage.addDevice(value);
+    inMemoryDeviceStorage.add(value);
     const devices = inMemoryDeviceStorage.devices;
 
     expect(devices.has(key)).toBe(true);
@@ -73,7 +73,7 @@ describe("InMemoryDeviceStorage class test", () => {
     },
   ])("Should add meter to storage", ({ key, value }) => {
     const inMemoryDeviceStorage = InMemoryDeviceStorage.getInstance();
-    inMemoryDeviceStorage.addDevice(value);
+    inMemoryDeviceStorage.add(value);
     const devices = inMemoryDeviceStorage.devices;
 
     expect(devices.has(key)).toBe(true);
@@ -91,7 +91,7 @@ describe("InMemoryDeviceStorage class test", () => {
     },
   ])("Should add switch to storage", ({ key, value }) => {
     const inMemoryDeviceStorage = InMemoryDeviceStorage.getInstance();
-    inMemoryDeviceStorage.addDevice(value);
+    inMemoryDeviceStorage.add(value);
     const devices = inMemoryDeviceStorage.devices;
 
     expect(devices.has(key)).toBe(true);
@@ -100,9 +100,9 @@ describe("InMemoryDeviceStorage class test", () => {
 
   test("Should delete item from storage", () => {
     const inMemoryDeviceStorage = InMemoryDeviceStorage.getInstance();
-    inMemoryDeviceStorage.addDevice(meter1);
-    inMemoryDeviceStorage.addDevice(switch1);
-    inMemoryDeviceStorage.deleteDevice("m1");
+    inMemoryDeviceStorage.add(meter1);
+    inMemoryDeviceStorage.add(switch1);
+    inMemoryDeviceStorage.delete("m1");
     const devices = inMemoryDeviceStorage.devices;
 
     expect(devices.has("m1")).toBe(false);

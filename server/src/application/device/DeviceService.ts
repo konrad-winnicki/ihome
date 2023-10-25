@@ -1,92 +1,72 @@
-import { Model, mongo } from "mongoose";
 import { Meter } from "../../domain/Meter";
-import { DeviceInterface } from "../../application/device/DeviceInterface";
+import { CacheRepository } from "./CacheRepository";
 import { Device } from "../../domain/Device";
 import { Switch } from "../../domain/Switch";
-import { DeviceListingInterface } from "../../application/device/DeviceListingInterface";
 import { InMemoryDeviceStorage } from "../../domain/InMemoryDeviceStorage";
 import { EventEmitter } from "node:events";
 import { ServerMessages } from "../../ServerMessages";
-import { ManagerResponse } from "../../application/task/TaskManagerInterface";
-
+import { ManagerResponse } from "../task/TaskManagerInterface";
+import { DeviceRepository } from "./DeviceRepository";
 
 //interface devicePersistence: adddevuce, deleteDevice, getMenager, Getswitch
 //mongo lub file impelement devicePersistence intrtface
 
-export class MongoDeviceManager
-  implements DeviceInterface, DeviceListingInterface
-{
-  private deviceDocument: Model<Device>;
+export class DeviceService {
+  private cacheRepository: CacheRepository;
+  private deviceRepository: DeviceRepository;
   private eventEmitter: EventEmitter;
   private serverMessages: ServerMessages;
 
-  delegate: DeviceInterface;
-
   constructor(
-    delegate: DeviceInterface,
-    deviceDocument: Model<Device>,
+    cacheRepository: CacheRepository,
+    deviceRepository: DeviceRepository,
     eventEmitter: EventEmitter,
     serverMessages: ServerMessages
   ) {
-    this.deviceDocument = deviceDocument;
-    this.delegate = delegate;
+    this.deviceRepository = deviceRepository;
+    this.cacheRepository = cacheRepository;
     this.eventEmitter = eventEmitter;
     this.serverMessages = serverMessages;
   }
 
   async addDevice(device: Device): Promise<ManagerResponse<object | string>> {
-    return this.delegate
-      .addDevice(device)
+    return this.cacheRepository
+      .add(device)
       .catch((err) => {
         const messageFailure = this.serverMessages.addDevice.FAILURE;
         return Promise.reject({ [messageFailure]: err });
       })
       .then((addingCompleted) =>
-        this.deviceDocument
-          .create(device)
+        this.deviceRepository
+          .add(device)
           .then(() => Promise.resolve(addingCompleted))
-          .catch((dbError) =>
-            this.compensateDeviceAdditionFromMemory(device.id)
+          .catch((deviceRepositoryError) =>
+            this.compensateDeviceAdditionToMemory(device.id)
               .catch((compensationError) => {
-                const messageFailure = this.serverMessages.addTask.FAILURE;
                 const rejectMessage = {
-                  [messageFailure]: {
-                    error: this.translateDbError(dbError),
-                    compensation: compensationError,
-                  },
+                  Error: deviceRepositoryError,
+                  compensation: compensationError,
                 };
+                console.log(rejectMessage);
                 return Promise.reject(rejectMessage);
               })
               .then((compensationResult) => {
-                console.log("THEN", compensationResult);
-
-                const messageFailure = this.serverMessages.addDevice.FAILURE;
                 const rejectMessage = {
-                  [messageFailure]: {
-                    error: this.translateDbError(dbError),
-                    compensation: compensationResult,
-                  },
+                  Error: deviceRepositoryError,
+                  compensation: compensationResult,
                 };
-                console.log("THEN2", rejectMessage);
+                console.log(rejectMessage);
                 return Promise.reject(rejectMessage);
               })
           )
       );
   }
 
-  private translateDbError(dbError: Error) {
-    return dbError instanceof mongo.MongoServerError
-      ? {
-          MongoServerError: this.uniqueViolationErrorHandler(dbError),
-        }
-      : { Error: dbError };
-  }
-
-  private async compensateDeviceAdditionFromMemory(
+  private async compensateDeviceAdditionToMemory(
     deviceId: string
   ): Promise<ManagerResponse<object | string>> {
-    return this.delegate
-      .deleteDevice(deviceId)
+    return this.cacheRepository
+      .delete(deviceId)
       .then((response) => {
         const messageSuccess = this.serverMessages.compensation.SUCCESS;
         const resolveMessage = {
@@ -103,14 +83,6 @@ export class MongoDeviceManager
       });
   }
 
-  uniqueViolationErrorHandler(err: mongo.MongoServerError) {
-    const isUniqueViolation = err.code === 11000;
-    if (isUniqueViolation && err.errmsg.includes("name")) {
-      return { Error: this.serverMessages.mongoServerError.NAME_DUPLICATION };
-    }
-    return { Error: err };
-  }
-
   async deleteDevice(
     deviceId: string
   ): Promise<ManagerResponse<object | string>> {
@@ -118,33 +90,27 @@ export class MongoDeviceManager
       deviceId
     ) as Device;
 
-    return this.delegate
-      .deleteDevice(deviceId)
+    return this.cacheRepository
+      .delete(deviceId)
       .catch((err) => {
         return Promise.reject(err);
       })
       .then((response) =>
-        this.deviceDocument
-          .deleteOne({ id: deviceId })
-          .catch((error) =>
+        this.deviceRepository
+          .delete(deviceId)
+          .catch((deviceRepositoryError) =>
             this.compensateDeviceDelationFromMemory(device)
               .then((compensationResult: ManagerResponse<object | string>) => {
-                const messageFailure = this.serverMessages.deleteTask.FAILURE;
                 const rejectMessage = {
-                  [messageFailure]: {
-                    error: error,
-                    compensation: compensationResult,
-                  },
+                  error: deviceRepositoryError,
+                  compensation: compensationResult,
                 };
                 return Promise.reject(rejectMessage);
               })
               .catch((compensationError: ManagerResponse<object | string>) => {
-                const messageFailure = this.serverMessages.deleteDevice.FAILURE;
                 const rejectMessage = {
-                  [messageFailure]: {
-                    error: error,
-                    compensation: compensationError,
-                  },
+                  error: deviceRepositoryError,
+                  compensation: compensationError,
                 };
                 return Promise.reject(rejectMessage);
               })
@@ -160,8 +126,8 @@ export class MongoDeviceManager
   private async compensateDeviceDelationFromMemory(
     device: Device
   ): Promise<ManagerResponse<object | string>> {
-    return this.delegate
-      .addDevice(device)
+    return this.cacheRepository
+      .add(device)
       .then((response) => {
         const messageSuccess = this.serverMessages.compensation.SUCCESS;
         const resolveMessage = {
@@ -180,8 +146,8 @@ export class MongoDeviceManager
   }
 
   async getMeterList(): Promise<Meter[]> {
-    return this.deviceDocument
-      .find({ deviceType: "meter" })
+    return this.deviceRepository
+      .listByType("meter")
       .then((devices) => {
         const meters = devices as unknown as Meter[];
         return Promise.resolve(meters);
@@ -192,8 +158,8 @@ export class MongoDeviceManager
   }
 
   async getSwitchList(): Promise<Switch[]> {
-    return this.deviceDocument
-      .find({ deviceType: "switch" })
+    return this.deviceRepository
+      .listByType("switch")
       .then((devices) => {
         const switches = devices as unknown as Switch[];
         return Promise.resolve(switches);
@@ -203,13 +169,15 @@ export class MongoDeviceManager
       );
   }
 
-  getDeviceById(deviceId: string): Promise<boolean> {
-    return this.deviceDocument
-      .findOne({ id: deviceId })
+  getDeviceById(deviceId: string): Promise<Device> {
+    return this.deviceRepository
+      .getById(deviceId)
       .then((device) =>
         device
-          ? Promise.resolve(true)
-          : Promise.reject({Error: `Device with id ${deviceId} does not exist.`})
+          ? Promise.resolve(device)
+          : Promise.reject({
+              Error: `Device with id ${deviceId} does not exist.`,
+            })
       )
       .catch((error) => Promise.reject(error));
   }

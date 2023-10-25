@@ -1,24 +1,23 @@
 import { InMemoryDeviceStorage } from "../../domain/InMemoryDeviceStorage";
-import { DeviceInterface } from "../../application/device/DeviceInterface";
+import { CacheRepository } from "../../application/device/CacheRepository";
 import { Device } from "../../domain/Device";
 import { ServerMessages } from "../../ServerMessages";
 import { ManagerResponse } from "../../application/task/TaskManagerInterface";
-//const appCron = new AppCron();
 
-export class InMemoryDeviceManager implements DeviceInterface {
-  private devicesInMemory: InMemoryDeviceStorage;
+export class CacheDeviceRepository implements CacheRepository {
+  private cachedDevices: InMemoryDeviceStorage;
   private serverMessages: ServerMessages;
   constructor(
-    deviceMap: InMemoryDeviceStorage,
+    cachedDevices: InMemoryDeviceStorage,
     serverMessages: ServerMessages
   ) {
-    this.devicesInMemory = deviceMap;
+    this.cachedDevices = cachedDevices;
     this.serverMessages = serverMessages;
   }
 
-  async addDevice(device: Device): Promise<ManagerResponse<object | string>> {
+  async add(device: Device): Promise<ManagerResponse<object | string>> {
     return new Promise<ManagerResponse<string>>((resolve) => {
-      this.devicesInMemory.addDevice(device);
+      this.cachedDevices.add(device);
       const messageSuccess = this.serverMessages.addDevice.SUCCESS;
       resolve({ [messageSuccess]: device.id });
     }).catch((err) => {
@@ -27,19 +26,19 @@ export class InMemoryDeviceManager implements DeviceInterface {
     });
   }
 
-  async deleteDevice(deviceId: string): Promise<ManagerResponse<string>> {
+  async delete(deviceId: string): Promise<ManagerResponse<string>> {
     return new Promise((resolve, reject) => {
-      const devicesList = this.devicesInMemory.devices;
+      const devicesList = this.cachedDevices.devices;
       const isExistingDevice = devicesList.get(deviceId);
       if (!isExistingDevice) {
         const messageFailure = this.serverMessages.deleteDevice.FAILURE;
 
-        reject({[messageFailure]: 'device not exists'});
+        reject({ [messageFailure]: "device not exists" });
       }
-      this.devicesInMemory.deleteDevice(deviceId);
+      this.cachedDevices.delete(deviceId);
       const messageSuccess = this.serverMessages.deleteDevice.SUCCESS;
 
-      resolve({[messageSuccess]: "No errors"});
+      resolve({ [messageSuccess]: "No errors" });
     });
   }
 }

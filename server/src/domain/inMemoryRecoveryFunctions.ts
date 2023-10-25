@@ -1,11 +1,11 @@
-import { MongoDeviceManager } from "../Infrastructure/device/MongoDeviceManager";
+import { DeviceService } from "../application/device/DeviceService";
 import { CronTaskInterface } from "../application/task/CronTaskInterface";
 import { InMemoryDeviceStorage } from "./InMemoryDeviceStorage";
 import { Meter } from "./Meter";
 import { Switch } from "./Switch";
 
 export async function recoveryInMemoryDeviceStorage(
-  deviceService: MongoDeviceManager,
+  deviceService: DeviceService,
   devicesInMemory: InMemoryDeviceStorage
 ) {
   const meters = await deviceService.getMeterList();
@@ -15,10 +15,10 @@ export async function recoveryInMemoryDeviceStorage(
     .then((promises) => {
       const [meters, switches] = promises;
       meters.forEach((meter: Meter) => {
-        devicesInMemory.addDevice(meter);
+        devicesInMemory.add(meter);
       });
       switches.forEach((switchDevice: Switch) => {
-        devicesInMemory.addDevice(switchDevice);
+        devicesInMemory.add(switchDevice);
       });
     })
     .catch((error) => console.log(error));

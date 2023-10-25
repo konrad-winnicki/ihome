@@ -1,7 +1,6 @@
 import { Device } from "./Device";
 
 export class InMemoryDeviceStorage {
-  
   private static instance: InMemoryDeviceStorage | null = null;
   private _devices: Map<string, Device>;
   private constructor() {
@@ -15,11 +14,11 @@ export class InMemoryDeviceStorage {
     return InMemoryDeviceStorage.instance;
   }
 
-  public addDevice(device: Device) {
+  public add(device: Device) {
     this._devices.set(device.id, device);
   }
 
-  public deleteDevice(deviceId: string) {
+  public delete(deviceId: string) {
     this._devices.delete(deviceId);
   }
 

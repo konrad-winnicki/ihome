@@ -5,8 +5,8 @@ import { DeviceRunManager } from "./Infrastructure/device/DeviceRunManager";
 import { DeviceRunService } from "./application/device/DeviceRunService";
 import { MongoDatabase } from "./Infrastructure/databse/MongoDataBase";
 import { AppCron } from "./domain/AppCron";
-import { MongoDeviceManager } from "./Infrastructure/device/MongoDeviceManager";
-import { InMemoryDeviceManager } from "./Infrastructure/device/InMemoryDeviceManager";
+import { DeviceService } from "./application/device/DeviceService";
+import { CacheDeviceRepository } from "./Infrastructure/device/CacheDeviceRepository";
 import { EventEmitter } from "node:events";
 import { CronTaskManager } from "./Infrastructure/task/CronTaskManager";
 import { MongoTaskManager } from "./Infrastructure/task/MongoTaskManager";
@@ -22,11 +22,12 @@ import { RunDeviceControllers } from "./controllers/runDeviceControllers";
 import { TaskControllers } from "./controllers/TaskControllers";
 import { LoginControllers } from "./controllers/LoginControllers";
 import { tokenGenerator } from "./domain/tokenGenerator";
-import { TaskRepository } from "./Infrastructure/task/TaskRepositoryN";
-import { CronTaskRepository } from "./Infrastructure/task/CronTaskRepositoryN";
+import { MongoTaskRepository } from "./Infrastructure/task/MongoTaskRepository";
+import { CronTaskRepositoryN } from "./Infrastructure/task/CronTaskRepositoryN";
 import { ServerMessages } from "./ServerMessages";
 import { prepareAppProperties } from "./prepareAppProperties";
 import { properties } from "./propertyWriter";
+import { MongoDeviceRepository } from "./Infrastructure/device/MongoDeviceRepository";
 function createMongoDocs(database: MongoDatabase) {
   const deviceDoc = database.createDeviceDoc();
   const taskDoc = database.createTaskerDoc();
@@ -34,70 +35,62 @@ function createMongoDocs(database: MongoDatabase) {
 }
 
 export async function initializeDependencias() {
-
-  if (sanitizedConfig.NODE_ENV === 'production'){
-    await prepareAppProperties()
+  if (sanitizedConfig.NODE_ENV === "production") {
+    await prepareAppProperties();
   }
 
   const serverMessages = new ServerMessages();
   const eventEmitter = new EventEmitter();
 
   const devicesInMemory = InMemoryDeviceStorage.getInstance();
-  const inMemoryDeviceManager = new InMemoryDeviceManager(
+  const inMemoryDeviceManager = new CacheDeviceRepository(
     devicesInMemory,
     serverMessages
   );
 
-
-
-
-  async function prepareDatabasePersistencia(inMemoryDeviceManager:InMemoryDeviceManager){
+  async function prepareDatabasePersistencia(
+    inMemoryDeviceManager: CacheDeviceRepository
+  ) {
     let DATABASE_URL = "";
     let DATABASE = "";
 
-    if(properties.get('persistencia') === "mongoDatabase"){
-      DATABASE_URL = (properties.get('DATABASE_URL')) as string
-      DATABASE = (properties.get('DATABASE')) as string
-    }else{
-      DATABASE_URL = sanitizedConfig.MONGO_URI
-      DATABASE = sanitizedConfig.DATABASE
+    if (properties.get("persistencia") === "mongoDatabase") {
+      DATABASE_URL = properties.get("DATABASE_URL") as string;
+      DATABASE = properties.get("DATABASE") as string;
+    } else {
+      DATABASE_URL = sanitizedConfig.MONGO_URI;
+      DATABASE = sanitizedConfig.DATABASE;
     }
 
-    const mongoDatabase = new MongoDatabase(
-      DATABASE_URL,
-      DATABASE
+    const mongoDatabase = new MongoDatabase(DATABASE_URL, DATABASE);
+    const mongoDocs = createMongoDocs(mongoDatabase);
+
+    const mongoDeviceRepository = new MongoDeviceRepository(
+      mongoDocs.deviceDoc,
+      serverMessages
     );
 
-    const mongoDocs = createMongoDocs(mongoDatabase);
-    const deviceService = new MongoDeviceManager(
+    const deviceService = new DeviceService(
       inMemoryDeviceManager,
-      mongoDocs.deviceDoc,
+      mongoDeviceRepository,
       eventEmitter,
       serverMessages
     );
-  
+
     const mongoTaskManager = new MongoTaskManager(
       mongoDocs.taskDoc,
       serverMessages
     );
-  
-    const taskRepository = new TaskRepository(mongoDocs.taskDoc);
-  
-    return {deviceService, mongoTaskManager, taskRepository, mongoDatabase}
+
+    const taskRepository = new MongoTaskRepository(mongoDocs.taskDoc, serverMessages);
+
+    return { deviceService, mongoTaskManager, taskRepository, mongoDatabase };
   }
-  
 
+  const persistencia = await prepareDatabasePersistencia(inMemoryDeviceManager);
 
-
-const persistencia = await prepareDatabasePersistencia(inMemoryDeviceManager)
-  
-
-
-  
   const appCorn = new AppCron();
   const cronTaskManager = new CronTaskManager(
-    persistencia.mongoTaskManager,
-    persistencia.taskRepository,
     appCorn,
     serverMessages
   );
@@ -133,20 +126,25 @@ const persistencia = await prepareDatabasePersistencia(inMemoryDeviceManager)
 
   const appServer = new AppServer(appRouter);
 
-  await recoveryInMemoryDeviceStorage(persistencia.deviceService, devicesInMemory);
+  await recoveryInMemoryDeviceStorage(
+    persistencia.deviceService,
+    devicesInMemory
+  );
 
-  const cronTaskRepository = new CronTaskRepository(persistencia.taskRepository, appCorn);
+  const cronTaskRepository = new CronTaskRepositoryN(
+    persistencia.taskRepository,
+    appCorn
+  );
   await fillCronInMemoryWithData(cronTaskRepository);
 
-
-  const port = sanitizedConfig.NODE_ENV==='prodction'? Number(properties.get('PORT')): sanitizedConfig.PORT
+  const port =
+    sanitizedConfig.NODE_ENV === "prodction"
+      ? Number(properties.get("PORT"))
+      : sanitizedConfig.PORT;
   appServer
     .startServer(port)
     .then(() => console.log("server listen succes"))
     .catch((err) => console.log("error", err));
-
-  
-
 
   return Application.getInstance(
     appServer,
@@ -206,9 +204,8 @@ type OptionsFlags<T> = {
 
 type Compensation = ObjectValues<typeof COMPENSATION>;
 
-
-const device1 = {id:"15", name: "ccc", type: 'type'}
-const device2 = {id:"14", name: "c", type: 'type'}
+const device1 = { id: "15", name: "ccc", type: "type" };
+const device2 = { id: "14", name: "c", type: "type" };
 
 //addDeviceToFile(device1).then((res)=>console.log(res)).catch((err)=> console.log(err))
 //addDeviceToFile(device2).then((res)=>console.log(res)).catch((err)=> console.log(err))

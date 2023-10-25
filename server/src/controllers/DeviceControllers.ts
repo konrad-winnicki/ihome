@@ -1,45 +1,42 @@
-
 import Koa from "koa";
-import { MongoDeviceManager } from "../Infrastructure/device/MongoDeviceManager";
+import { DeviceService } from "../application/device/DeviceService";
+
 /*
 export type DeviceControllers = {
   addDevice: (ctx: Koa.Context) => Promise<void>;
 };
 */
 
-
-export class DeviceControllers  {
-  private deviceService:MongoDeviceManager
-  constructor(
-    deviceService: MongoDeviceManager
-  ){
-    this.deviceService = deviceService
-    this.addDevice = this.addDevice.bind(this)
-    this.deleteDevice = this.deleteDevice.bind(this)
-    this.getMeters = this.getMeters.bind(this)
-    this.getSwitches = this.getSwitches.bind(this)
+export class DeviceControllers {
+  private deviceService: DeviceService;
+  constructor(deviceService: DeviceService) {
+    this.deviceService = deviceService;
+    this.addDevice = this.addDevice.bind(this);
+    this.deleteDevice = this.deleteDevice.bind(this);
+    this.getMeters = this.getMeters.bind(this);
+    this.getSwitches = this.getSwitches.bind(this);
   }
-    async addDevice(ctx: Koa.Context) {
+  async addDevice(ctx: Koa.Context) {
     return this.deviceService
       .addDevice(ctx.device)
       .then((response) => {
         ctx.status = 201;
-        ctx.body =  response 
+        ctx.body = response;
       })
       .catch((error) => {
-        console.log('CONTROLLER', error)
-        if (JSON.stringify(error).includes('NameConflictError')){
+        console.log("CONTROLLER", error);
+        if (JSON.stringify(error).includes("NameConflictError")) {
           ctx.status = 409;
-         return ctx.body = error
+          return (ctx.body = error);
         }
         ctx.status = 500;
         ctx.body = error;
       });
   }
 
-   async deleteDevice(ctx: Koa.Context) {
+  async deleteDevice(ctx: Koa.Context) {
     const deviceId = ctx.params.id;
-  
+
     return this.deviceService
       .deleteDevice(deviceId)
       .then((response) => {
@@ -50,9 +47,8 @@ export class DeviceControllers  {
         ctx.status = 500;
         ctx.body = error;
       });
-  
   }
- async getMeters(ctx: Koa.Context) {
+  async getMeters(ctx: Koa.Context) {
     return this.deviceService
       .getMeterList()
       .then((response) => {
@@ -65,8 +61,7 @@ export class DeviceControllers  {
       });
   }
 
-
-  async  getSwitches(ctx: Koa.Context) {
+  async getSwitches(ctx: Koa.Context) {
     return this.deviceService
       .getSwitchList()
       .then((response) => {
@@ -78,9 +73,4 @@ export class DeviceControllers  {
         ctx.body = error;
       });
   }
-
-  
-
 }
-
-

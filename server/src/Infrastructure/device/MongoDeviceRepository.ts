@@ -24,7 +24,7 @@ export class MongoDeviceRepository implements DeviceRepository {
       .create(device)
       .then(() => Promise.resolve())
       .catch((error) => {
-        const messageFailure = this.serverMessages.addTask.FAILURE;
+        const messageFailure = this.serverMessages.addDevice.FAILURE;
         const rejectMessage = {
           [messageFailure]: this.translateDbError(error),
         };

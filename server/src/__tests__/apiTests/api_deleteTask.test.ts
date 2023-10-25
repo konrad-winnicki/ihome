@@ -84,10 +84,8 @@ describe("API DELETE TASK TEST", () => {
       .expect(500)
       .expect("Content-Type", /application\/json/);
 
-    expect(response.body).toEqual({
-      "Task not deleted due to error":
-        "Task not deleted due to error: Task with id nonExisitingId doesn't exist.",
-    });
+    expect(response.body).toEqual({"Task not deleted": "Task with id nonExisitingId doesn't exist."
+      });
   });
 
   test("Should not delete task if not valid token:", async () => {

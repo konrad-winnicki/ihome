@@ -20,6 +20,7 @@ export class DeviceControllers {
     return this.deviceService
       .addDevice(ctx.device)
       .then((response) => {
+        console.log(response)
         ctx.status = 201;
         ctx.body = response;
       })

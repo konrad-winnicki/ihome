@@ -1,37 +1,164 @@
+import { DeviceService } from "../device/DeviceService";
+import { TaskManager } from "./TaskManager";
 import { TaskRepository } from "./TaskRepository";
 import { Task } from "../../domain/Task";
-import { DeviceListingInterface } from "../device/DeviceListingInterface";
-import { TaskManager } from "./TaskManagerInterface";
-import { ManagerResponse } from "./TaskManagerInterface";
+import { ServerMessages } from "../../ServerMessages";
+import EventEmitter from "node:events";
+
+type ManagerResponse<T> = {
+  [key: string]: T;
+};
 
 export class TaskService {
-  private taskManager: TaskManager;
   private taskRepository: TaskRepository;
-  private deviceService: DeviceListingInterface;
+  private taskManager: TaskManager;
+  private dviceService: DeviceService;
+
+  private serverMessages: ServerMessages;
 
   constructor(
+    taskRepository: TaskRepository,
     taskManager: TaskManager,
-    taskRapository: TaskRepository,
-    deviceService: DeviceListingInterface
+    deviceService: DeviceService,
+    serverMessages: ServerMessages,
+    eventEmitter: EventEmitter
   ) {
+    this.taskRepository = taskRepository;
     this.taskManager = taskManager;
-    this.taskRepository = taskRapository;
-    this.deviceService = deviceService;
+    this.dviceService = deviceService;
+    this.serverMessages = serverMessages;
+    this.handleEvent = this.handleEvent.bind(this);
+    eventEmitter.on("deviceDeleted", this.handleEvent);
   }
 
-  async addTask(task: Task): Promise<ManagerResponse<object | string>> {
-    // TODO: this.deviceService.findById(task.deviceId)
-    return this.deviceService
-      .getDeviceById(task.deviceId)
-      .then(() => this.taskManager.add(task))
-      .catch((error) => Promise.reject(error));
+  async add(task: Task): Promise<ManagerResponse<object | string>> {
+    return this.dviceService
+      .getById(task.deviceId)
+      .catch((error) => Promise.reject(error))
+      .then(() =>
+        this.taskRepository
+          .add(task)
+          .catch((error) => {
+            return Promise.reject(error);
+          })
+          .then((addingCompleted) => {
+            return this.taskRepository
+              .findById(task.id)
+              .then((aggregatedTask) => {
+                this.taskManager.add(aggregatedTask);
+                return Promise.resolve(addingCompleted);
+              })
+              .catch((error) =>
+                this.compensateTaskAdditionToDB(task.id)
+                  .catch((compensationError) => {
+                    const messageFailure = this.serverMessages.addTask.FAILURE;
+                    const rejectMessage = {
+                      [messageFailure]: {
+                        error: error,
+                        compensationError: compensationError,
+                      },
+                    };
+                    return Promise.reject(rejectMessage);
+                  })
+                  .then((compensationResult) => {
+                    const messageFailure = this.serverMessages.addTask.FAILURE;
+                    const rejectMessage = {
+                      [messageFailure]: {
+                        error: error,
+                        compensationSucceded: compensationResult,
+                      },
+                    };
+                    return Promise.reject(rejectMessage);
+                  })
+              );
+          })
+      );
   }
 
-  deleteTaskFromDB(taskId: string): Promise<ManagerResponse<object | string>> {
-    return this.taskManager.delete(taskId);
+  async delete(taskId: string): Promise<ManagerResponse<object | string>> {
+    return this.taskManager
+      .delete(taskId)
+      .catch((error) => {
+        console.log('taskservice', error)
+        return Promise.reject(error);
+      })
+      .then(() =>
+        this.taskRepository
+          .delete(taskId)
+          .then((deletionCompleted) => Promise.resolve(deletionCompleted))
+          .catch((error) =>
+            this.compensateTaskDeletionFromMemory(taskId)
+              .catch((compensationError: ManagerResponse<object>) => {
+                const messageFailure = this.serverMessages.deleteTask.FAILURE;
+                const rejectMessage = {
+                  [messageFailure]: {
+                    error: error,
+                    compensationError: compensationError,
+                  },
+                };
+                return Promise.reject(rejectMessage);
+              })
+              .then((compensationResult: ManagerResponse<string>) => {
+                const messageFailure = this.serverMessages.deleteTask.FAILURE;
+                const rejectMessage = {
+                  [messageFailure]: {
+                    error: error,
+                    compensationError: compensationResult,
+                  },
+                };
+                return Promise.reject(rejectMessage);
+              })
+          )
+      );
   }
 
-  async findTasksForDevice(deviceId: string): Promise<Task[]> {
+  async compensateTaskAdditionToDB(taskId: string) {
+    return this.taskRepository
+      .delete(taskId)
+      .then((response) => {
+        const message = this.serverMessages.compensation.SUCCESS;
+        const resolveMessage = { [message]: response };
+        console.log(resolveMessage);
+        return Promise.resolve(resolveMessage);
+      })
+      .catch((error) => {
+        const message = this.serverMessages.compensation.FAILURE;
+        const rejectionMessage = { [message]: error };
+        console.log(rejectionMessage);
+        return Promise.reject(rejectionMessage);
+      });
+  }
+
+  async compensateTaskDeletionFromMemory(taskId: string) {
+    return this.taskRepository
+      .findById(taskId)
+      .then((aggregatedTask) => {
+        this.taskManager.add(aggregatedTask);
+        const message = this.serverMessages.compensation.SUCCESS;
+        const resolveMessage = { [message]: "Task restored to cron" };
+        console.log(resolveMessage);
+        return Promise.resolve(resolveMessage);
+      })
+      .catch((err: ManagerResponse<object>) => {
+        const message = this.serverMessages.compensation.FAILURE;
+        const rejectMessage = { [message]: err };
+        console.log(rejectMessage);
+        return Promise.reject(rejectMessage);
+      });
+  }
+
+  async handleEvent(deviceId: string) {
+    await this.taskRepository
+      .getByDevice(deviceId)
+      .then((tasks) => {
+        Promise.all(tasks.map((task) => this.delete(task.id)))
+          .then((result) => console.log(result))
+          .catch((err) => console.log(err));
+      })
+      .catch((err) => console.log(err));
+  }
+
+  async getByDevice(deviceId: string): Promise<Task[]> {
     return this.taskRepository.getByDevice(deviceId);
   }
 }

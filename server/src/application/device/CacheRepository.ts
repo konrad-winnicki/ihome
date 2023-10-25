@@ -1,5 +1,5 @@
 import { Device } from "../../domain/Device";
-import { ManagerResponse } from "../task/TaskManagerInterface";
+import { ManagerResponse } from "../task/TaskManager";
 
 export interface CacheRepository {
   add: (device: Device) => Promise<ManagerResponse<object | string>>;

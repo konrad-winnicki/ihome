@@ -1,6 +1,4 @@
 import sanitizedConfig from "../config/config";
-import { TaskService } from "./application/task/TaskService";
-import { TaskManager } from "./Infrastructure/task/TaskManager";
 import { DeviceRunManager } from "./Infrastructure/device/DeviceRunManager";
 import { DeviceRunService } from "./application/device/DeviceRunService";
 import { MongoDatabase } from "./Infrastructure/databse/MongoDataBase";
@@ -9,7 +7,6 @@ import { DeviceService } from "./application/device/DeviceService";
 import { CacheDeviceRepository } from "./Infrastructure/device/CacheDeviceRepository";
 import { EventEmitter } from "node:events";
 import { CronTaskManager } from "./Infrastructure/task/CronTaskManager";
-import { MongoTaskManager } from "./Infrastructure/task/MongoTaskManager";
 import {
   recoveryInMemoryDeviceStorage,
   fillCronInMemoryWithData,
@@ -23,11 +20,12 @@ import { TaskControllers } from "./controllers/TaskControllers";
 import { LoginControllers } from "./controllers/LoginControllers";
 import { tokenGenerator } from "./domain/tokenGenerator";
 import { MongoTaskRepository } from "./Infrastructure/task/MongoTaskRepository";
-import { CronTaskRepositoryN } from "./Infrastructure/task/CronTaskRepositoryN";
+import { TaskRecoveryManager } from "./Infrastructure/task/TaskRecoveryManager";
 import { ServerMessages } from "./ServerMessages";
 import { prepareAppProperties } from "./prepareAppProperties";
-import { properties } from "./propertyWriter";
 import { MongoDeviceRepository } from "./Infrastructure/device/MongoDeviceRepository";
+import { TaskService } from "./application/task/TaskService";
+import { properties } from "./propertyWriter";
 function createMongoDocs(database: MongoDatabase) {
   const deviceDoc = database.createDeviceDoc();
   const taskDoc = database.createTaskerDoc();
@@ -54,10 +52,13 @@ export async function initializeDependencias() {
     let DATABASE_URL = "";
     let DATABASE = "";
 
-    if (properties.get("persistencia") === "mongoDatabase") {
-      DATABASE_URL = properties.get("DATABASE_URL") as string;
-      DATABASE = properties.get("DATABASE") as string;
-    } else {
+    if(sanitizedConfig.NODE_ENV === "production"){
+      if (properties.get("persistencia") === "mongoDatabase") {
+        DATABASE_URL = properties.get("DATABASE_URL") as string;
+        DATABASE = properties.get("DATABASE") as string;
+      }
+    }
+     else {
       DATABASE_URL = sanitizedConfig.MONGO_URI;
       DATABASE = sanitizedConfig.DATABASE;
     }
@@ -77,33 +78,26 @@ export async function initializeDependencias() {
       serverMessages
     );
 
-    const mongoTaskManager = new MongoTaskManager(
+    
+    const taskRepository = new MongoTaskRepository(
       mongoDocs.taskDoc,
       serverMessages
     );
 
-    const taskRepository = new MongoTaskRepository(mongoDocs.taskDoc, serverMessages);
-
-    return { deviceService, mongoTaskManager, taskRepository, mongoDatabase };
+    return { deviceService, taskRepository, mongoDatabase };
   }
 
   const persistencia = await prepareDatabasePersistencia(inMemoryDeviceManager);
 
   const appCorn = new AppCron();
-  const cronTaskManager = new CronTaskManager(
-    appCorn,
-    serverMessages
-  );
+  const cronTaskManager = new CronTaskManager(appCorn, serverMessages);
 
-  const taskManager = new TaskManager(
-    cronTaskManager,
-    persistencia.taskRepository,
-    eventEmitter
-  );
   const taskService = new TaskService(
-    taskManager,
     persistencia.taskRepository,
-    persistencia.deviceService
+    cronTaskManager,
+    persistencia.deviceService,
+    serverMessages,
+    eventEmitter
   );
 
   const deviceRunManager = new DeviceRunManager();
@@ -131,9 +125,9 @@ export async function initializeDependencias() {
     devicesInMemory
   );
 
-  const cronTaskRepository = new CronTaskRepositoryN(
+  const cronTaskRepository = new TaskRecoveryManager(
     persistencia.taskRepository,
-    appCorn
+    cronTaskManager
   );
   await fillCronInMemoryWithData(cronTaskRepository);
 

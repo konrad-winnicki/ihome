@@ -402,18 +402,15 @@ describe("API ADD DEVICE TEST", () => {
       .expect(409)
       .expect("Content-Type", /application\/json/);
 
+      console.log(response.body)
 
     expect(response.body).toEqual({
-      "Device not added": {
-        error: {
-          MongoServerError: {
-            Error: "Unique violation error: NameConflictError",
-          },
-        },
-        compensation: {
-          "Compensation succeded": { "Device deleted": "No errors" },
-        },
+      Error: {
+        'Device not added': {
+          mongoServerError: {"error":"Unique violation error: NameConflictError"}
+        }
       },
+      compensation: { 'Compensation succeded': { 'Device deleted': 'No errors' } }
     });
 
     const [...devicesInMemoryKeys] = app.devicesInMemory.devices.keys();

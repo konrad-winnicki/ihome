@@ -1,5 +1,5 @@
 import { DeviceService } from "../application/device/DeviceService";
-import { CronTaskInterface } from "../application/task/CronTaskInterface";
+import { TaskRecovery } from "../application/task/TaskRecovery";
 import { InMemoryDeviceStorage } from "./InMemoryDeviceStorage";
 import { Meter } from "./Meter";
 import { Switch } from "./Switch";
@@ -24,9 +24,7 @@ export async function recoveryInMemoryDeviceStorage(
     .catch((error) => console.log(error));
 }
 
-export async function fillCronInMemoryWithData(
-  cronTaskManager: CronTaskInterface
-) {
+export async function fillCronInMemoryWithData(cronTaskManager: TaskRecovery) {
   return cronTaskManager
     .transformTaskFromDbToCron()
     .then((result) => console.log(result))

@@ -79,19 +79,6 @@ export class MongoTaskRepository implements TaskRepository {
   }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
   async findById(taskId: string): Promise<AggregatedTask> {
     return this.taskDocument
       .aggregate(taskAndDeviceAggregationPipeline(taskId))

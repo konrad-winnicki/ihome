@@ -5,7 +5,7 @@ import { Switch } from "../../domain/Switch";
 import { InMemoryDeviceStorage } from "../../domain/InMemoryDeviceStorage";
 import { EventEmitter } from "node:events";
 import { ServerMessages } from "../../ServerMessages";
-import { ManagerResponse } from "../task/TaskManagerInterface";
+import { ManagerResponse } from "../task/TaskManager";
 import { DeviceRepository } from "./DeviceRepository";
 
 //interface devicePersistence: adddevuce, deleteDevice, getMenager, Getswitch
@@ -169,7 +169,7 @@ export class DeviceService {
       );
   }
 
-  getDeviceById(deviceId: string): Promise<Device> {
+  getById(deviceId: string): Promise<Device> {
     return this.deviceRepository
       .getById(deviceId)
       .then((device) =>

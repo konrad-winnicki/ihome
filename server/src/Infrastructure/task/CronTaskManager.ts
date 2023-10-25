@@ -1,5 +1,5 @@
 import { AppCron } from "../../domain/AppCron";
-import { TaskManager } from "../../application/task/TaskManagerInterface";
+import { TaskManager } from "../../application/task/TaskManager";
 import { ServerMessages } from "../../ServerMessages";
 import { AggregatedTask } from "../../domain/AggregatedTask";
 
@@ -11,10 +11,7 @@ export class CronTaskManager implements TaskManager {
   private appCron: AppCron;
   private serverMessages: ServerMessages;
 
-  constructor(
-    appCron: AppCron,
-    serverMessages: ServerMessages
-  ) {
+  constructor(appCron: AppCron, serverMessages: ServerMessages) {
     this.appCron = appCron;
     this.serverMessages = serverMessages;
   }
@@ -45,21 +42,17 @@ export class CronTaskManager implements TaskManager {
   }
 
   async delete(taskId: string): Promise<ManagerResponse<object | string>> {
-    return new Promise((resolve, reject) => {
-      try {
-        this.appCron.deleteTask(taskId);
-
-        const messageSucces = this.serverMessages.deleteTask.SUCCESS;
-        const resolveMessage = { [messageSucces]: "No errors" };
-
-        return resolve(resolveMessage);
-      } catch (error) {
-        const messageFailure = this.serverMessages.deleteTask.FAILURE;
+        return this.appCron.deleteTask(taskId).then(()=>{
+          const messageSucces = this.serverMessages.deleteTask.SUCCESS;
+          const resolveMessage = { [messageSucces]: "No errors" };
+          return Promise.resolve(resolveMessage);
+        }).catch((error)=>{
+          const messageFailure = this.serverMessages.deleteTask.FAILURE;
         const rejectMessage = { [messageFailure]: error };
-
-        return reject(rejectMessage);
-      }
-    });  
-}
-
+        return Promise.reject(rejectMessage);
+        })
+        
+      
+    
+  }
 }

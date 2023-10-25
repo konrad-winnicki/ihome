@@ -1,7 +1,7 @@
 import PropertiesReader from "properties-reader";
 import path from "node:path";
 
-const propertiesPath = path.resolve(__dirname, "../../src/app.properties");
+const propertiesPath = path.resolve(process.cwd(), 'src/app.properties');
 export const properties = PropertiesReader(propertiesPath, undefined, {
   writer: { saveSections: true },
 });

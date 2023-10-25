@@ -2,7 +2,7 @@ import { InMemoryDeviceStorage } from "../../domain/InMemoryDeviceStorage";
 import { CacheRepository } from "../../application/device/CacheRepository";
 import { Device } from "../../domain/Device";
 import { ServerMessages } from "../../ServerMessages";
-import { ManagerResponse } from "../../application/task/TaskManagerInterface";
+import { ManagerResponse } from "../../application/task/TaskManager";
 
 export class CacheDeviceRepository implements CacheRepository {
   private cachedDevices: InMemoryDeviceStorage;

@@ -1,5 +1,4 @@
 import { Meter } from "../../domain/Meter";
-import { CacheRepository } from "./CacheRepository";
 import { Device } from "../../domain/Device";
 import { Switch } from "../../domain/Switch";
 import { InMemoryDeviceStorage } from "../../domain/InMemoryDeviceStorage";
@@ -12,13 +11,13 @@ import { DeviceRepository } from "./DeviceRepository";
 //mongo lub file impelement devicePersistence intrtface
 
 export class DeviceService {
-  private cacheRepository: CacheRepository;
+  private cacheRepository: DeviceRepository;
   private deviceRepository: DeviceRepository;
   private eventEmitter: EventEmitter;
   private serverMessages: ServerMessages;
 
   constructor(
-    cacheRepository: CacheRepository,
+    cacheRepository: DeviceRepository,
     deviceRepository: DeviceRepository,
     eventEmitter: EventEmitter,
     serverMessages: ServerMessages

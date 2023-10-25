@@ -4,6 +4,7 @@ import { Device } from "../../domain/Device";
 
 import { DeviceRepository } from "../../application/device/DeviceRepository";
 import { ServerMessages } from "../../ServerMessages";
+import { ManagerResponse } from "../../application/task/TaskManager";
 
 //interface devicePersistence: adddevuce, deleteDevice, getMenager, Getswitch
 //mongo lub file impelement devicePersistence intrtface
@@ -19,10 +20,14 @@ export class MongoDeviceRepository implements DeviceRepository {
 
   }
 
-  async add(device: Device): Promise<void> {
+  async add(device: Device): Promise<ManagerResponse<string>> {
     return this.deviceDocument
       .create(device)
-      .then(() => Promise.resolve())
+      .then(() => {
+        const messageSuccess = this.serverMessages.addDevice.SUCCESS;
+      const resolveMessage = { [messageSuccess]: device.id }
+        
+        return Promise.resolve(resolveMessage)})
       .catch((error) => {
         const messageFailure = this.serverMessages.addDevice.FAILURE;
         const rejectMessage = {
@@ -48,8 +53,13 @@ export class MongoDeviceRepository implements DeviceRepository {
     return { error: err.message };
   }
 
-  async delete(deviceId: string): Promise<void> {
-    return this.deviceDocument.deleteOne({ id: deviceId }).then(() =>  Promise.resolve())
+  async delete(deviceId: string): Promise<ManagerResponse<string>> {
+    return this.deviceDocument.deleteOne({ id: deviceId }).then(() => 
+    {
+      const messageSuccess = this.serverMessages.deleteDevice.SUCCESS;
+
+      const resolveMessage = { [messageSuccess]: "No errors" }
+      return Promise.resolve(resolveMessage)})
     .catch((error) => {
       const messageFailure = this.serverMessages.deleteDevice.FAILURE;
       const rejectMessage = { [messageFailure]: error };
@@ -68,7 +78,7 @@ export class MongoDeviceRepository implements DeviceRepository {
       device
         ? Promise.resolve(device)
         : Promise.reject({
-            Error: `Device with id ${deviceId} does not exist.`,
+            NonExistsError: `Device with id ${deviceId} does not exist.`,
           })
     );
   }

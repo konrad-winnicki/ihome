@@ -58,10 +58,9 @@ describe("API RUN METER TEST", () => {
       .post(`/meters/run/${meterWithNonExistingScriptId}`)
       .set("Authorization", token)
       .expect(500)
-      .expect("Content-Type", /text\/plain/);
+      .expect("Content-Type", /application\/json/);
 
-    console.log(responseFromMeter.text);
-    expect(responseFromMeter.text).toMatch("Acomplished with error:");
+    expect(Object.keys(responseFromMeter.body)[0]).toMatch("Error occured during switching on");
   });
 
   afterAll(async () => {

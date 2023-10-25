@@ -56,8 +56,7 @@ export class TaskControllers {
   async getTasksForDevice(ctx: Koa.Context) {
     const deviceId = await ctx.params.id;
 
-    return this.taskService
-      .getByDevice(deviceId)
+    return this.taskService.getByDevice(deviceId)
       .then((tasks) => {
         ctx.status = 200;
         ctx.body = tasks;

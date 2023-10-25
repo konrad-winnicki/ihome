@@ -84,9 +84,9 @@ describe("API RUN SWITCH TEST", () => {
       .set("Authorization", token)
       .send({ switchOn: true })
       .expect(500)
-      .expect("Content-Type", /text\/plain/);
+      .expect("Content-Type", /application\/json/);
 
-    expect(responseFromSwitch.text).toMatch("Acomplished with error:");
+    expect(Object.keys(responseFromSwitch.body)[0]).toMatch("Error occured during switching on");
   });
 
   test("Switch off should return error if file not exists:", async () => {
@@ -95,10 +95,10 @@ describe("API RUN SWITCH TEST", () => {
       .set("Authorization", token)
       .send({ switchOn: false })
       .expect(500)
-      .expect("Content-Type", /text\/plain/);
+      .expect("Content-Type", /application\/json/);
 
     console.log(responseFromMeter.text);
-    expect(responseFromMeter.text).toMatch("Acomplished with error:");
+    expect(responseFromMeter.text).toMatch("Error occured during switching off");
   });
 
   test("Should resolve promise even if process not ended:", async () => {

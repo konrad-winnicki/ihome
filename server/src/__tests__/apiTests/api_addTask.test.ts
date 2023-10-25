@@ -111,7 +111,7 @@ describe("API ADD TASK TEST", () => {
 
     
 
-    expect(responseTask1.body).toStrictEqual({"Error":"Device with id notExistingId does not exist."});
+    expect(responseTask1.body).toStrictEqual({"NonExistsError": "Device with id notExistingId does not exist."});
     
   
       

@@ -1,22 +1,21 @@
 
-import { Device } from "../../domain/Device";
 import { findIfIdExists, findIfNameExists, readFile, writeFile } from "./auxilaryFunctions";
 
 
-export async function addDeviceToFile(device:Device
-): Promise<string> {
+export async function addDeviceToFile(data: {
+  [key: string]: string;
+}): Promise<string> {
   
 
   return readFile("devices.json")
     .then((fileContent) => {
       
-      const isDeviceExisting = findIfIdExists(fileContent, device.id);
+      const isDeviceExisting = findIfIdExists(fileContent, data.id);
       console.log(isDeviceExisting)
       if (isDeviceExisting){
-        throw new Error(`Key ${device.id} already exists`);
+        throw new Error(`Key ${data.id} already exists`);
       }
-      findIfNameExists(fileContent, device.name);
-      fileContent[device.id] = device;
+      fileContent[data.id] = data;
       return writeFile("devices.json", fileContent).then(() =>
         Promise.resolve("Written succesfully")
       );

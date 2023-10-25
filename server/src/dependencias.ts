@@ -1,5 +1,4 @@
 import sanitizedConfig from "../config/config";
-import { DeviceRunManager } from "./Infrastructure/device/DeviceRunManager";
 import { DeviceRunService } from "./application/device/DeviceRunService";
 import { MongoDatabase } from "./Infrastructure/databse/MongoDataBase";
 import { AppCron } from "./domain/AppCron";
@@ -41,24 +40,23 @@ export async function initializeDependencias() {
   const eventEmitter = new EventEmitter();
 
   const devicesInMemory = InMemoryDeviceStorage.getInstance();
-  const inMemoryDeviceManager = new CacheDeviceRepository(
+  const cacheDeviceRepository = new CacheDeviceRepository(
     devicesInMemory,
     serverMessages
   );
 
   async function prepareDatabasePersistencia(
-    inMemoryDeviceManager: CacheDeviceRepository
+    cacheDeviceRepository: CacheDeviceRepository
   ) {
     let DATABASE_URL = "";
     let DATABASE = "";
 
-    if(sanitizedConfig.NODE_ENV === "production"){
+    if (sanitizedConfig.NODE_ENV === "production") {
       if (properties.get("persistencia") === "mongoDatabase") {
         DATABASE_URL = properties.get("DATABASE_URL") as string;
         DATABASE = properties.get("DATABASE") as string;
       }
-    }
-     else {
+    } else {
       DATABASE_URL = sanitizedConfig.MONGO_URI;
       DATABASE = sanitizedConfig.DATABASE;
     }
@@ -72,13 +70,12 @@ export async function initializeDependencias() {
     );
 
     const deviceService = new DeviceService(
-      inMemoryDeviceManager,
+      cacheDeviceRepository,
       mongoDeviceRepository,
       eventEmitter,
       serverMessages
     );
 
-    
     const taskRepository = new MongoTaskRepository(
       mongoDocs.taskDoc,
       serverMessages
@@ -87,7 +84,7 @@ export async function initializeDependencias() {
     return { deviceService, taskRepository, mongoDatabase };
   }
 
-  const persistencia = await prepareDatabasePersistencia(inMemoryDeviceManager);
+  const persistencia = await prepareDatabasePersistencia(cacheDeviceRepository);
 
   const appCorn = new AppCron();
   const cronTaskManager = new CronTaskManager(appCorn, serverMessages);
@@ -100,13 +97,10 @@ export async function initializeDependencias() {
     eventEmitter
   );
 
-  const deviceRunManager = new DeviceRunManager();
-  const deviceRunService = new DeviceRunService(deviceRunManager);
+  const deviceRunService = new DeviceRunService(cacheDeviceRepository);
 
-  const deviceRunControllerDep = new RunDeviceControllers(
-    deviceRunService,
-    devicesInMemory
-  );
+  const deviceRunControllerDep = new RunDeviceControllers(deviceRunService);
+
   const deviceControllers = new DeviceControllers(persistencia.deviceService);
   const taskControlles = new TaskControllers(taskService);
   const loginControllers = new LoginControllers(tokenGenerator);

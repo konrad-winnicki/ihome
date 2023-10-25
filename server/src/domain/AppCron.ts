@@ -16,9 +16,12 @@ export class AppCron {
           console.log(err);
         }
       },
-      { name: taskId, scheduled: false, timezone: "Europe/Warsaw" }
+      { name: taskId, scheduled: true, timezone: "Europe/Warsaw" }
     );
     //schedule.start();
+
+
+    
   }
 
   deleteTask(taskId: string): Promise<string> {

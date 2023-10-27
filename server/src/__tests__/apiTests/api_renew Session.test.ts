@@ -13,6 +13,8 @@ describe("API RENEW SESSION TEST", () => {
   const tokenExpirationTimeInMS = 360000
   const manipulationTimeInMS = 10000
   beforeAll(async () => {
+    sanitizedConfig.NODE_ENV = "test_api_database"
+
     app = await initializeDependencias();
     token = await loginUser(requestUri, "testPassword");
     jest.useFakeTimers();
@@ -50,7 +52,8 @@ describe("API RENEW SESSION TEST", () => {
  
 
   afterAll(async () => {
-   await app.databaseInstance.connection.close();
-    await app.appServer.stopServer();
+    if (sanitizedConfig.NODE_ENV === "test_api_database"){
+      await app.databaseInstance?.connection.close();}
+      await app.appServer.stopServer();
   });
 });

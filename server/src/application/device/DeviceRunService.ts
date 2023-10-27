@@ -55,7 +55,7 @@ export class DeviceRunService implements DeviceRunInterface {
         () => {
           resolve("Timeout: Proccess not ended. Not waiting more for stdout.");
         },
-        sanitizedConfig.NODE_ENV === "test" ? 500 : 60000
+        sanitizedConfig.NODE_ENV.includes('test') ? 500 : 60000
       );
     });
 

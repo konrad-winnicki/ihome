@@ -9,6 +9,8 @@ import { addSwitch } from "./auxilaryFunctionsForTests/addSwitch";
 import cron from "node-cron";
 import { getTasksForDevice } from "./auxilaryFunctionsForTests/getTasksForDevice";
 import { addTask } from "./auxilaryFunctionsForTests/addTask";
+import { cleanupFiles } from "./auxilaryFunctionsForTests/fileCleanup";
+import { Connection } from "mongoose";
 
 const requestUri = `http://localhost:${sanitizedConfig.PORT}`;
 
@@ -24,8 +26,15 @@ describe("API DELETE TASK TEST", () => {
   });
 
   beforeEach(async () => {
-    await cleanupDatabase(app.databaseInstance.connection);
-    app.devicesInMemory.devices.clear();
+    if (sanitizedConfig.NODE_ENV === "test_api_database"){
+      const connection = (app.databaseInstance?.connection) as Connection
+      await cleanupDatabase(connection);
+
+    }
+    if (sanitizedConfig.NODE_ENV === "test_api_file"){
+      await cleanupFiles();
+
+    }    app.devicesInMemory.devices.clear();
     cron.getTasks().clear();
 
     switch1Id = await addSwitch(
@@ -66,8 +75,8 @@ describe("API DELETE TASK TEST", () => {
     const taskKeyList = [...taskKeysIterator];
     const deletedTaskFromMemory = cron.getTasks().get(task1Id);
     const taskFromDB = await getTasksForDevice(
-      app.databaseInstance.connection,
-      switch1Id
+      (app.databaseInstance?.connection) as Connection,
+            switch1Id
     );
     const [remainingTaskInDB] = taskFromDB;
     expect(response.body).toEqual({
@@ -118,7 +127,8 @@ describe("API DELETE TASK TEST", () => {
   });
 
   afterAll(async () => {
-    await app.databaseInstance.connection.close();
-    await app.appServer.stopServer();
+    if (sanitizedConfig.NODE_ENV === "test_api_database"){
+      await app.databaseInstance?.connection.close();}
+      await app.appServer.stopServer();
   });
 });

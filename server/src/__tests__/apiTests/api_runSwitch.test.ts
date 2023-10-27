@@ -6,6 +6,8 @@ import { Application } from "../../dependencias";
 import { cleanupDatabase } from "./auxilaryFunctionsForTests/dbCleanup";
 import { loginUser } from "./auxilaryFunctionsForTests/loginUser";
 import { addSwitch } from "./auxilaryFunctionsForTests/addSwitch";
+import { Connection } from "mongoose";
+import { cleanupFiles } from "./auxilaryFunctionsForTests/fileCleanup";
 
 const requestUri = `http://localhost:${sanitizedConfig.PORT}`;
 
@@ -17,9 +19,18 @@ describe("API RUN SWITCH TEST", () => {
   let listeningSwitch: string;
   let switchWithNoPrint: string;
   beforeAll(async () => {
+    sanitizedConfig.NODE_ENV = "test_api_database"
+
     app = await initializeDependencias();
-    await cleanupDatabase(app.databaseInstance.connection);
-    app.devicesInMemory.devices.clear();
+    if (sanitizedConfig.NODE_ENV === "test_api_database"){
+      const connection = (app.databaseInstance?.connection) as Connection
+      await cleanupDatabase(connection);
+
+    }
+    if (sanitizedConfig.NODE_ENV === "test_api_file"){
+      await cleanupFiles();
+
+    }    app.devicesInMemory.devices.clear();
     token = await loginUser(requestUri, "testPassword");
     switchId = await addSwitch(
       requestUri,
@@ -132,7 +143,8 @@ describe("API RUN SWITCH TEST", () => {
   });
 
   afterAll(async () => {
-    await app.databaseInstance.connection.close();
-    await app.appServer.stopServer();
+    if (sanitizedConfig.NODE_ENV === "test_api_database"){
+      await app.databaseInstance?.connection.close();}
+      await app.appServer.stopServer();
   });
 });

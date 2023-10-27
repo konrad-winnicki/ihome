@@ -9,17 +9,14 @@ export async function getAllDevices(
   callback: callback,
   callbackParam: string | Connection
 ) {
- 
     return await callback(callbackParam as string & Connection)}
   
 
 
 export async function getAllDevicesFromDB(databaseConnection: Connection) {
-  const con = databaseConnection as Connection
-  const database = con.useDb("raspberrypi_test");
+  const database = databaseConnection.useDb("raspberrypi_test");
   const collection = database.collection("devices");
   const response = (await collection.find({}).toArray()) as unknown as Device[]
-  console.log('res', response)
   return response;
 }
 

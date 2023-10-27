@@ -35,7 +35,8 @@ export class FileDeviceRepository implements DeviceRepository {
           device.name
         );
         if (isNameExisting) {
-          throw new Error(this.serverMessages.uniqueViolation.NAME_DUPLICATION);
+          //throw new Error(this.serverMessages.uniqueViolation.NAME_DUPLICATION);
+        return Promise.reject({error: this.serverMessages.uniqueViolation.NAME_DUPLICATION})
         }
         fileContent[device.id] = device;
         return this.helperMethods

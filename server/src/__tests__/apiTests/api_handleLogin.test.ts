@@ -8,6 +8,7 @@ const requestUri = `http://localhost:${sanitizedConfig.PORT}`;
 describe("API HANDLE LOGIN TEST", () => {
   let app: Application;
   beforeAll(async () => {
+    sanitizedConfig.NODE_ENV = "test_api_file"
     app = await initializeDependencias();
   });
   
@@ -31,7 +32,8 @@ describe("API HANDLE LOGIN TEST", () => {
   });
 
   afterAll(async () => {
-    await app.databaseInstance.connection.close();
-    await app.appServer.stopServer();
+    if (sanitizedConfig.NODE_ENV === "test_api_database"){
+      await app.databaseInstance?.connection.close();}
+      await app.appServer.stopServer();
   });
 });

@@ -26,25 +26,30 @@ describe("API ADD DEVICE TEST", () => {
   let app: Application;
   let token: string;
 
-  let getDeviceCallback: callback;
+  let getAllDevicesCallback: callback;
   let callbackFunctionParam: string | Connection;
- 
+
   beforeAll(async () => {
-    sanitizedConfig.NODE_ENV = "test_api_file"
+    sanitizedConfig.NODE_ENV = "test_api_file";
     app = await initializeDependencias();
-     if (sanitizedConfig.NODE_ENV === "test_api_database"){
-      console.log('aa')
-      callbackFunctionParam = app.databaseInstance.connection
-      getDeviceCallback = getAllDevicesFromDB
+    if (sanitizedConfig.NODE_ENV === "test_api_database") {
+      callbackFunctionParam = app.databaseInstance?.connection as Connection;
+      getAllDevicesCallback = getAllDevicesFromDB;
     }
-    if (sanitizedConfig.NODE_ENV === "test_api_file"){
-      callbackFunctionParam = "devices.json"
-      getDeviceCallback = getAllDevicesFromFile
+    if (sanitizedConfig.NODE_ENV === "test_api_file") {
+      callbackFunctionParam = "devices.json";
+      getAllDevicesCallback = getAllDevicesFromFile;
     }
   });
+
   beforeEach(async () => {
-    await cleanupDatabase(app.databaseInstance.connection);
-    await cleanupFiles();
+    if (sanitizedConfig.NODE_ENV === "test_api_database") {
+      const connection = app.databaseInstance?.connection as Connection;
+      await cleanupDatabase(connection);
+    }
+    if (sanitizedConfig.NODE_ENV === "test_api_file") {
+      await cleanupFiles();
+    }
     app.devicesInMemory.devices.clear();
     token = await loginUser(requestUri, "testPassword");
   });
@@ -63,9 +68,10 @@ describe("API ADD DEVICE TEST", () => {
       .expect("Content-Type", /application\/json/);
     const deviceId = response.body.deviceId;
     const devicesInMemory = app.devicesInMemory.devices.get(deviceId);
-    const [device] = await getAllDevices(getDeviceCallback, callbackFunctionParam);
-    //const [device] = await getAllDevicesFromFile("devices.json");
-    //const [device] = await getAllDevicesFromDB(app.databaseInstance.connection);
+    const [device] = await getAllDevices(
+      getAllDevicesCallback,
+      callbackFunctionParam
+    );
 
     expect(response.body).toHaveProperty("deviceId");
     expect(devicesInMemory).toEqual({
@@ -100,7 +106,10 @@ describe("API ADD DEVICE TEST", () => {
 
     const deviceId = response.body.deviceId;
     const devicesInMemory = app.devicesInMemory.devices.get(deviceId);
-    const [device] = await getAllDevices(getDeviceCallback, callbackFunctionParam);
+    const [device] = await getAllDevices(
+      getAllDevicesCallback,
+      callbackFunctionParam
+    );
 
     expect(response.body).toHaveProperty("deviceId");
     expect(devicesInMemory).toEqual({
@@ -426,14 +435,12 @@ describe("API ADD DEVICE TEST", () => {
       .expect(409)
       .expect("Content-Type", /application\/json/);
 
-    console.log(response.body);
+    console.log(JSON.stringify(response.body));
 
     expect(response.body).toEqual({
       Error: {
         "Device not added": {
-          mongoServerError: {
-            error: "Unique violation error: NameConflictError",
-          },
+          error: "Unique violation error: NameConflictError",
         },
       },
       compensation: {
@@ -443,7 +450,10 @@ describe("API ADD DEVICE TEST", () => {
 
     const [...devicesInMemoryKeys] = app.devicesInMemory.devices.keys();
     const deviceInMemory = app.devicesInMemory.devices.get(deviceId);
-    const [device] = await getAllDevices(getDeviceCallback, callbackFunctionParam)
+    const [device] = await getAllDevices(
+      getAllDevicesCallback,
+      callbackFunctionParam
+    );
     expect(devicesInMemoryKeys).toEqual([deviceId]);
 
     expect(deviceInMemory).toEqual({
@@ -464,7 +474,9 @@ describe("API ADD DEVICE TEST", () => {
   });
 
   afterAll(async () => {
-    await app.databaseInstance.connection.close();
+    if (sanitizedConfig.NODE_ENV === "test_api_database") {
+      await app.databaseInstance?.connection.close();
+    }
     await app.appServer.stopServer();
   });
 });

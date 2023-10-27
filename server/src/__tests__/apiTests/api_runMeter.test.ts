@@ -6,6 +6,8 @@ import { Application } from "../../dependencias";
 import { cleanupDatabase } from "./auxilaryFunctionsForTests/dbCleanup";
 import { loginUser } from "./auxilaryFunctionsForTests/loginUser";
 import { addMeter } from "./auxilaryFunctionsForTests/addMeter";
+import { cleanupFiles } from "./auxilaryFunctionsForTests/fileCleanup";
+import { Connection } from "mongoose";
 const requestUri = `http://localhost:${sanitizedConfig.PORT}`;
 
 describe("API RUN METER TEST", () => {
@@ -15,10 +17,19 @@ describe("API RUN METER TEST", () => {
   let meterWithNonExistingScriptId: string;
 
   beforeAll(async () => {
+    sanitizedConfig.NODE_ENV = "test_api_file"
+
     app = await initializeDependencias();
     token = await loginUser(requestUri, "testPassword");
-    await cleanupDatabase(app.databaseInstance.connection);
-    app.devicesInMemory.devices.clear();
+    if (sanitizedConfig.NODE_ENV === "test_api_database"){
+      const connection = (app.databaseInstance?.connection) as Connection
+      await cleanupDatabase(connection);
+
+    }
+    if (sanitizedConfig.NODE_ENV === "test_api_file"){
+      await cleanupFiles();
+
+    }    app.devicesInMemory.devices.clear();
 
     meterId = await addMeter(
       requestUri,
@@ -65,7 +76,8 @@ describe("API RUN METER TEST", () => {
   });
 
   afterAll(async () => {
-    await app.databaseInstance.connection.close();
-    await app.appServer.stopServer();
+    if (sanitizedConfig.NODE_ENV === "test_api_database"){
+      await app.databaseInstance?.connection.close();}
+      await app.appServer.stopServer();
   });
 });

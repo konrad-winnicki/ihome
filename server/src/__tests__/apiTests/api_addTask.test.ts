@@ -6,9 +6,11 @@ import { Application } from "../../dependencias";
 import { cleanupDatabase } from "./auxilaryFunctionsForTests/dbCleanup";
 import { loginUser } from "./auxilaryFunctionsForTests/loginUser";
 import { addSwitch } from "./auxilaryFunctionsForTests/addSwitch";
+import { Connection } from "mongoose";
 
 import cron from "node-cron";
 import { getTasksForDevice } from "./auxilaryFunctionsForTests/getTasksForDevice";
+import { cleanupFiles } from "./auxilaryFunctionsForTests/fileCleanup";
 
 const requestUri = `http://localhost:${sanitizedConfig.PORT}`;
 
@@ -26,8 +28,15 @@ describe("API ADD TASK TEST", () => {
     app = await initializeDependencias();
   });
   beforeEach(async () => {
-    await cleanupDatabase(app.databaseInstance.connection);
-    app.devicesInMemory.devices.clear();
+    if (sanitizedConfig.NODE_ENV === "test_api_database"){
+      const connection = (app.databaseInstance?.connection) as Connection
+      await cleanupDatabase(connection);
+
+    }
+    if (sanitizedConfig.NODE_ENV === "test_api_file"){
+      await cleanupFiles();
+
+    }    app.devicesInMemory.devices.clear();
     cron.getTasks().clear();
 
     token = await loginUser(requestUri, "testPassword");
@@ -78,8 +87,8 @@ describe("API ADD TASK TEST", () => {
     const taskKeysIterator = cron.getTasks().keys();
     const taskKeyList = [...taskKeysIterator];
     const taskFromDB = await getTasksForDevice(
-      app.databaseInstance.connection,
-      switch1Id
+      (app.databaseInstance?.connection) as Connection,
+            switch1Id
     );
 
     const [task1, task2] = taskFromDB;
@@ -240,7 +249,8 @@ describe("API ADD TASK TEST", () => {
   });
 
   afterAll(async () => {
-    await app.databaseInstance.connection.close();
-    await app.appServer.stopServer();
+    if (sanitizedConfig.NODE_ENV === "test_api_database"){
+      await app.databaseInstance?.connection.close();}
+      await app.appServer.stopServer();
   });
 });

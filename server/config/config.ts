@@ -6,7 +6,10 @@ switch (process.env.NODE_ENV) {
   case "test":
     env = "test.env";
     break;
-  case "development":
+  case "dev_database":
+    env = "development.env";
+    break;
+    case "dev_file":
     env = "development.env";
     break
   case "production":
@@ -14,7 +17,7 @@ switch (process.env.NODE_ENV) {
     break;
 }
 dotenv.config({ path: path.resolve(process.cwd(), env) });
-
+console.log('fffffff',  path.resolve(process.cwd(), env), 'ggg')
 interface ENV {
   PAIR_PASSWORD: string | undefined;
   NODE_ENV: string | undefined;

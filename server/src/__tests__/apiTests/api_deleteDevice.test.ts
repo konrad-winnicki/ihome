@@ -5,10 +5,23 @@ import { initializeDependencias } from "../../dependencias";
 import { Application } from "../../dependencias";
 import { cleanupDatabase } from "./auxilaryFunctionsForTests/dbCleanup";
 import { loginUser } from "./auxilaryFunctionsForTests/loginUser";
-import { getDevice } from "./auxilaryFunctionsForTests/getDevice";
+import {
+  callbackGetDevice,
+  getDevice,
+  getDeviceFromDB,
+  getDeviceFromFile,
+} from "./auxilaryFunctionsForTests/getDevice";
 import { addSwitch } from "./auxilaryFunctionsForTests/addSwitch";
-import { callback, getAllDevicesFromDB, getAllDevicesFromFile } from "./auxilaryFunctionsForTests/getAllDevices";
+import {
+ 
+  callback,
+  getAllDevices,
+  getAllDevicesFromDB,
+  getAllDevicesFromFile,
+} from "./auxilaryFunctionsForTests/getAllDevices";
+import { cleanupFiles } from "./auxilaryFunctionsForTests/fileCleanup";
 const requestUri = `http://localhost:${sanitizedConfig.PORT}`;
+import { Connection } from "mongoose";
 
 describe("API DELETE DEVICE TEST", () => {
   let app: Application;
@@ -16,28 +29,37 @@ describe("API DELETE DEVICE TEST", () => {
   let switch1Id: string;
   let switch2Id: string;
 
-   let getDeviceCallback: callback;
+  let getAllDevicesCallback: callback;
+  let getDeviceCallback: callbackGetDevice;
   let callbackFunctionParam: string | Connection;
- 
 
   beforeAll(async () => {
-  
-
-    sanitizedConfig.NODE_ENV = "test_api_file"
+    sanitizedConfig.NODE_ENV = "test_api_file";
     app = await initializeDependencias();
-     if (sanitizedConfig.NODE_ENV === "test_api_database"){
-      console.log('aa')
-      callbackFunctionParam = app.databaseInstance.connection
-      getDeviceCallback = getAllDevicesFromDB
+    if (sanitizedConfig.NODE_ENV === "test_api_database") {
+      callbackFunctionParam = app.databaseInstance?.connection as Connection;
+      getAllDevicesCallback = getAllDevicesFromDB;
+      getDeviceCallback = getDeviceFromDB;
     }
-    if (sanitizedConfig.NODE_ENV === "test_api_file"){
-      callbackFunctionParam = "devices.json"
-      getDeviceCallback = getAllDevicesFromFile
+    if (sanitizedConfig.NODE_ENV === "test_api_file") {
+      callbackFunctionParam = "devices.json";
+      getAllDevicesCallback = getAllDevicesFromFile;
+      getDeviceCallback = getDeviceFromFile;
     }
   });
 
   beforeEach(async () => {
-    await cleanupDatabase(app.databaseInstance.connection);
+    if (sanitizedConfig.NODE_ENV === "test_api_database") {
+      console.log('before cleanup', app.devicesInMemory.devices)
+
+      const connection = app.databaseInstance?.connection as Connection;
+      await cleanupDatabase(connection);
+      console.log('sfter cleanup', app.devicesInMemory.devices)
+
+    }
+    if (sanitizedConfig.NODE_ENV === "test_api_file") {
+      await cleanupFiles();
+    }
     app.devicesInMemory.devices.clear();
     token = await loginUser(requestUri, "testPassword");
 
@@ -61,18 +83,18 @@ describe("API DELETE DEVICE TEST", () => {
   });
 
   test("Should not delete device from database if wrong device Id:", async () => {
+    
     const nonExisitingId = "nonExisitingId";
     const response = await request(requestUri)
       .delete(`/devices/${nonExisitingId}`)
       .set("Authorization", token)
       .expect(500)
       .expect("Content-Type", /application\/json/);
-    const devicesInDB = await getAllDevicesFromDB(
-      app.databaseInstance.connection
+    const devicesInDB = await getAllDevices(
+      getAllDevicesCallback,
+      callbackFunctionParam
     );
-
     const [device1, device2] = app.devicesInMemory.devices.values();
-
     expect(response.body).toEqual({
       "Device not deleted": "device not exists",
     });
@@ -109,6 +131,7 @@ describe("API DELETE DEVICE TEST", () => {
         commandOff: "switch off",
       },
     ]);
+    
   });
 
   test("Should delete switch from database and inMemoryStorage:", async () => {
@@ -117,10 +140,8 @@ describe("API DELETE DEVICE TEST", () => {
       .set("Authorization", token)
       .expect(200)
       .expect("Content-Type", /application\/json/);
-    const findDeteledItem = await getDevice(
-      app.databaseInstance.connection,
-      switch1Id
-    );
+    const findDeteledItem = await getDevice(getDeviceCallback, callbackFunctionParam, switch1Id)
+
     const deletedDeviceFromMemory = app.devicesInMemory.devices.get(switch1Id);
     expect(response.body).toEqual({ "Device deleted": "No errors" });
     expect(findDeteledItem).toEqual([]);
@@ -153,7 +174,9 @@ describe("API DELETE DEVICE TEST", () => {
     });
   });
   afterAll(async () => {
-    await app.databaseInstance.connection.close();
+    if (sanitizedConfig.NODE_ENV === "test_api_database") {
+      await app.databaseInstance?.connection.close();
+    }
     await app.appServer.stopServer();
   });
 });

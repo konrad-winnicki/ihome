@@ -1,4 +1,6 @@
 export class ServerMessages {
+
+  private static instance: ServerMessages | null = null;
   public compensation = {
     SUCCESS: "Compensation succeded",
     FAILURE: "Compensation failed",
@@ -29,4 +31,13 @@ export class ServerMessages {
     ID_DUPLICATION: "Unique violation error: IdConflictError",
 
   };
+
+  public static getInstance(
+    ) {
+    if (!ServerMessages.instance) {
+      ServerMessages.instance = new ServerMessages();
+    }
+    return ServerMessages.instance;
+  }
+ 
 }

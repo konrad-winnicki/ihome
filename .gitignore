@@ -4,4 +4,4 @@
 **/config.env
 production.env
 **/coverage/
-server/src/app.properties
+server/src/properties/app.properties

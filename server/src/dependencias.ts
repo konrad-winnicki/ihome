@@ -24,21 +24,104 @@ import { ServerMessages } from "./ServerMessages";
 import { prepareAppProperties } from "./prepareAppProperties";
 import { MongoDeviceRepository } from "./Infrastructure/device/MongoDeviceRepository";
 import { TaskService } from "./application/task/TaskService";
-import { properties } from "./propertyWriter";
 import { FileDeviceRepository } from "./Infrastructure/filePersistencia/FileDeviceRepository";
 import { FileRepositoryHelpers } from "./Infrastructure/filePersistencia/auxilaryFunctions";
+import PropertiesReader from "properties-reader";
+import { readPropertyFile } from "./propertyWriter";
+
 function createMongoDocs(database: MongoDatabase) {
   const deviceDoc = database.createDeviceDoc();
   const taskDoc = database.createTaskerDoc();
   return { deviceDoc, taskDoc };
 }
 
-export async function initializeDependencias() {
-  if (sanitizedConfig.NODE_ENV === "production") {
-    await prepareAppProperties();
+function prepareDatabaseUrlAndName(environment: string, properties: PropertiesReader.Reader) {
+  let databaseUrl = "";
+  let database = "";
+
+  if (environment === "production") {
+    if (properties.get("persistencia") === "mongoDatabase") {
+      databaseUrl = properties.get("DATABASE_URL") as string;
+      database = properties.get("DATABASE") as string;
+    }
+  } else {
+    databaseUrl = sanitizedConfig.MONGO_URI;
+    database = sanitizedConfig.DATABASE;
   }
 
-  const serverMessages = new ServerMessages();
+  return { databaseUrl, database };
+}
+
+async function choosePersistenciaType(environment: string, properties: PropertiesReader.Reader) {
+  if (
+    properties.get("persistencia") === "mongoDatabase" ||
+    environment === "test_api_database" ||
+    environment === "dev_database"
+  ) {
+    return createDBRepositories(environment, properties);
+  }
+  if (
+    properties.get("persistencia") === "file" ||
+    environment === "test_api_file" ||
+    environment === "dev_file"
+  ) {
+    return createFileRepositories(environment, properties);
+  }
+
+  throw new Error("Imposible to choose persistencia type");
+}
+
+function createFileRepositories(environment: string, properties: PropertiesReader.Reader) {
+  const serverMessages = ServerMessages.getInstance();
+  const fileHelperMethods = new FileRepositoryHelpers();
+  const deviceRepository = new FileDeviceRepository(
+    fileHelperMethods,
+    serverMessages
+  );
+
+  const a = createDBRepositories(environment, properties);
+  const taskRepository = a.taskRepository;
+  return { deviceRepository, taskRepository };
+}
+
+function createDBRepositories(environment: string, properties: PropertiesReader.Reader) {
+  const serverMessages = ServerMessages.getInstance();
+  const databaseData = prepareDatabaseUrlAndName(environment, properties);
+
+  const mongoDatabase = new MongoDatabase(
+    databaseData.databaseUrl,
+    databaseData.database
+  );
+  const mongoDocs = createMongoDocs(mongoDatabase);
+
+  const deviceRepository = new MongoDeviceRepository(
+    mongoDocs.deviceDoc,
+    serverMessages
+  );
+  const taskRepository = new MongoTaskRepository(
+    mongoDocs.taskDoc,
+    serverMessages
+  );
+
+  return { deviceRepository, taskRepository, mongoDatabase };
+}
+
+export async function initializeDependencias() {
+  const environment = sanitizedConfig.NODE_ENV;
+  const propertiesPath = readPropertyFile(environment);
+  const properties = PropertiesReader(propertiesPath, undefined, {
+    writer: { saveSections: true },
+  });
+
+  if (environment === "production") {
+    await prepareAppProperties(properties, propertiesPath);
+  }
+
+  
+
+
+
+  const serverMessages = ServerMessages.getInstance();
   const eventEmitter = new EventEmitter();
 
   const devicesInMemory = InMemoryDeviceStorage.getInstance();
@@ -47,59 +130,22 @@ export async function initializeDependencias() {
     serverMessages
   );
 
-  async function prepareDatabasePersistencia(
-    cacheDeviceRepository: CacheDeviceRepository
-  ) {
-    let DATABASE_URL = "";
-    let DATABASE = "";
+  const persistenciaType = await choosePersistenciaType(environment, properties);
 
-    if (sanitizedConfig.NODE_ENV === "production") {
-      if (properties.get("persistencia") === "mongoDatabase") {
-        DATABASE_URL = properties.get("DATABASE_URL") as string;
-        DATABASE = properties.get("DATABASE") as string;
-      }
-    } else {
-      DATABASE_URL = sanitizedConfig.MONGO_URI;
-      DATABASE = sanitizedConfig.DATABASE;
-    }
-
-    //function createDeviceDBRepository(){}
-
-    const mongoDatabase = new MongoDatabase(DATABASE_URL, DATABASE);
-    const mongoDocs = createMongoDocs(mongoDatabase);
-
-    const mongoDeviceRepository = new MongoDeviceRepository(
-      mongoDocs.deviceDoc,
-      serverMessages
-    );
-
-    const fileHelperMethods = new FileRepositoryHelpers
-    const fileDeviceRepository = new FileDeviceRepository(fileHelperMethods, serverMessages)
-    
-    const deviceService = new DeviceService(
-      cacheDeviceRepository,
-      fileDeviceRepository,
-      eventEmitter,
-      serverMessages
-    );
-
-    const taskRepository = new MongoTaskRepository(
-      mongoDocs.taskDoc,
-      serverMessages
-    );
-
-    return { deviceService, taskRepository, mongoDatabase };
-  }
-
-  const persistencia = await prepareDatabasePersistencia(cacheDeviceRepository);
+  const deviceService = new DeviceService(
+    cacheDeviceRepository,
+    persistenciaType.deviceRepository,
+    eventEmitter,
+    serverMessages
+  );
 
   const appCorn = new AppCron();
   const cronTaskManager = new CronTaskManager(appCorn, serverMessages);
 
   const taskService = new TaskService(
-    persistencia.taskRepository,
+    persistenciaType.taskRepository,
     cronTaskManager,
-    persistencia.deviceService,
+    deviceService,
     serverMessages,
     eventEmitter
   );
@@ -108,7 +154,7 @@ export async function initializeDependencias() {
 
   const deviceRunControllerDep = new RunDeviceControllers(deviceRunService);
 
-  const deviceControllers = new DeviceControllers(persistencia.deviceService);
+  const deviceControllers = new DeviceControllers(deviceService);
   const taskControlles = new TaskControllers(taskService);
   const loginControllers = new LoginControllers(tokenGenerator);
 
@@ -121,19 +167,16 @@ export async function initializeDependencias() {
 
   const appServer = new AppServer(appRouter);
 
-  await recoveryInMemoryDeviceStorage(
-    persistencia.deviceService,
-    devicesInMemory
-  );
+  await recoveryInMemoryDeviceStorage(deviceService, devicesInMemory);
 
   const cronTaskRepository = new TaskRecoveryManager(
-    persistencia.taskRepository,
+    persistenciaType.taskRepository,
     cronTaskManager
   );
   await fillCronInMemoryWithData(cronTaskRepository);
 
   const port =
-    sanitizedConfig.NODE_ENV === "prodction"
+    environment === "prodction"
       ? Number(properties.get("PORT"))
       : sanitizedConfig.PORT;
   appServer
@@ -141,45 +184,49 @@ export async function initializeDependencias() {
     .then(() => console.log("server listen succes"))
     .catch((err) => console.log("error", err));
 
-  return Application.getInstance(
-    appServer,
-    persistencia.mongoDatabase,
-    devicesInMemory,
-    serverMessages
-  );
+  if ("mongoDatabase" in persistenciaType) {
+    return Application.getInstance(
+      appServer,
+      devicesInMemory,
+      serverMessages,
+      persistenciaType.mongoDatabase
+    );
+  } else {
+    return Application.getInstance(appServer, devicesInMemory, serverMessages);
+  }
 }
 
 export class Application {
   private static instance: Application | null = null;
   public appServer: AppServer;
-  public databaseInstance: MongoDatabase;
   public devicesInMemory: InMemoryDeviceStorage;
   public serverMessages: ServerMessages;
+  public databaseInstance?: MongoDatabase;
 
   constructor(
     appServer: AppServer,
-    databaseInstance: MongoDatabase,
     devicesInMemory: InMemoryDeviceStorage,
-    serverMessages: ServerMessages
+    serverMessages: ServerMessages,
+    databaseInstance?: MongoDatabase
   ) {
     this.appServer = appServer;
     this.databaseInstance = databaseInstance;
-    this.devicesInMemory = devicesInMemory;
     this.serverMessages = serverMessages;
+    this.devicesInMemory = devicesInMemory;
   }
 
   public static getInstance(
     appServer: AppServer,
-    databaseInstance: MongoDatabase,
     devicesInMemory: InMemoryDeviceStorage,
-    serverMessages: ServerMessages
+    serverMessages: ServerMessages,
+    databaseInstance?: MongoDatabase
   ) {
     if (!Application.instance) {
       Application.instance = new Application(
         appServer,
-        databaseInstance,
         devicesInMemory,
-        serverMessages
+        serverMessages,
+        databaseInstance
       );
     }
     return Application.instance;
@@ -201,6 +248,7 @@ type Compensation = ObjectValues<typeof COMPENSATION>;
 
 const device1 = { id: "15", name: "ccc", type: "type" };
 const device2 = { id: "14", name: "c", type: "type" };
+
 
 //addDeviceToFile(device1).then((res)=>console.log(res)).catch((err)=> console.log(err))
 //addDeviceToFile(device2).then((res)=>console.log(res)).catch((err)=> console.log(err))

@@ -36,9 +36,9 @@ export class MongoDeviceRepository implements DeviceRepository {
 
   private translateDbError(error: Error) {
     return error instanceof mongo.MongoServerError
-      ? {
-          mongoServerError: this.uniqueViolationErrorHandler(error),
-        }
+      ? 
+         this.uniqueViolationErrorHandler(error)
+        
       : { error: error.message };
   }
 

@@ -3,7 +3,7 @@ import { describe, afterAll, beforeAll } from "@jest/globals";
 import sanitizedConfig from "../../../config/config";
 import { initializeDependencias } from "../../dependencias";
 import { Application } from "../../dependencias";
-import { cleanupDatabase } from "./auxilaryFunctionsForTests/cleanup";
+import { cleanupDatabase } from "./auxilaryFunctionsForTests/dbCleanup";
 import { loginUser } from "./auxilaryFunctionsForTests/loginUser";
 import { addMeter } from "./auxilaryFunctionsForTests/addMeter";
 const requestUri = `http://localhost:${sanitizedConfig.PORT}`;
@@ -38,8 +38,7 @@ describe("API RUN METER TEST", () => {
     );
   });
 
-  afterAll(() => {
-  });
+  afterAll(() => {});
 
   test("Should run command on script:", async () => {
     const responseFromMeter = await request(requestUri)
@@ -60,7 +59,9 @@ describe("API RUN METER TEST", () => {
       .expect(500)
       .expect("Content-Type", /application\/json/);
 
-    expect(Object.keys(responseFromMeter.body)[0]).toMatch("Error occured during switching on");
+    expect(Object.keys(responseFromMeter.body)[0]).toMatch(
+      "Error occured during switching on"
+    );
   });
 
   afterAll(async () => {

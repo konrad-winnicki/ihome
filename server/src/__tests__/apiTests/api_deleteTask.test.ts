@@ -3,7 +3,7 @@ import { describe, afterAll, beforeEach, beforeAll } from "@jest/globals";
 import sanitizedConfig from "../../../config/config";
 import { initializeDependencias } from "../../dependencias";
 import { Application } from "../../dependencias";
-import { cleanupDatabase } from "./auxilaryFunctionsForTests/cleanup";
+import { cleanupDatabase } from "./auxilaryFunctionsForTests/dbCleanup";
 import { loginUser } from "./auxilaryFunctionsForTests/loginUser";
 import { addSwitch } from "./auxilaryFunctionsForTests/addSwitch";
 import cron from "node-cron";
@@ -70,7 +70,9 @@ describe("API DELETE TASK TEST", () => {
       switch1Id
     );
     const [remainingTaskInDB] = taskFromDB;
-    expect(response.body).toEqual({ 'Task deleted': { acknowledged: true, deletedCount: 1 } });
+    expect(response.body).toEqual({
+      "Task deleted": { acknowledged: true, deletedCount: 1 },
+    });
     expect(taskKeyList).toEqual([task2Id]);
     expect(deletedTaskFromMemory).toEqual(undefined);
     expect(remainingTaskInDB.id).toEqual(task2Id);
@@ -84,8 +86,9 @@ describe("API DELETE TASK TEST", () => {
       .expect(500)
       .expect("Content-Type", /application\/json/);
 
-    expect(response.body).toEqual({"Task not deleted": "Task with id nonExisitingId doesn't exist."
-      });
+    expect(response.body).toEqual({
+      "Task not deleted": "Task with id nonExisitingId doesn't exist.",
+    });
   });
 
   test("Should not delete task if not valid token:", async () => {
@@ -114,7 +117,7 @@ describe("API DELETE TASK TEST", () => {
     });
   });
 
-   afterAll(async () => {
+  afterAll(async () => {
     await app.databaseInstance.connection.close();
     await app.appServer.stopServer();
   });

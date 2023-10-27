@@ -3,11 +3,11 @@ import { describe, afterAll, beforeEach, beforeAll } from "@jest/globals";
 import sanitizedConfig from "../../../config/config";
 import { initializeDependencias } from "../../dependencias";
 import { Application } from "../../dependencias";
-import { cleanupDatabase } from "./auxilaryFunctionsForTests/cleanup";
+import { cleanupDatabase } from "./auxilaryFunctionsForTests/dbCleanup";
 import { loginUser } from "./auxilaryFunctionsForTests/loginUser";
 import { getDevice } from "./auxilaryFunctionsForTests/getDevice";
 import { addSwitch } from "./auxilaryFunctionsForTests/addSwitch";
-import { getAllDevices } from "./auxilaryFunctionsForTests/getAllDevices";
+import { callback, getAllDevicesFromDB, getAllDevicesFromFile } from "./auxilaryFunctionsForTests/getAllDevices";
 const requestUri = `http://localhost:${sanitizedConfig.PORT}`;
 
 describe("API DELETE DEVICE TEST", () => {
@@ -16,14 +16,30 @@ describe("API DELETE DEVICE TEST", () => {
   let switch1Id: string;
   let switch2Id: string;
 
+   let getDeviceCallback: callback;
+  let callbackFunctionParam: string | Connection;
+ 
+
   beforeAll(async () => {
+  
+
+    sanitizedConfig.NODE_ENV = "test_api_file"
     app = await initializeDependencias();
-    token = await loginUser(requestUri, "testPassword");
+     if (sanitizedConfig.NODE_ENV === "test_api_database"){
+      console.log('aa')
+      callbackFunctionParam = app.databaseInstance.connection
+      getDeviceCallback = getAllDevicesFromDB
+    }
+    if (sanitizedConfig.NODE_ENV === "test_api_file"){
+      callbackFunctionParam = "devices.json"
+      getDeviceCallback = getAllDevicesFromFile
+    }
   });
 
   beforeEach(async () => {
     await cleanupDatabase(app.databaseInstance.connection);
     app.devicesInMemory.devices.clear();
+    token = await loginUser(requestUri, "testPassword");
 
     switch1Id = await addSwitch(
       requestUri,
@@ -51,11 +67,15 @@ describe("API DELETE DEVICE TEST", () => {
       .set("Authorization", token)
       .expect(500)
       .expect("Content-Type", /application\/json/);
-    const devicesInDB = await getAllDevices(app.databaseInstance.connection);
+    const devicesInDB = await getAllDevicesFromDB(
+      app.databaseInstance.connection
+    );
 
     const [device1, device2] = app.devicesInMemory.devices.values();
-    
-    expect(response.body).toEqual({ 'Device not deleted': 'device not exists' });
+
+    expect(response.body).toEqual({
+      "Device not deleted": "device not exists",
+    });
     expect(devicesInDB).toMatchObject([
       {
         id: switch1Id,
@@ -102,7 +122,7 @@ describe("API DELETE DEVICE TEST", () => {
       switch1Id
     );
     const deletedDeviceFromMemory = app.devicesInMemory.devices.get(switch1Id);
-    expect(response.body).toEqual({"Device deleted": "No errors" });
+    expect(response.body).toEqual({ "Device deleted": "No errors" });
     expect(findDeteledItem).toEqual([]);
     expect(deletedDeviceFromMemory).toEqual(undefined);
   });

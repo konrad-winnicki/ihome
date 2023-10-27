@@ -24,8 +24,9 @@ export class ServerMessages {
     FAILURE: "Task not deleted",
   };
 
-public mongoServerError = {
-  NAME_DUPLICATION: "Unique violation error: NameConflictError"
-}
+  public uniqueViolation = {
+    NAME_DUPLICATION: "Unique violation error: NameConflictError",
+    ID_DUPLICATION: "Unique violation error: IdConflictError",
 
+  };
 }

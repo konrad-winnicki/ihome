@@ -3,7 +3,7 @@ import { describe, afterAll, beforeEach, beforeAll } from "@jest/globals";
 import sanitizedConfig from "../../../config/config";
 import { initializeDependencias } from "../../dependencias";
 import { Application } from "../../dependencias";
-import { cleanupDatabase } from "./auxilaryFunctionsForTests/cleanup";
+import { cleanupDatabase } from "./auxilaryFunctionsForTests/dbCleanup";
 import { loginUser } from "./auxilaryFunctionsForTests/loginUser";
 import { addSwitch } from "./auxilaryFunctionsForTests/addSwitch";
 
@@ -51,7 +51,6 @@ describe("API ADD TASK TEST", () => {
   });
 
   test("Should add task to database and inMemoryStorage:", async () => {
-    
     const responseTask1 = await request(requestUri)
       .post(`/tasks`)
       .set("Authorization", token)
@@ -63,7 +62,7 @@ describe("API ADD TASK TEST", () => {
       .expect(201)
       .expect("Content-Type", /application\/json/);
     task1Id = responseTask1.body.taskId;
-   
+
     const responseTask2 = await request(requestUri)
       .post(`/tasks`)
       .set("Authorization", token)
@@ -82,39 +81,42 @@ describe("API ADD TASK TEST", () => {
       app.databaseInstance.connection,
       switch1Id
     );
-    
-    const [task1, task2] = taskFromDB
+
+    const [task1, task2] = taskFromDB;
 
     expect(responseTask1.body).toStrictEqual({ taskId: task1Id });
     expect(responseTask2.body).toStrictEqual({ taskId: task2Id });
-    
-    expect(taskKeyList).toStrictEqual([task1Id, task2Id]);
-    expect(task1).toMatchObject({id: task1Id, deviceId: switch1Id, onStatus: true, scheduledTime:{ hour: "10", minutes: "10" } })
-    expect(task2).toMatchObject({id: task2Id, deviceId: switch1Id, onStatus: false, scheduledTime: { hour: "05", minutes: "55" } })
 
-      
+    expect(taskKeyList).toStrictEqual([task1Id, task2Id]);
+    expect(task1).toMatchObject({
+      id: task1Id,
+      deviceId: switch1Id,
+      onStatus: true,
+      scheduledTime: { hour: "10", minutes: "10" },
+    });
+    expect(task2).toMatchObject({
+      id: task2Id,
+      deviceId: switch1Id,
+      onStatus: false,
+      scheduledTime: { hour: "05", minutes: "55" },
+    });
   });
 
-
   test("Should not add task if device not exists:", async () => {
-    
     const responseTask1 = await request(requestUri)
       .post(`/tasks`)
       .set("Authorization", token)
       .send({
-        deviceId: 'notExistingId',
+        deviceId: "notExistingId",
         onStatus: true,
         scheduledTime: { hour: "10", minutes: "10" },
       })
       .expect(500)
       .expect("Content-Type", /application\/json/);
 
-    
-
-    expect(responseTask1.body).toStrictEqual({"NonExistsError": "Device with id notExistingId does not exist."});
-    
-  
-      
+    expect(responseTask1.body).toStrictEqual({
+      NonExistsError: "Device with id notExistingId does not exist.",
+    });
   });
 
   it(`Add switch should return bad request error if body lack deviceId`, async () => {

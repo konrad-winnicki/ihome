@@ -3,10 +3,17 @@ import { describe, afterAll, beforeEach, beforeAll } from "@jest/globals";
 import sanitizedConfig from "../../../config/config";
 import { initializeDependencias } from "../../dependencias";
 import { Application } from "../../dependencias";
-import { cleanupDatabase } from "./auxilaryFunctionsForTests/cleanup";
+import { cleanupDatabase } from "./auxilaryFunctionsForTests/dbCleanup";
 import { loginUser } from "./auxilaryFunctionsForTests/loginUser";
-import { getAllDevices } from "./auxilaryFunctionsForTests/getAllDevices";
+import {
+  callback,
+  getAllDevices,
+  getAllDevicesFromDB,
+  getAllDevicesFromFile,
+} from "./auxilaryFunctionsForTests/getAllDevices";
 import { addSwitch } from "./auxilaryFunctionsForTests/addSwitch";
+import { cleanupFiles } from "./auxilaryFunctionsForTests/fileCleanup";
+import { Connection } from "mongoose";
 const requestUri = `http://localhost:${sanitizedConfig.PORT}`;
 
 describe("API ADD DEVICE TEST", () => {
@@ -18,11 +25,26 @@ describe("API ADD DEVICE TEST", () => {
   };
   let app: Application;
   let token: string;
+
+  let getDeviceCallback: callback;
+  let callbackFunctionParam: string | Connection;
+ 
   beforeAll(async () => {
+    sanitizedConfig.NODE_ENV = "test_api_file"
     app = await initializeDependencias();
+     if (sanitizedConfig.NODE_ENV === "test_api_database"){
+      console.log('aa')
+      callbackFunctionParam = app.databaseInstance.connection
+      getDeviceCallback = getAllDevicesFromDB
+    }
+    if (sanitizedConfig.NODE_ENV === "test_api_file"){
+      callbackFunctionParam = "devices.json"
+      getDeviceCallback = getAllDevicesFromFile
+    }
   });
   beforeEach(async () => {
     await cleanupDatabase(app.databaseInstance.connection);
+    await cleanupFiles();
     app.devicesInMemory.devices.clear();
     token = await loginUser(requestUri, "testPassword");
   });
@@ -41,7 +63,9 @@ describe("API ADD DEVICE TEST", () => {
       .expect("Content-Type", /application\/json/);
     const deviceId = response.body.deviceId;
     const devicesInMemory = app.devicesInMemory.devices.get(deviceId);
-    const [device] = await getAllDevices(app.databaseInstance.connection);
+    const [device] = await getAllDevices(getDeviceCallback, callbackFunctionParam);
+    //const [device] = await getAllDevicesFromFile("devices.json");
+    //const [device] = await getAllDevicesFromDB(app.databaseInstance.connection);
 
     expect(response.body).toHaveProperty("deviceId");
     expect(devicesInMemory).toEqual({
@@ -76,7 +100,7 @@ describe("API ADD DEVICE TEST", () => {
 
     const deviceId = response.body.deviceId;
     const devicesInMemory = app.devicesInMemory.devices.get(deviceId);
-    const [device] = await getAllDevices(app.databaseInstance.connection);
+    const [device] = await getAllDevices(getDeviceCallback, callbackFunctionParam);
 
     expect(response.body).toHaveProperty("deviceId");
     expect(devicesInMemory).toEqual({
@@ -402,20 +426,24 @@ describe("API ADD DEVICE TEST", () => {
       .expect(409)
       .expect("Content-Type", /application\/json/);
 
-      console.log(response.body)
+    console.log(response.body);
 
     expect(response.body).toEqual({
       Error: {
-        'Device not added': {
-          mongoServerError: {"error":"Unique violation error: NameConflictError"}
-        }
+        "Device not added": {
+          mongoServerError: {
+            error: "Unique violation error: NameConflictError",
+          },
+        },
       },
-      compensation: { 'Compensation succeded': { 'Device deleted': 'No errors' } }
+      compensation: {
+        "Compensation succeded": { "Device deleted": "No errors" },
+      },
     });
 
     const [...devicesInMemoryKeys] = app.devicesInMemory.devices.keys();
     const deviceInMemory = app.devicesInMemory.devices.get(deviceId);
-    const [device] = await getAllDevices(app.databaseInstance.connection);
+    const [device] = await getAllDevices(getDeviceCallback, callbackFunctionParam)
     expect(devicesInMemoryKeys).toEqual([deviceId]);
 
     expect(deviceInMemory).toEqual({

@@ -25,6 +25,8 @@ import { prepareAppProperties } from "./prepareAppProperties";
 import { MongoDeviceRepository } from "./Infrastructure/device/MongoDeviceRepository";
 import { TaskService } from "./application/task/TaskService";
 import { properties } from "./propertyWriter";
+import { FileDeviceRepository } from "./Infrastructure/filePersistencia/FileDeviceRepository";
+import { FileRepositoryHelpers } from "./Infrastructure/filePersistencia/auxilaryFunctions";
 function createMongoDocs(database: MongoDatabase) {
   const deviceDoc = database.createDeviceDoc();
   const taskDoc = database.createTaskerDoc();
@@ -61,6 +63,8 @@ export async function initializeDependencias() {
       DATABASE = sanitizedConfig.DATABASE;
     }
 
+    //function createDeviceDBRepository(){}
+
     const mongoDatabase = new MongoDatabase(DATABASE_URL, DATABASE);
     const mongoDocs = createMongoDocs(mongoDatabase);
 
@@ -69,9 +73,12 @@ export async function initializeDependencias() {
       serverMessages
     );
 
+    const fileHelperMethods = new FileRepositoryHelpers
+    const fileDeviceRepository = new FileDeviceRepository(fileHelperMethods, serverMessages)
+    
     const deviceService = new DeviceService(
       cacheDeviceRepository,
-      mongoDeviceRepository,
+      fileDeviceRepository,
       eventEmitter,
       serverMessages
     );

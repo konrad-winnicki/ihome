@@ -3,7 +3,7 @@ import { describe, afterAll, beforeAll } from "@jest/globals";
 import sanitizedConfig from "../../../config/config";
 import { initializeDependencias } from "../../dependencias";
 import { Application } from "../../dependencias";
-import { cleanupDatabase } from "./auxilaryFunctionsForTests/cleanup";
+import { cleanupDatabase } from "./auxilaryFunctionsForTests/dbCleanup";
 import { loginUser } from "./auxilaryFunctionsForTests/loginUser";
 import { addSwitch } from "./auxilaryFunctionsForTests/addSwitch";
 
@@ -86,7 +86,9 @@ describe("API RUN SWITCH TEST", () => {
       .expect(500)
       .expect("Content-Type", /application\/json/);
 
-    expect(Object.keys(responseFromSwitch.body)[0]).toMatch("Error occured during switching on");
+    expect(Object.keys(responseFromSwitch.body)[0]).toMatch(
+      "Error occured during switching on"
+    );
   });
 
   test("Switch off should return error if file not exists:", async () => {
@@ -98,11 +100,12 @@ describe("API RUN SWITCH TEST", () => {
       .expect("Content-Type", /application\/json/);
 
     console.log(responseFromMeter.text);
-    expect(responseFromMeter.text).toMatch("Error occured during switching off");
+    expect(responseFromMeter.text).toMatch(
+      "Error occured during switching off"
+    );
   });
 
   test("Should resolve promise even if process not ended:", async () => {
-   
     const responseFromMeter = await request(requestUri)
       .post(`/switches/run/${listeningSwitch}`)
       .set("Authorization", token)

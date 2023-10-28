@@ -8,9 +8,16 @@ import { loginUser } from "./auxilaryFunctionsForTests/loginUser";
 import { addSwitch } from "./auxilaryFunctionsForTests/addSwitch";
 import { Connection } from "mongoose";
 import { cleanupFiles } from "./auxilaryFunctionsForTests/fileCleanup";
+import PropertiesReader from "properties-reader";
+import { readPropertyFile } from "../../propertyWriter";
 
-const requestUri = `http://localhost:${sanitizedConfig.PORT}`;
-
+sanitizedConfig.NODE_ENV='test_api_file'
+const environment = sanitizedConfig.NODE_ENV
+  const propertiesPath = readPropertyFile(environment);
+  const properties = PropertiesReader(propertiesPath, undefined, {
+    writer: { saveSections: true },
+  });
+const requestUri = `http://localhost:${properties.get('PORT')}`
 describe("API RUN SWITCH TEST", () => {
   let app: Application;
   let token: string;
@@ -19,15 +26,14 @@ describe("API RUN SWITCH TEST", () => {
   let listeningSwitch: string;
   let switchWithNoPrint: string;
   beforeAll(async () => {
-    sanitizedConfig.NODE_ENV = "test_api_database"
 
     app = await initializeDependencias();
-    if (sanitizedConfig.NODE_ENV === "test_api_database"){
+    if (environment === "test_api_database"){
       const connection = (app.databaseInstance?.connection) as Connection
       await cleanupDatabase(connection);
 
     }
-    if (sanitizedConfig.NODE_ENV === "test_api_file"){
+    if (environment === "test_api_file"){
       await cleanupFiles();
 
     }    app.devicesInMemory.devices.clear();
@@ -143,7 +149,7 @@ describe("API RUN SWITCH TEST", () => {
   });
 
   afterAll(async () => {
-    if (sanitizedConfig.NODE_ENV === "test_api_database"){
+    if (environment=== "test_api_database"){
       await app.databaseInstance?.connection.close();}
       await app.appServer.stopServer();
   });

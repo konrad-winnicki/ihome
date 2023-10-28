@@ -3,13 +3,19 @@ import { collectUserData } from "./prompt/prompts";
 import PropertiesReader from "properties-reader";
 import { propertyWriter } from "./propertyWriter";
 
-export async function prepareAppProperties(properties:PropertiesReader.Reader, propertiesPath:string) {
+export async function prepareAppProperties(
+  properties: PropertiesReader.Reader,
+  propertiesPath: string
+) {
   return collectUserData()
     .then((response) => {
       const responseKeys = Object.keys(response);
-      responseKeys.forEach((key) => propertyWriter(properties, propertiesPath, key, response[key]));
-      propertyWriter(properties, propertiesPath, "JWT_SECRET", v4());
-      return Promise.resolve("Success");
+      responseKeys.forEach(
+        (key) => properties.set(key, response[key])
+        //await propertyWriter(properties, propertiesPath, key, response[key])
+      );
+      properties.set("JWT_SECRET", v4());
+      return propertyWriter(properties, propertiesPath);
     })
     .catch((err) => {
       console.log("err", err);

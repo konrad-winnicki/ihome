@@ -6,15 +6,23 @@ import { Application } from "../../dependencias";
 import { cleanupDatabase } from "./auxilaryFunctionsForTests/dbCleanup";
 import { loginUser } from "./auxilaryFunctionsForTests/loginUser";
 import {
-  callback,
-  getAllDevices,
-  getAllDevicesFromDB,
-  getAllDevicesFromFile,
+  produceGetAllDevicesFromDB,
+  produceGetAllDevicesFromFiles,
 } from "./auxilaryFunctionsForTests/getAllDevices";
 import { addSwitch } from "./auxilaryFunctionsForTests/addSwitch";
 import { cleanupFiles } from "./auxilaryFunctionsForTests/fileCleanup";
 import { Connection } from "mongoose";
-const requestUri = `http://localhost:${sanitizedConfig.PORT}`;
+import { Device } from "../../domain/Device";
+import PropertiesReader from "properties-reader";
+import { readPropertyFile } from "../../propertyWriter";
+
+sanitizedConfig.NODE_ENV='test_api_file'
+const environment = sanitizedConfig.NODE_ENV
+  const propertiesPath = readPropertyFile(environment);
+  const properties = PropertiesReader(propertiesPath, undefined, {
+    writer: { saveSections: true },
+  });
+const requestUri = `http://localhost:${properties.get('PORT')}`;
 
 describe("API ADD DEVICE TEST", () => {
   const badRequestResponse = {
@@ -25,29 +33,25 @@ describe("API ADD DEVICE TEST", () => {
   };
   let app: Application;
   let token: string;
-
-  let getAllDevicesCallback: callback;
-  let callbackFunctionParam: string | Connection;
+  let listDevices: () => Promise<Device[]>;
 
   beforeAll(async () => {
-    sanitizedConfig.NODE_ENV = "test_api_file";
     app = await initializeDependencias();
-    if (sanitizedConfig.NODE_ENV === "test_api_database") {
-      callbackFunctionParam = app.databaseInstance?.connection as Connection;
-      getAllDevicesCallback = getAllDevicesFromDB;
+    if (environment === "test_api_database") {
+      const connection = app.databaseInstance?.connection as Connection;
+      listDevices = produceGetAllDevicesFromDB(connection);
     }
-    if (sanitizedConfig.NODE_ENV === "test_api_file") {
-      callbackFunctionParam = "devices.json";
-      getAllDevicesCallback = getAllDevicesFromFile;
+    else if (environment === "test_api_file") {
+      listDevices = produceGetAllDevicesFromFiles("devices.json");
     }
   });
 
   beforeEach(async () => {
-    if (sanitizedConfig.NODE_ENV === "test_api_database") {
+    if (environment === "test_api_database") {
       const connection = app.databaseInstance?.connection as Connection;
       await cleanupDatabase(connection);
     }
-    if (sanitizedConfig.NODE_ENV === "test_api_file") {
+    else if (environment === "test_api_file") {
       await cleanupFiles();
     }
     app.devicesInMemory.devices.clear();
@@ -68,10 +72,7 @@ describe("API ADD DEVICE TEST", () => {
       .expect("Content-Type", /application\/json/);
     const deviceId = response.body.deviceId;
     const devicesInMemory = app.devicesInMemory.devices.get(deviceId);
-    const [device] = await getAllDevices(
-      getAllDevicesCallback,
-      callbackFunctionParam
-    );
+    const [device] = await listDevices();
 
     expect(response.body).toHaveProperty("deviceId");
     expect(devicesInMemory).toEqual({
@@ -106,10 +107,7 @@ describe("API ADD DEVICE TEST", () => {
 
     const deviceId = response.body.deviceId;
     const devicesInMemory = app.devicesInMemory.devices.get(deviceId);
-    const [device] = await getAllDevices(
-      getAllDevicesCallback,
-      callbackFunctionParam
-    );
+    const [device] = await listDevices();
 
     expect(response.body).toHaveProperty("deviceId");
     expect(devicesInMemory).toEqual({
@@ -450,10 +448,7 @@ describe("API ADD DEVICE TEST", () => {
 
     const [...devicesInMemoryKeys] = app.devicesInMemory.devices.keys();
     const deviceInMemory = app.devicesInMemory.devices.get(deviceId);
-    const [device] = await getAllDevices(
-      getAllDevicesCallback,
-      callbackFunctionParam
-    );
+    const [device] = await listDevices();
     expect(devicesInMemoryKeys).toEqual([deviceId]);
 
     expect(deviceInMemory).toEqual({
@@ -474,7 +469,7 @@ describe("API ADD DEVICE TEST", () => {
   });
 
   afterAll(async () => {
-    if (sanitizedConfig.NODE_ENV === "test_api_database") {
+    if (environment === "test_api_database") {
       await app.databaseInstance?.connection.close();
     }
     await app.appServer.stopServer();

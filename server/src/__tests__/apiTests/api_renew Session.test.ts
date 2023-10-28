@@ -4,16 +4,22 @@ import sanitizedConfig from "../../../config/config";
 import { initializeDependencias } from "../../dependencias";
 import { Application } from "../../dependencias";
 import { loginUser } from "./auxilaryFunctionsForTests/loginUser";
+import PropertiesReader from "properties-reader";
+import { readPropertyFile } from "../../propertyWriter";
 
-const requestUri = `http://localhost:${sanitizedConfig.PORT}`;
-
+sanitizedConfig.NODE_ENV='test_api_file'
+const environment = sanitizedConfig.NODE_ENV
+  const propertiesPath = readPropertyFile(environment);
+  const properties = PropertiesReader(propertiesPath, undefined, {
+    writer: { saveSections: true },
+  });
+const requestUri = `http://localhost:${properties.get('PORT')}`
 describe("API RENEW SESSION TEST", () => {
   let app: Application;
   let token: string;
   const tokenExpirationTimeInMS = 360000
   const manipulationTimeInMS = 10000
   beforeAll(async () => {
-    sanitizedConfig.NODE_ENV = "test_api_database"
 
     app = await initializeDependencias();
     token = await loginUser(requestUri, "testPassword");
@@ -52,7 +58,7 @@ describe("API RENEW SESSION TEST", () => {
  
 
   afterAll(async () => {
-    if (sanitizedConfig.NODE_ENV === "test_api_database"){
+    if (environment === "test_api_database"){
       await app.databaseInstance?.connection.close();}
       await app.appServer.stopServer();
   });

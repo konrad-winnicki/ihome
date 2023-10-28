@@ -1,11 +1,11 @@
 import PropertiesReader from "properties-reader";
 import path from "node:path";
-import sanitizedConfig from "../config/config";
 
-export function readPropertyFile(environment:string) {
+export function readPropertyFile(environment: string) {
   switch (environment) {
     case "production":
       return path.resolve(process.cwd(), "src/properties/app.properties");
+
     case "test_api_database":
       return path.resolve(
         process.cwd(),
@@ -28,19 +28,16 @@ export function readPropertyFile(environment:string) {
   }
 }
 
-/*
-const propertiesPath = readPropertyFile(environmenr);
-
-export const properties = PropertiesReader(propertiesPath, undefined, {
-  writer: { saveSections: true },
-});
-*/
-export const propertyWriter = (properties:PropertiesReader.Reader, propertiesPath:string, key: string, value: string) => {
-  properties.set(key, value);
-  properties.save(propertiesPath, function (error, _data) {
+export const propertyWriter = async (
+  properties: PropertiesReader.Reader,
+  propertiesPath: string
+) => {
+  await properties.save(propertiesPath, function (error, _data) {
     if (error) {
+      console.log("writer error", properties);
       console.error("Error saving properties:", error);
     } else {
+      console.log("writer succes", properties);
       console.log("Properties file updated successfully.");
     }
   });

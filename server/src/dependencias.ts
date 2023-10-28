@@ -35,12 +35,15 @@ function createMongoDocs(database: MongoDatabase) {
   return { deviceDoc, taskDoc };
 }
 
-function prepareDatabaseUrlAndName(environment: string, properties: PropertiesReader.Reader) {
+function prepareDatabaseUrlAndName(
+  environment: string,
+  properties: PropertiesReader.Reader
+) {
   let databaseUrl = "";
   let database = "";
 
   if (environment === "production") {
-    if (properties.get("persistencia") === "mongoDatabase") {
+    if (properties.get("PERSISTENCIA") === "mongoDatabase") {
       databaseUrl = properties.get("DATABASE_URL") as string;
       database = properties.get("DATABASE") as string;
     }
@@ -52,16 +55,21 @@ function prepareDatabaseUrlAndName(environment: string, properties: PropertiesRe
   return { databaseUrl, database };
 }
 
-async function choosePersistenciaType(environment: string, properties: PropertiesReader.Reader) {
+async function choosePersistenciaType(
+  environment: string,
+  properties: PropertiesReader.Reader
+) {
+  console.log("choose persistencia", properties.get("PERSISTENCIA"));
+
   if (
-    properties.get("persistencia") === "mongoDatabase" ||
+    properties.get("PERSISTENCIA") === "mongoDatabase" ||
     environment === "test_api_database" ||
     environment === "dev_database"
   ) {
     return createDBRepositories(environment, properties);
   }
   if (
-    properties.get("persistencia") === "file" ||
+    properties.get("PERSISTENCIA") === "file" ||
     environment === "test_api_file" ||
     environment === "dev_file"
   ) {
@@ -71,7 +79,10 @@ async function choosePersistenciaType(environment: string, properties: Propertie
   throw new Error("Imposible to choose persistencia type");
 }
 
-function createFileRepositories(environment: string, properties: PropertiesReader.Reader) {
+function createFileRepositories(
+  environment: string,
+  properties: PropertiesReader.Reader
+) {
   const serverMessages = ServerMessages.getInstance();
   const fileHelperMethods = new FileRepositoryHelpers();
   const deviceRepository = new FileDeviceRepository(
@@ -84,7 +95,10 @@ function createFileRepositories(environment: string, properties: PropertiesReade
   return { deviceRepository, taskRepository };
 }
 
-function createDBRepositories(environment: string, properties: PropertiesReader.Reader) {
+function createDBRepositories(
+  environment: string,
+  properties: PropertiesReader.Reader
+) {
   const serverMessages = ServerMessages.getInstance();
   const databaseData = prepareDatabaseUrlAndName(environment, properties);
 
@@ -108,6 +122,7 @@ function createDBRepositories(environment: string, properties: PropertiesReader.
 
 export async function initializeDependencias() {
   const environment = sanitizedConfig.NODE_ENV;
+
   const propertiesPath = readPropertyFile(environment);
   const properties = PropertiesReader(propertiesPath, undefined, {
     writer: { saveSections: true },
@@ -115,11 +130,8 @@ export async function initializeDependencias() {
 
   if (environment === "production") {
     await prepareAppProperties(properties, propertiesPath);
+    console.log("if", properties.get("PERSISTENCIA"));
   }
-
-  
-
-
 
   const serverMessages = ServerMessages.getInstance();
   const eventEmitter = new EventEmitter();
@@ -130,7 +142,10 @@ export async function initializeDependencias() {
     serverMessages
   );
 
-  const persistenciaType = await choosePersistenciaType(environment, properties);
+  const persistenciaType = await choosePersistenciaType(
+    environment,
+    properties
+  );
 
   const deviceService = new DeviceService(
     cacheDeviceRepository,
@@ -175,10 +190,8 @@ export async function initializeDependencias() {
   );
   await fillCronInMemoryWithData(cronTaskRepository);
 
-  const port =
-    environment === "prodction"
-      ? Number(properties.get("PORT"))
-      : sanitizedConfig.PORT;
+  const port = Number(properties.get("PORT"));
+
   appServer
     .startServer(port)
     .then(() => console.log("server listen succes"))
@@ -248,7 +261,6 @@ type Compensation = ObjectValues<typeof COMPENSATION>;
 
 const device1 = { id: "15", name: "ccc", type: "type" };
 const device2 = { id: "14", name: "c", type: "type" };
-
 
 //addDeviceToFile(device1).then((res)=>console.log(res)).catch((err)=> console.log(err))
 //addDeviceToFile(device2).then((res)=>console.log(res)).catch((err)=> console.log(err))

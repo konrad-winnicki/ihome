@@ -3,12 +3,20 @@ import { describe, afterAll, beforeAll, it } from "@jest/globals";
 import sanitizedConfig from "../../../config/config";
 import { initializeDependencias } from "../../dependencias";
 import { Application } from "../../dependencias";
-const requestUri = `http://localhost:${sanitizedConfig.PORT}`;
+import PropertiesReader from "properties-reader";
+import { readPropertyFile } from "../../propertyWriter";
 
+
+sanitizedConfig.NODE_ENV='test_api_file'
+const environment = sanitizedConfig.NODE_ENV
+  const propertiesPath = readPropertyFile(environment);
+  const properties = PropertiesReader(propertiesPath, undefined, {
+    writer: { saveSections: true },
+  });
+const requestUri = `http://localhost:${properties.get('PORT')}`
 describe("API HANDLE LOGIN TEST", () => {
   let app: Application;
   beforeAll(async () => {
-    sanitizedConfig.NODE_ENV = "test_api_file"
     app = await initializeDependencias();
   });
   
@@ -32,7 +40,7 @@ describe("API HANDLE LOGIN TEST", () => {
   });
 
   afterAll(async () => {
-    if (sanitizedConfig.NODE_ENV === "test_api_database"){
+    if (environment === "test_api_database"){
       await app.databaseInstance?.connection.close();}
       await app.appServer.stopServer();
   });

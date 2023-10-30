@@ -12,17 +12,17 @@ import { DeviceRepository } from "./DeviceRepository";
 
 export class DeviceService {
   private cacheRepository: DeviceRepository;
-  private deviceRepository: DeviceRepository;
+  private persistenceDeviceRepository: DeviceRepository;
   private eventEmitter: EventEmitter;
   private serverMessages: ServerMessages;
 
   constructor(
     cacheRepository: DeviceRepository,
-    deviceRepository: DeviceRepository,
+    persistenceDeviceRepository: DeviceRepository,
     eventEmitter: EventEmitter,
     serverMessages: ServerMessages
   ) {
-    this.deviceRepository = deviceRepository;
+    this.persistenceDeviceRepository = persistenceDeviceRepository;
     this.cacheRepository = cacheRepository;
     this.eventEmitter = eventEmitter;
     this.serverMessages = serverMessages;
@@ -36,7 +36,7 @@ export class DeviceService {
         return Promise.reject({ [messageFailure]: err });
       })
       .then((addingCompleted) =>
-        this.deviceRepository
+        this.persistenceDeviceRepository
           .add(device)
           .then(() => Promise.resolve(addingCompleted))
           .catch((deviceRepositoryError) =>
@@ -95,7 +95,7 @@ export class DeviceService {
         return Promise.reject(err);
       })
       .then((response) =>
-        this.deviceRepository
+        this.persistenceDeviceRepository
           .delete(deviceId)
           .catch((deviceRepositoryError) =>
             this.compensateDeviceDelationFromMemory(device)
@@ -145,7 +145,7 @@ export class DeviceService {
   }
 
   async getMeterList(): Promise<Meter[]> {
-    return this.deviceRepository
+    return this.persistenceDeviceRepository
       .listByType("meter")
       .then((devices) => {
         const meters = devices as unknown as Meter[];
@@ -157,7 +157,7 @@ export class DeviceService {
   }
 
   async getSwitchList(): Promise<Switch[]> {
-    return this.deviceRepository
+    return this.persistenceDeviceRepository
       .listByType("switch")
       .then((devices) => {
         const switches = devices as unknown as Switch[];
@@ -168,8 +168,8 @@ export class DeviceService {
       );
   }
 
-  getById(deviceId: string): Promise<Device> {
-    return this.deviceRepository
+  async getById(deviceId: string): Promise<Device> {
+    return this.persistenceDeviceRepository
       .getById(deviceId)
       .then((device) =>
         device

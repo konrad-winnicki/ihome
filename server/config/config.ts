@@ -17,7 +17,6 @@ switch (process.env.NODE_ENV) {
     break;
 }
 dotenv.config({ path: path.resolve(process.cwd(), env) });
-console.log('fffffff',  path.resolve(process.cwd(), env), 'ggg')
 interface ENV {
   PAIR_PASSWORD: string | undefined;
   NODE_ENV: string | undefined;

@@ -4,12 +4,13 @@ import { Device } from "../../domain/Device";
 
 export class FileRepositoryHelpers {
   async writeFile(path: string, data: object) {
-    try {
-      const content = JSON.stringify(data);
-      await fs.writeFile(path, content);
-    } catch (err) {
-      console.log(err);
-    }
+    const content = JSON.stringify(data);
+    return await fs
+      .writeFile(path, content)
+      .then(() => {
+        Promise.resolve();
+      })
+      .catch((err) => Promise.reject({ error: err }));
   }
 
   async readFile(path: string) {
@@ -33,15 +34,21 @@ export class FileRepositoryHelpers {
     return null;
   }
 
+  findTasksByDeviceId(content: { [key: string]: object }, searchedKey: string) {
+    const resultValue = content[searchedKey];
+    if (resultValue) {
+      return resultValue;
+    }
+    return null;
+  }
+
   findIfNameExists(content: { [key: string]: Device }, searchedName: string) {
     const devices = Object.values(content);
-    for (const device of devices){
-
-      if (device.name === searchedName){
+    for (const device of devices) {
+      if (device.name === searchedName) {
         return true;
       }
     }
-    return false
-
+    return false;
   }
 }

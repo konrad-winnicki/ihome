@@ -4,7 +4,7 @@ import { isTask } from "./guardHelpers/addTaskGuardHelpers";
 import { v4 } from "uuid";
 
 export async function addTaskGuardMiddleware(ctx: Koa.Context, next: Next) {
-  const body = (await ctx.request.body) as Task;
+  const body = await ctx.request.body
 
   const maybeTask = body as Task;
   if (isTask(maybeTask)) {

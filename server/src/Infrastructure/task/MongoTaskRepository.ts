@@ -1,9 +1,11 @@
 import { TaskRepository } from "../../application/task/TaskRepository";
 import { Task } from "../../domain/Task";
-import { Model } from "mongoose";
+import  { Model} from "mongoose";
 import { AggregatedTask } from "../../domain/AggregatedTask";
 import { RepositoryResponse } from "../../application/task/TaskRepository";
 import { ServerMessages } from "../../ServerMessages";
+
+
 const taskAndDeviceAggregationPipeline = (taskId?: string) => [
   taskId ? { $match: { id: taskId } } : { $match: {} },
   {
@@ -33,7 +35,6 @@ export class MongoTaskRepository implements TaskRepository {
   constructor(taskDocument: Model<Task>, serverMessages: ServerMessages) {
     this.taskDocument = taskDocument;
     this.serverMessages = serverMessages;
-
   }
 
   async add(task: Task): Promise<RepositoryResponse<object>> {
@@ -44,9 +45,9 @@ export class MongoTaskRepository implements TaskRepository {
       scheduledTime: task.scheduledTime,
     };
 
-    return this.taskDocument
-      .create(newTask)
-      .then((task) => {
+    return this.taskDocument.create(newTask)
+    
+    .then((task) => {
         const message = this.serverMessages.addTask.SUCCESS;
         return Promise.resolve({ [message]: task.id });
       })
@@ -78,7 +79,6 @@ export class MongoTaskRepository implements TaskRepository {
       });
   }
 
-
   async findById(taskId: string): Promise<AggregatedTask> {
     return this.taskDocument
       .aggregate(taskAndDeviceAggregationPipeline(taskId))
@@ -86,13 +86,15 @@ export class MongoTaskRepository implements TaskRepository {
         if (aggregatedTasksList.length === 1) {
           const aggregatedTask = aggregatedTasksList[0];
 
-          return new AggregatedTask(
-            aggregatedTask.id,
-            aggregatedTask.onStatus,
-            aggregatedTask.scheduledTime.hour,
-            aggregatedTask.scheduledTime.minutes,
-            aggregatedTask.device.commandOn,
-            aggregatedTask.device.commandOff
+          return Promise.resolve(
+            new AggregatedTask(
+              aggregatedTask.id,
+              aggregatedTask.onStatus,
+              aggregatedTask.scheduledTime.hour,
+              aggregatedTask.scheduledTime.minutes,
+              aggregatedTask.device.commandOn,
+              aggregatedTask.device.commandOff
+            )
           );
         }
         return Promise.reject({ ["Wrong id"]: `Task not exists` });
@@ -102,8 +104,8 @@ export class MongoTaskRepository implements TaskRepository {
   async listAll(): Promise<AggregatedTask[]> {
     return this.taskDocument
       .aggregate(taskAndDeviceAggregationPipeline())
-      .then((aggregatedTasks) =>
-        aggregatedTasks.map(
+      .then((aggregatedTasks) => {
+        const tasks = aggregatedTasks.map(
           (task) =>
             new AggregatedTask(
               task.id,
@@ -113,8 +115,9 @@ export class MongoTaskRepository implements TaskRepository {
               task.device.commandOn,
               task.device.commandOff
             )
-        )
-      )
+        );
+        return Promise.resolve(tasks);
+      })
       .catch((error) =>
         Promise.reject({ ["Fetching all tasks failed due error"]: error })
       );

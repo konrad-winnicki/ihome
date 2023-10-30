@@ -19,40 +19,40 @@ export class CronTaskManager implements TaskManager {
   async add(
     aggregatedTask: AggregatedTask
   ): Promise<ManagerResponse<object | string>> {
-    return new Promise((resolve, reject) => {
-      try {
-        this.appCron.installTask(
-          aggregatedTask.id,
-          aggregatedTask.minutes,
-          aggregatedTask.hour,
-          aggregatedTask.onStatus
-            ? aggregatedTask.commandOn
-            : aggregatedTask.commandOff
-            ? aggregatedTask.commandOff
-            : ""
-        );
+    return this.appCron
+      .installTask(
+        aggregatedTask.id,
+        aggregatedTask.minutes,
+        aggregatedTask.hour,
+        aggregatedTask.onStatus
+          ? aggregatedTask.commandOn
+          : aggregatedTask.commandOff
+          ? aggregatedTask.commandOff
+          : ""
+      )
+      .then(() => {
         const message = this.serverMessages.addTask.SUCCESS;
-        return resolve({ [message]: aggregatedTask.id });
-      } catch (error) {
+        return Promise.resolve({ [message]: aggregatedTask.id });
+      })
+      .catch((error) => {
         const message = this.serverMessages.addTask.FAILURE;
         const rejectMessage = { [message]: error };
-        return reject(rejectMessage);
-      }
-    });
+        return Promise.reject(rejectMessage);
+      });
   }
 
   async delete(taskId: string): Promise<ManagerResponse<object | string>> {
-        return this.appCron.deleteTask(taskId).then(()=>{
-          const messageSucces = this.serverMessages.deleteTask.SUCCESS;
-          const resolveMessage = { [messageSucces]: "No errors" };
-          return Promise.resolve(resolveMessage);
-        }).catch((error)=>{
-          const messageFailure = this.serverMessages.deleteTask.FAILURE;
+    return this.appCron
+      .deleteTask(taskId)
+      .then(() => {
+        const messageSucces = this.serverMessages.deleteTask.SUCCESS;
+        const resolveMessage = { [messageSucces]: "No errors" };
+        return Promise.resolve(resolveMessage);
+      })
+      .catch((error) => {
+        const messageFailure = this.serverMessages.deleteTask.FAILURE;
         const rejectMessage = { [messageFailure]: error };
         return Promise.reject(rejectMessage);
-        })
-        
-      
-    
+      });
   }
 }

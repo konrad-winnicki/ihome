@@ -42,7 +42,6 @@ export class FileDeviceRepository implements DeviceRepository {
         return this.helperMethods
           .writeFile("devices.json", fileContent)
           .then(() => {
-            console.log('alllla')
             const messageSuccess = this.serverMessages.addDevice.SUCCESS;
             const resolveMessage = { [messageSuccess]: device.id };
             return Promise.resolve(resolveMessage);

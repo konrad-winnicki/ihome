@@ -41,12 +41,16 @@ export class TaskService {
           .catch((error) => {
             return Promise.reject(error);
           })
-          .then((addingCompleted) => {
+          .then(() => {
             return this.taskRepository
               .findById(task.id)
               .then((aggregatedTask) => {
-                this.taskManager.add(aggregatedTask);
-                return Promise.resolve(addingCompleted);
+                return this.taskManager
+                  .add(aggregatedTask)
+                  .then((response) => {
+                    console.log('response',response)
+                    return Promise.resolve(response)})
+                  .catch((error) => Promise.reject(error))
               })
               .catch((error) =>
                 this.compensateTaskAdditionToDB(task.id)
@@ -79,7 +83,7 @@ export class TaskService {
     return this.taskManager
       .delete(taskId)
       .catch((error) => {
-        console.log('taskservice', error)
+        console.log("taskservice", error);
         return Promise.reject(error);
       })
       .then(() =>

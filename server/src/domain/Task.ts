@@ -27,7 +27,6 @@ export class ScheduleTime {
     const digitRegExp = /^[0-9]+$/
     const parsedHour = parseFloat(hour);
     const parsedMinutes = parseFloat(minutes);
-    console.log(digitRegExp.test(hour), parseFloat(minutes) )
     if (!digitRegExp.test(hour) || !digitRegExp.test(minutes)) {
       throw new Error("Strings must contain only digits");
     }

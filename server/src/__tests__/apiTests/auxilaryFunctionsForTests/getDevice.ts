@@ -3,7 +3,6 @@ import { Device } from "../../../domain/Device";
 import fs from "fs/promises";
 import { FileRepositoryHelpers } from "../../../Infrastructure/filePersistencia/auxilaryFunctions";
 
-
 export function produceGetDeviceFromDB(connection: Connection) {
   return async (deviceId: string
   ): Promise<Device[]> =>{

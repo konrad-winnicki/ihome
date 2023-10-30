@@ -11,10 +11,9 @@
     "dev": "cross-env NODE_ENV=development concurrently \"tsc -w\" \"nodemon ./dist/src/server.js\"",
     "dev_database": "cross-env NODE_ENV=dev_database node ./dist/src/server.js",
     "dev2_file": "cross-env NODE_ENV=dev_file node ./dist/src/server.js",
-
     "test_domain": "npx jest --runInBand --coverage --testPathPattern=./__tests__/domain",
     "test_infrastructure": "npx jest --runInBand --coverage --testPathPattern=./__tests__/infrastructure",
-    "test_api": "cross-env NODE_ENV=test npx jest --silent=false --runInBand --coverage --testPathPattern=./__tests__/apiTests --detectOpenHandles",
+    "test_api": "cross-env NODE_ENV=test npx jest --silent=false --runInBand --coverage --inspect --testPathPattern=./__tests__/apiTests --detectOpenHandles",
     "test_api_simple": "cross-env NODE_ENV=test npx jest --silent=true --runInBand --testPathPattern=./__tests__/apiTests --detectOpenHandles"
   },
   "author": "Konrad Winnicki",
@@ -61,7 +60,7 @@
     "koa-router": "^12.0.0",
     "koa-session": "^6.4.0",
     "koa-session-memory": "^1.0.4",
-    "mongoose": "^7.5.0",
+    "mongoose": "^7.6.3",
     "node-cron": "^3.0.2",
     "prompt": "^1.3.0",
     "properties-reader": "^2.3.0"

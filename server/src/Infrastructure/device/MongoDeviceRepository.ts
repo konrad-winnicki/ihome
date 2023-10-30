@@ -36,9 +36,7 @@ export class MongoDeviceRepository implements DeviceRepository {
 
   private translateDbError(error: Error) {
     return error instanceof mongo.MongoServerError
-      ? 
-         this.uniqueViolationErrorHandler(error)
-        
+      ? this.uniqueViolationErrorHandler(error)
       : { error: error.message };
   }
 
@@ -80,5 +78,9 @@ export class MongoDeviceRepository implements DeviceRepository {
             NonExistsError: `Device with id ${deviceId} does not exist.`,
           })
     );
+
+    // console.log("STH:" + sth.toString());
+    // console.log(typeof sth);
+    // return sth;
   }
 }

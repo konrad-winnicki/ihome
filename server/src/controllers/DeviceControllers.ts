@@ -20,7 +20,6 @@ export class DeviceControllers {
     return this.deviceService
       .addDevice(ctx.device)
       .then((response) => {
-        console.log(response)
         ctx.status = 201;
         ctx.body = response;
       })
@@ -36,7 +35,7 @@ export class DeviceControllers {
   }
 
   async deleteDevice(ctx: Koa.Context) {
-    const deviceId = ctx.params.id;
+    const deviceId = await ctx.params.id;
 
     return this.deviceService
       .deleteDevice(deviceId)

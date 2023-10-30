@@ -57,10 +57,9 @@ export const TaskSchema = new mongoose.Schema({
       required: true,
     },
   },
-  //
+  
   deviceId: {
     type: String,
-    //ref: mongoose.model("Switch", SwitchSchema),
     index: {
       required: true,
     },

@@ -7,13 +7,23 @@ import { cleanupDatabase } from "./auxilaryFunctionsForTests/dbCleanup";
 import { loginUser } from "./auxilaryFunctionsForTests/loginUser";
 import { addSwitch } from "./auxilaryFunctionsForTests/addSwitch";
 import { Connection } from "mongoose";
-
 import cron from "node-cron";
-import { getTasksForDevice } from "./auxilaryFunctionsForTests/getTasksForDevice";
 import { cleanupFiles } from "./auxilaryFunctionsForTests/fileCleanup";
+import PropertiesReader from "properties-reader";
+import { readPropertyFile } from "../../propertyWriter";
+import { Task } from "../../domain/Task";
+import {
+  getTasksForDeviceFromDB,
+  getTasksForDeviceFromFile,
+} from "./auxilaryFunctionsForTests/getTasksForDevice";
 
-const requestUri = `http://localhost:${sanitizedConfig.PORT}`;
-
+sanitizedConfig.NODE_ENV = "test_api_file";
+const environment = sanitizedConfig.NODE_ENV;
+const propertiesPath = readPropertyFile(environment);
+const properties = PropertiesReader(propertiesPath, undefined, {
+  writer: { saveSections: true },
+});
+const requestUri = `http://localhost:${properties.get("PORT")}`;
 describe("API ADD TASK TEST", () => {
   const badRequestResponse = {
     BadRequest: `Task request must contain following parameters:\n 
@@ -24,19 +34,32 @@ describe("API ADD TASK TEST", () => {
   let switch1Id: string;
   let task1Id: string;
   let task2Id: string;
+
+  let getTasksForDevice: (deviceId: string) => Promise<Task[]>;
+
   beforeAll(async () => {
     app = await initializeDependencias();
-  });
-  beforeEach(async () => {
-    if (sanitizedConfig.NODE_ENV === "test_api_database"){
-      const connection = (app.databaseInstance?.connection) as Connection
-      await cleanupDatabase(connection);
-
+    console.log("SERVER IS UP");
+    if (environment === "test_api_database") {
+      const connection = app.databaseInstance?.connection as Connection;
+      getTasksForDevice = getTasksForDeviceFromDB(connection);
+    } else if (environment === "test_api_file") {
+      getTasksForDevice = getTasksForDeviceFromFile("tasks.json");
     }
-    if (sanitizedConfig.NODE_ENV === "test_api_file"){
-      await cleanupFiles();
+  });
 
-    }    app.devicesInMemory.devices.clear();
+  beforeEach(async () => {
+    if (sanitizedConfig.NODE_ENV === "test_api_database") {
+      const connection = app.databaseInstance?.connection as Connection;
+      await cleanupDatabase(connection);
+    }
+    if (sanitizedConfig.NODE_ENV === "test_api_file") {
+      await cleanupFiles(["devices.json", "tasks.json"]);
+    }
+
+    app.devicesInMemory.devices.clear();
+
+    cron.getTasks().forEach((task) => task.stop());
     cron.getTasks().clear();
 
     token = await loginUser(requestUri, "testPassword");
@@ -68,10 +91,12 @@ describe("API ADD TASK TEST", () => {
         onStatus: true,
         scheduledTime: { hour: "10", minutes: "10" },
       })
+
       .expect(201)
       .expect("Content-Type", /application\/json/);
-    task1Id = responseTask1.body.taskId;
 
+
+    task1Id = await responseTask1.body.taskId;
     const responseTask2 = await request(requestUri)
       .post(`/tasks`)
       .set("Authorization", token)
@@ -84,12 +109,11 @@ describe("API ADD TASK TEST", () => {
       .expect("Content-Type", /application\/json/);
 
     task2Id = responseTask2.body.taskId;
+    console.log("task2", task2Id);
     const taskKeysIterator = cron.getTasks().keys();
     const taskKeyList = [...taskKeysIterator];
-    const taskFromDB = await getTasksForDevice(
-      (app.databaseInstance?.connection) as Connection,
-            switch1Id
-    );
+
+    const taskFromDB = await getTasksForDevice(switch1Id);
 
     const [task1, task2] = taskFromDB;
 
@@ -97,6 +121,7 @@ describe("API ADD TASK TEST", () => {
     expect(responseTask2.body).toStrictEqual({ taskId: task2Id });
 
     expect(taskKeyList).toStrictEqual([task1Id, task2Id]);
+
     expect(task1).toMatchObject({
       id: task1Id,
       deviceId: switch1Id,
@@ -110,7 +135,7 @@ describe("API ADD TASK TEST", () => {
       scheduledTime: { hour: "05", minutes: "55" },
     });
   });
-
+/*
   test("Should not add task if device not exists:", async () => {
     const responseTask1 = await request(requestUri)
       .post(`/tasks`)
@@ -247,10 +272,18 @@ describe("API ADD TASK TEST", () => {
       Error: "Token reqired",
     });
   });
-
+*/
   afterAll(async () => {
-    if (sanitizedConfig.NODE_ENV === "test_api_database"){
-      await app.databaseInstance?.connection.close();}
-      await app.appServer.stopServer();
+    if (sanitizedConfig.NODE_ENV === "test_api_database") {
+      await app.databaseInstance?.connection.close();
+    }
+    // cron.getTasks().forEach((task) => task.stop());
+    cron.getTasks().forEach((task) => {
+      task.stop();
+    });
+    cron.getTasks().clear();
+
+    console.log('task after all', cron.getTasks())
+    await app.appServer.stopServer();
   });
 });

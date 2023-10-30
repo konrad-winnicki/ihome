@@ -28,10 +28,11 @@ import { FileDeviceRepository } from "./Infrastructure/filePersistencia/FileDevi
 import { FileRepositoryHelpers } from "./Infrastructure/filePersistencia/auxilaryFunctions";
 import PropertiesReader from "properties-reader";
 import { readPropertyFile } from "./propertyWriter";
+import { FileTaskRepository } from "./Infrastructure/filePersistencia/FileTaskRepository";
 
-function createMongoDocs(database: MongoDatabase) {
-  const deviceDoc = database.createDeviceDoc();
-  const taskDoc = database.createTaskerDoc();
+  function createMongoDocs(database: MongoDatabase) {
+  const deviceDoc =  database.createDeviceDoc();
+  const taskDoc =  database.createTaskerDoc();
   return { deviceDoc, taskDoc };
 }
 
@@ -59,7 +60,6 @@ async function choosePersistenciaType(
   environment: string,
   properties: PropertiesReader.Reader
 ) {
-  console.log("choose persistencia", properties.get("PERSISTENCIA"));
 
   if (
     properties.get("PERSISTENCIA") === "mongoDatabase" ||
@@ -73,15 +73,13 @@ async function choosePersistenciaType(
     environment === "test_api_file" ||
     environment === "dev_file"
   ) {
-    return createFileRepositories(environment, properties);
+    return createFileRepositories();
   }
 
   throw new Error("Imposible to choose persistencia type");
 }
 
 function createFileRepositories(
-  environment: string,
-  properties: PropertiesReader.Reader
 ) {
   const serverMessages = ServerMessages.getInstance();
   const fileHelperMethods = new FileRepositoryHelpers();
@@ -90,12 +88,11 @@ function createFileRepositories(
     serverMessages
   );
 
-  const a = createDBRepositories(environment, properties);
-  const taskRepository = a.taskRepository;
+  const taskRepository = new FileTaskRepository(fileHelperMethods, serverMessages)
   return { deviceRepository, taskRepository };
 }
 
-function createDBRepositories(
+async function createDBRepositories(
   environment: string,
   properties: PropertiesReader.Reader
 ) {
@@ -106,7 +103,7 @@ function createDBRepositories(
     databaseData.databaseUrl,
     databaseData.database
   );
-  const mongoDocs = createMongoDocs(mongoDatabase);
+  const mongoDocs =  createMongoDocs(mongoDatabase);
 
   const deviceRepository = new MongoDeviceRepository(
     mongoDocs.deviceDoc,
@@ -194,7 +191,7 @@ export async function initializeDependencias() {
 
   appServer
     .startServer(port)
-    .then(() => console.log("server listen succes"))
+    .then(() => console.log("App server started"))
     .catch((err) => console.log("error", err));
 
   if ("mongoDatabase" in persistenciaType) {
@@ -245,24 +242,3 @@ export class Application {
     return Application.instance;
   }
 }
-
-const COMPENSATION = {
-  SUCCESS: "Compensation succeded",
-  FAILURE: "Compensation failed",
-} as const;
-
-type ObjectValues<T> = T[keyof T];
-
-type OptionsFlags<T> = {
-  [K in keyof T]: T[K];
-};
-
-type Compensation = ObjectValues<typeof COMPENSATION>;
-
-const device1 = { id: "15", name: "ccc", type: "type" };
-const device2 = { id: "14", name: "c", type: "type" };
-
-//addDeviceToFile(device1).then((res)=>console.log(res)).catch((err)=> console.log(err))
-//addDeviceToFile(device2).then((res)=>console.log(res)).catch((err)=> console.log(err))
-
-//deleteDeviceFromFile('14').then((res)=>console.log(res)).catch((err)=> console.log(err))

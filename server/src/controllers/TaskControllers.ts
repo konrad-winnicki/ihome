@@ -1,6 +1,4 @@
 import Koa from "koa";
-import { Task } from "../domain/Task";
-import { v4 } from "uuid";
 import { TaskService } from "../application/task/TaskService";
 /*
 export type DeviceControllers = {
@@ -18,17 +16,10 @@ export class TaskControllers {
   }
 
   async createTask(ctx: Koa.Context) {
-    const data = (await ctx.request.body) as Task;
-    const task = new Task(
-      v4(),
-      data.deviceId,
-      data.onStatus,
-      data.scheduledTime
-    );
-
     return this.taskService
-      .add(task)
+      .add(ctx.task)
       .then((response) => {
+        console.log("SETTING HTTP 201 response");
         ctx.status = 201;
         ctx.body = response;
       })
@@ -40,7 +31,7 @@ export class TaskControllers {
   }
 
   async deleteTask(ctx: Koa.Context) {
-    const taskId = ctx.params.id;
+    const taskId = await ctx.params.id;
     return this.taskService
       .delete(taskId)
       .then((response) => {
@@ -56,7 +47,8 @@ export class TaskControllers {
   async getTasksForDevice(ctx: Koa.Context) {
     const deviceId = await ctx.params.id;
 
-    return this.taskService.getByDevice(deviceId)
+    return this.taskService
+      .getByDevice(deviceId)
       .then((tasks) => {
         ctx.status = 200;
         ctx.body = tasks;

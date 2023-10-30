@@ -44,7 +44,6 @@ describe("API DELETE DEVICE TEST", () => {
       const connection = app.databaseInstance?.connection as Connection;
       listDevices = produceGetAllDevicesFromDB(connection);
       getDevice = produceGetDeviceFromDB(connection);
-      console.log('fffff', getDevice)
     }
     else if (environment === "test_api_file") {
       listDevices = produceGetAllDevicesFromFiles("devices.json");
@@ -61,7 +60,7 @@ describe("API DELETE DEVICE TEST", () => {
       console.log("sfter cleanup", app.devicesInMemory.devices);
     }
     if (environment === "test_api_file") {
-      await cleanupFiles();
+      await cleanupFiles(['devices.json']);
     }
     app.devicesInMemory.devices.clear();
     token = await loginUser(requestUri, "testPassword");

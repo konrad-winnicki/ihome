@@ -35,7 +35,7 @@ describe("API RUN METER TEST", () => {
 
     }
     if (environment === "test_api_file"){
-      await cleanupFiles();
+      await cleanupFiles(['devices.json']);
 
     }    app.devicesInMemory.devices.clear();
 

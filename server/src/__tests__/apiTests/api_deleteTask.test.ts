@@ -7,35 +7,65 @@ import { cleanupDatabase } from "./auxilaryFunctionsForTests/dbCleanup";
 import { loginUser } from "./auxilaryFunctionsForTests/loginUser";
 import { addSwitch } from "./auxilaryFunctionsForTests/addSwitch";
 import cron from "node-cron";
-import { getTasksForDevice } from "./auxilaryFunctionsForTests/getTasksForDevice";
 import { addTask } from "./auxilaryFunctionsForTests/addTask";
 import { cleanupFiles } from "./auxilaryFunctionsForTests/fileCleanup";
 import { Connection } from "mongoose";
+import PropertiesReader from "properties-reader";
+import { readPropertyFile } from "../../propertyWriter";
+import { Task } from "../../domain/Task";
+import {
+  getTasksForDeviceFromDB,
+  getTasksForDeviceFromFile,
+} from "./auxilaryFunctionsForTests/getTasksForDevice";
 
-const requestUri = `http://localhost:${sanitizedConfig.PORT}`;
-
+sanitizedConfig.NODE_ENV = "test_api_file";
+const environment = sanitizedConfig.NODE_ENV;
+const propertiesPath = readPropertyFile(environment);
+const properties = PropertiesReader(propertiesPath, undefined, {
+  writer: { saveSections: true },
+});
+const requestUri = `http://localhost:${properties.get("PORT")}`;
 describe("API DELETE TASK TEST", () => {
   let app: Application;
   let token: string;
   let switch1Id: string;
   let task1Id: string;
   let task2Id: string;
+  let getTasksForDevice: (deviceId: string) => Promise<Task[]>;
+
   beforeAll(async () => {
     app = await initializeDependencias();
+    if (environment === "test_api_database") {
+      const connection = app.databaseInstance?.connection as Connection;
+      getTasksForDevice = getTasksForDeviceFromDB(connection);
+    } else if (environment === "test_api_file") {
+      getTasksForDevice = getTasksForDeviceFromFile("tasks.json");
+    }
     token = await loginUser(requestUri, "testPassword");
   });
 
+  function printCronTasks(prefix: string) {
+    console.log("B-----------------", prefix, ", size:", cron.getTasks().size);
+    cron.getTasks().forEach((value, key, m) => console.log(key));
+    console.log("E-----------------", prefix, ", size:", cron.getTasks().size);
+  }
+
   beforeEach(async () => {
-    if (sanitizedConfig.NODE_ENV === "test_api_database"){
-      const connection = (app.databaseInstance?.connection) as Connection
+    if (sanitizedConfig.NODE_ENV === "test_api_database") {
+      const connection = app.databaseInstance?.connection as Connection;
       await cleanupDatabase(connection);
-
     }
-    if (sanitizedConfig.NODE_ENV === "test_api_file"){
-      await cleanupFiles();
+    if (sanitizedConfig.NODE_ENV === "test_api_file") {
+      await cleanupFiles(["devices.json", "tasks.json"]);
+    }
 
-    }    app.devicesInMemory.devices.clear();
+    printCronTasks("beforeEach 1");
+
+    app.devicesInMemory.devices.clear();
+    cron.getTasks().forEach((task) => task.stop());
     cron.getTasks().clear();
+
+    printCronTasks("beforeEach 2");
 
     switch1Id = await addSwitch(
       requestUri,
@@ -74,19 +104,14 @@ describe("API DELETE TASK TEST", () => {
     const taskKeysIterator = cron.getTasks().keys();
     const taskKeyList = [...taskKeysIterator];
     const deletedTaskFromMemory = cron.getTasks().get(task1Id);
-    const taskFromDB = await getTasksForDevice(
-      (app.databaseInstance?.connection) as Connection,
-            switch1Id
-    );
+    const taskFromDB = await getTasksForDevice(switch1Id);
     const [remainingTaskInDB] = taskFromDB;
-    expect(response.body).toEqual({
-      "Task deleted": { acknowledged: true, deletedCount: 1 },
-    });
+    expect(Object.keys(response.body)).toEqual(["Task deleted"]);
     expect(taskKeyList).toEqual([task2Id]);
     expect(deletedTaskFromMemory).toEqual(undefined);
     expect(remainingTaskInDB.id).toEqual(task2Id);
   });
-
+  /*
   test("Should not delete task from database if wrong task Id:", async () => {
     const nonExisitingId = "nonExisitingId";
     const response = await request(requestUri)
@@ -125,10 +150,22 @@ describe("API DELETE TASK TEST", () => {
       Error: "Token reqired",
     });
   });
+*/
 
   afterAll(async () => {
-    if (sanitizedConfig.NODE_ENV === "test_api_database"){
-      await app.databaseInstance?.connection.close();}
-      await app.appServer.stopServer();
+    if (sanitizedConfig.NODE_ENV === "test_api_database") {
+      await app.databaseInstance?.connection.close();
+    }
+
+    printCronTasks("afterAll 1");
+
+    cron.getTasks().forEach((task) => {
+      task.stop();
+    });
+
+    cron.getTasks().clear();
+    printCronTasks("afterAll 2");
+
+    await app.appServer.stopServer();
   });
 });

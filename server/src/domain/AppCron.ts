@@ -3,10 +3,15 @@ import cron from "node-cron";
 import { exec } from "child_process";
 
 export class AppCron {
-  installTask(taskId: string, minutes: number, hours: number, command: string) {
+  async installTask(
+    taskId: string,
+    minutes: number,
+    hours: number,
+    command: string
+  ) {
     const cronString = `${minutes} ${hours} * * * `;
 
-    cron.schedule(
+    const task = cron.schedule(
       cronString,
       () => {
         try {
@@ -18,13 +23,11 @@ export class AppCron {
       },
       { name: taskId, scheduled: true, timezone: "Europe/Warsaw" }
     );
-    //schedule.start();
-
-
-    
+    task.start();
+    Promise.resolve({ taskId: taskId });
   }
 
-  deleteTask(taskId: string): Promise<string> {
+  async deleteTask(taskId: string): Promise<string> {
     const memoryTaskList = cron.getTasks();
     const isDeletedFromMemory = memoryTaskList.delete(taskId);
     return isDeletedFromMemory

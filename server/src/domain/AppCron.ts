@@ -29,9 +29,13 @@ export class AppCron {
 
   async deleteTask(taskId: string): Promise<string> {
     const memoryTaskList = cron.getTasks();
+    const task = memoryTaskList.get(taskId);
+    task?.stop();
     const isDeletedFromMemory = memoryTaskList.delete(taskId);
     return isDeletedFromMemory
       ? Promise.resolve("Task deleted")
       : Promise.reject(`Task with id ${taskId} doesn't exist.`);
   }
 }
+
+

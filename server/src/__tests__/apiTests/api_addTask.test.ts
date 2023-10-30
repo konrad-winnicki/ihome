@@ -135,7 +135,7 @@ describe("API ADD TASK TEST", () => {
       scheduledTime: { hour: "05", minutes: "55" },
     });
   });
-/*
+
   test("Should not add task if device not exists:", async () => {
     const responseTask1 = await request(requestUri)
       .post(`/tasks`)
@@ -272,18 +272,15 @@ describe("API ADD TASK TEST", () => {
       Error: "Token reqired",
     });
   });
-*/
+
   afterAll(async () => {
     if (sanitizedConfig.NODE_ENV === "test_api_database") {
       await app.databaseInstance?.connection.close();
     }
-    // cron.getTasks().forEach((task) => task.stop());
     cron.getTasks().forEach((task) => {
       task.stop();
     });
-    cron.getTasks().clear();
 
-    console.log('task after all', cron.getTasks())
     await app.appServer.stopServer();
   });
 });

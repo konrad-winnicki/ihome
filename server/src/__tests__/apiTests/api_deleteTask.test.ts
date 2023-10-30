@@ -44,11 +44,6 @@ describe("API DELETE TASK TEST", () => {
     token = await loginUser(requestUri, "testPassword");
   });
 
-  function printCronTasks(prefix: string) {
-    console.log("B-----------------", prefix, ", size:", cron.getTasks().size);
-    cron.getTasks().forEach((value, key, m) => console.log(key));
-    console.log("E-----------------", prefix, ", size:", cron.getTasks().size);
-  }
 
   beforeEach(async () => {
     if (sanitizedConfig.NODE_ENV === "test_api_database") {
@@ -59,13 +54,10 @@ describe("API DELETE TASK TEST", () => {
       await cleanupFiles(["devices.json", "tasks.json"]);
     }
 
-    printCronTasks("beforeEach 1");
 
-    app.devicesInMemory.devices.clear();
     cron.getTasks().forEach((task) => task.stop());
     cron.getTasks().clear();
 
-    printCronTasks("beforeEach 2");
 
     switch1Id = await addSwitch(
       requestUri,
@@ -111,7 +103,7 @@ describe("API DELETE TASK TEST", () => {
     expect(deletedTaskFromMemory).toEqual(undefined);
     expect(remainingTaskInDB.id).toEqual(task2Id);
   });
-  /*
+  
   test("Should not delete task from database if wrong task Id:", async () => {
     const nonExisitingId = "nonExisitingId";
     const response = await request(requestUri)
@@ -150,21 +142,18 @@ describe("API DELETE TASK TEST", () => {
       Error: "Token reqired",
     });
   });
-*/
+
 
   afterAll(async () => {
     if (sanitizedConfig.NODE_ENV === "test_api_database") {
       await app.databaseInstance?.connection.close();
     }
 
-    printCronTasks("afterAll 1");
 
     cron.getTasks().forEach((task) => {
       task.stop();
     });
 
-    cron.getTasks().clear();
-    printCronTasks("afterAll 2");
 
     await app.appServer.stopServer();
   });

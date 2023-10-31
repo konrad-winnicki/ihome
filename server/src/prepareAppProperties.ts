@@ -7,6 +7,7 @@ export async function prepareAppProperties(
   properties: PropertiesReader.Reader,
   propertiesPath: string
 ) {
+ 
   return collectUserData()
     .then((response) => {
       const responseKeys = Object.keys(response);

@@ -8,16 +8,9 @@ import { loginUser } from "./auxilaryFunctionsForTests/loginUser";
 import { addSwitch } from "./auxilaryFunctionsForTests/addSwitch";
 import { Connection } from "mongoose";
 import { cleanupFiles } from "./auxilaryFunctionsForTests/fileCleanup";
-import PropertiesReader from "properties-reader";
-import { readPropertyFile } from "../../propertyWriter";
 
-sanitizedConfig.NODE_ENV='test_api_file'
 const environment = sanitizedConfig.NODE_ENV
-  const propertiesPath = readPropertyFile(environment);
-  const properties = PropertiesReader(propertiesPath, undefined, {
-    writer: { saveSections: true },
-  });
-const requestUri = `http://localhost:${properties.get('PORT')}`
+
 describe("API RUN SWITCH TEST", () => {
   let app: Application;
   let token: string;
@@ -25,6 +18,7 @@ describe("API RUN SWITCH TEST", () => {
   let switchWithNonExistingScriptId: string;
   let listeningSwitch: string;
   let switchWithNoPrint: string;
+  let requestUri:string
   beforeAll(async () => {
 
     app = await initializeDependencias();
@@ -33,10 +27,13 @@ describe("API RUN SWITCH TEST", () => {
       await cleanupDatabase(connection);
 
     }
-    if (environment === "test_api_file"){
+   else if (environment === "test_api_file"){
       await cleanupFiles(['devices.json']);
 
-    }    app.devicesInMemory.devices.clear();
+    }    
+    requestUri = `http://localhost:${appConfiguration.PORT}`;
+
+    app.devicesInMemory.devices.clear();
     token = await loginUser(requestUri, "testPassword");
     switchId = await addSwitch(
       requestUri,

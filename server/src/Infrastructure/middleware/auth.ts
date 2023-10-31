@@ -1,7 +1,7 @@
 // middleware/authenticate.ts
 import jwt, { JwtPayload } from "jsonwebtoken";
-import sanitizedConfig from "../../../config/config";
 import Koa, { Next } from "koa";
+//import appConfiguration from "../../../config/sanitizedProperties";
 
 const authenticate = async (ctx: Koa.Context, next: Next) => {
   const data = ctx.request.headers["authorization"];
@@ -33,9 +33,12 @@ const authenticate = async (ctx: Koa.Context, next: Next) => {
   */
 };
 
+
 const tokenValidation = (token: string) => {
+
+  
   return new Promise<string>((resolve) => {
-    jwt.verify(token, sanitizedConfig.JWT_SECRET, {
+    jwt.verify(token, appConfiguration.JWT_SECRET, {
       ignoreExpiration: false,
     }) as JwtPayload;
     resolve("access granted");

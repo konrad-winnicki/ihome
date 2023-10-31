@@ -8,36 +8,33 @@ import { loginUser } from "./auxilaryFunctionsForTests/loginUser";
 import { addMeter } from "./auxilaryFunctionsForTests/addMeter";
 import { cleanupFiles } from "./auxilaryFunctionsForTests/fileCleanup";
 import { Connection } from "mongoose";
-import PropertiesReader from "properties-reader";
-import { readPropertyFile } from "../../propertyWriter";
+//import appConfiguration from "../../../config/sanitizedProperties";
 
 
-sanitizedConfig.NODE_ENV='test_api_file'
 const environment = sanitizedConfig.NODE_ENV
-  const propertiesPath = readPropertyFile(environment);
-  const properties = PropertiesReader(propertiesPath, undefined, {
-    writer: { saveSections: true },
-  });
-const requestUri = `http://localhost:${properties.get('PORT')}`
+
 describe("API RUN METER TEST", () => {
   let app: Application;
   let token: string;
   let meterId: string;
   let meterWithNonExistingScriptId: string;
-
+let requestUri: string
   beforeAll(async () => {
 
     app = await initializeDependencias();
+    requestUri = `http://localhost:${appConfiguration.PORT}`;
     token = await loginUser(requestUri, "testPassword");
     if (environment === "test_api_database"){
       const connection = (app.databaseInstance?.connection) as Connection
       await cleanupDatabase(connection);
 
     }
-    if (environment === "test_api_file"){
+    else if (environment === "test_api_file"){
       await cleanupFiles(['devices.json']);
 
-    }    app.devicesInMemory.devices.clear();
+    }    
+    
+    app.devicesInMemory.devices.clear();
 
     meterId = await addMeter(
       requestUri,

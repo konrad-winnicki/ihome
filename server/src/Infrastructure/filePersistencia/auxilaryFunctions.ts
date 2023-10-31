@@ -5,11 +5,8 @@ import { Device } from "../../domain/Device";
 export class FileRepositoryHelpers {
   async writeFile(path: string, data: object) {
     const content = JSON.stringify(data);
-    return await fs
+    return fs
       .writeFile(path, content)
-      .then(() => {
-        Promise.resolve();
-      })
       .catch((err) => Promise.reject({ error: err }));
   }
 

@@ -10,21 +10,14 @@ import cron from "node-cron";
 import { addTask } from "./auxilaryFunctionsForTests/addTask";
 import { cleanupFiles } from "./auxilaryFunctionsForTests/fileCleanup";
 import { Connection } from "mongoose";
-import PropertiesReader from "properties-reader";
-import { readPropertyFile } from "../../propertyWriter";
 import { Task } from "../../domain/Task";
 import {
   getTasksForDeviceFromDB,
   getTasksForDeviceFromFile,
 } from "./auxilaryFunctionsForTests/getTasksForDevice";
 
-sanitizedConfig.NODE_ENV = "test_api_file";
 const environment = sanitizedConfig.NODE_ENV;
-const propertiesPath = readPropertyFile(environment);
-const properties = PropertiesReader(propertiesPath, undefined, {
-  writer: { saveSections: true },
-});
-const requestUri = `http://localhost:${properties.get("PORT")}`;
+
 describe("API DELETE TASK TEST", () => {
   let app: Application;
   let token: string;
@@ -32,7 +25,7 @@ describe("API DELETE TASK TEST", () => {
   let task1Id: string;
   let task2Id: string;
   let getTasksForDevice: (deviceId: string) => Promise<Task[]>;
-
+let requestUri: string;
   beforeAll(async () => {
     app = await initializeDependencias();
     if (environment === "test_api_database") {
@@ -41,6 +34,8 @@ describe("API DELETE TASK TEST", () => {
     } else if (environment === "test_api_file") {
       getTasksForDevice = getTasksForDeviceFromFile("tasks.json");
     }
+    requestUri = `http://localhost:${appConfiguration.PORT}`;
+
     token = await loginUser(requestUri, "testPassword");
   });
 

@@ -1,7 +1,7 @@
 import PropertiesReader from "properties-reader";
 import path from "node:path";
 
-export function readPropertyFile(environment: string) {
+export function choosePropertyFile(environment: string) {
   switch (environment) {
     case "production":
       return path.resolve(process.cwd(), "src/properties/app.properties");

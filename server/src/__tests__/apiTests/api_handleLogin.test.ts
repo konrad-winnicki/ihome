@@ -3,21 +3,16 @@ import { describe, afterAll, beforeAll, it } from "@jest/globals";
 import sanitizedConfig from "../../../config/config";
 import { initializeDependencias } from "../../dependencias";
 import { Application } from "../../dependencias";
-import PropertiesReader from "properties-reader";
-import { readPropertyFile } from "../../propertyWriter";
 
-
-sanitizedConfig.NODE_ENV='test_api_file'
 const environment = sanitizedConfig.NODE_ENV
-  const propertiesPath = readPropertyFile(environment);
-  const properties = PropertiesReader(propertiesPath, undefined, {
-    writer: { saveSections: true },
-  });
-const requestUri = `http://localhost:${properties.get('PORT')}`
+
 describe("API HANDLE LOGIN TEST", () => {
   let app: Application;
+  let requestUri: string
   beforeAll(async () => {
     app = await initializeDependencias();
+    requestUri = `http://localhost:${appConfiguration.PORT}`;
+
   });
   
 

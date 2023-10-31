@@ -13,16 +13,10 @@ import { addSwitch } from "./auxilaryFunctionsForTests/addSwitch";
 import { cleanupFiles } from "./auxilaryFunctionsForTests/fileCleanup";
 import { Connection } from "mongoose";
 import { Device } from "../../domain/Device";
-import PropertiesReader from "properties-reader";
-import { readPropertyFile } from "../../propertyWriter";
+//import appConfiguration from "../../../config/sanitizedProperties";
 
-sanitizedConfig.NODE_ENV='test_api_file'
-const environment = sanitizedConfig.NODE_ENV
-  const propertiesPath = readPropertyFile(environment);
-  const properties = PropertiesReader(propertiesPath, undefined, {
-    writer: { saveSections: true },
-  });
-const requestUri = `http://localhost:${properties.get('PORT')}`;
+const environment = sanitizedConfig.NODE_ENV;
+
 
 describe("API ADD DEVICE TEST", () => {
   const badRequestResponse = {
@@ -34,25 +28,25 @@ describe("API ADD DEVICE TEST", () => {
   let app: Application;
   let token: string;
   let listDevices: () => Promise<Device[]>;
-
+  let requestUri: string;
   beforeAll(async () => {
     app = await initializeDependencias();
     if (environment === "test_api_database") {
       const connection = app.databaseInstance?.connection as Connection;
       listDevices = produceGetAllDevicesFromDB(connection);
-    }
-    else if (environment === "test_api_file") {
+    } else if (environment === "test_api_file") {
       listDevices = produceGetAllDevicesFromFiles("devices.json");
     }
+
+    requestUri = `http://localhost:${appConfiguration.PORT}`;
   });
 
   beforeEach(async () => {
     if (environment === "test_api_database") {
       const connection = app.databaseInstance?.connection as Connection;
       await cleanupDatabase(connection);
-    }
-    else if (environment === "test_api_file") {
-      await cleanupFiles(['devices.json']);
+    } else if (environment === "test_api_file") {
+      await cleanupFiles(["devices.json"]);
     }
     app.devicesInMemory.devices.clear();
     token = await loginUser(requestUri, "testPassword");

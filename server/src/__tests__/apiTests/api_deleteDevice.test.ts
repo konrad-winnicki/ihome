@@ -17,17 +17,10 @@ import {
 import { cleanupFiles } from "./auxilaryFunctionsForTests/fileCleanup";
 import { Connection } from "mongoose";
 import { Device } from "../../domain/Device";
-import PropertiesReader from "properties-reader";
-import { readPropertyFile } from "../../propertyWriter";
 
 
-sanitizedConfig.NODE_ENV='test_api_file'
 const environment = sanitizedConfig.NODE_ENV
-  const propertiesPath = readPropertyFile(environment);
-  const properties = PropertiesReader(propertiesPath, undefined, {
-    writer: { saveSections: true },
-  });
-const requestUri = `http://localhost:${properties.get('PORT')}`
+  
 
 
 describe("API DELETE DEVICE TEST", () => {
@@ -35,7 +28,7 @@ describe("API DELETE DEVICE TEST", () => {
   let token: string;
   let switch1Id: string;
   let switch2Id: string;
-
+  let requestUri:string;
   let listDevices: () => Promise<Device[]>;
   let getDevice: (deviceId: string) => Promise<Device[]>;
   beforeAll(async () => {
@@ -49,6 +42,8 @@ describe("API DELETE DEVICE TEST", () => {
       listDevices = produceGetAllDevicesFromFiles("devices.json");
       getDevice = produceGetDeviceFromFiles("devices.json");
     }
+    requestUri = `http://localhost:${appConfiguration.PORT}`;
+
   });
 
   beforeEach(async () => {

@@ -1,10 +1,7 @@
 import Koa from "koa";
-import sanitizedConfig from "../../config/config";
-/*
-export type DeviceControllers = {
-  addDevice: (ctx: Koa.Context) => Promise<void>;
-};
-*/
+//import appConfiguration from "../../config/sanitizedProperties";
+
+
 
 interface LoginControllersType {
   password: string;
@@ -19,7 +16,7 @@ export class LoginControllers {
 
   async handleLogin(ctx: Koa.Context) {
     const requestBody = await ctx.request.body;
-    const serverPassword = sanitizedConfig.PAIR_PASSWORD;
+    const serverPassword = appConfiguration.PASSWORD
     const incomingPassword = (requestBody as LoginControllersType).password;
     if (serverPassword !== incomingPassword) {
       ctx.status = 401;

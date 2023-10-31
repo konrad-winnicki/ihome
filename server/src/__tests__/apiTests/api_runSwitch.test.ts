@@ -8,6 +8,7 @@ import { loginUser } from "./auxilaryFunctionsForTests/loginUser";
 import { addSwitch } from "./auxilaryFunctionsForTests/addSwitch";
 import { Connection } from "mongoose";
 import { cleanupFiles } from "./auxilaryFunctionsForTests/fileCleanup";
+import cron from "node-cron";
 
 const environment = sanitizedConfig.NODE_ENV
 
@@ -148,6 +149,8 @@ describe("API RUN SWITCH TEST", () => {
   afterAll(async () => {
     if (environment=== "test_api_database"){
       await app.databaseInstance?.connection.close();}
+      cron.getTasks().forEach((task) => task.stop());
+      cron.getTasks().clear();
       await app.appServer.stopServer();
   });
 });

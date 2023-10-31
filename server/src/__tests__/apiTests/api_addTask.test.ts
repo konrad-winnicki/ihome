@@ -272,9 +272,8 @@ describe("API ADD TASK TEST", () => {
     if (sanitizedConfig.NODE_ENV === "test_api_database") {
       await app.databaseInstance?.connection.close();
     }
-    cron.getTasks().forEach((task) => {
-      task.stop();
-    });
+    cron.getTasks().forEach((task) => task.stop());
+    cron.getTasks().clear();
 
     await app.appServer.stopServer();
   });

@@ -9,6 +9,7 @@ import { addMeter } from "./auxilaryFunctionsForTests/addMeter";
 import { cleanupFiles } from "./auxilaryFunctionsForTests/fileCleanup";
 import { Connection } from "mongoose";
 //import appConfiguration from "../../../config/sanitizedProperties";
+import cron from "node-cron";
 
 
 const environment = sanitizedConfig.NODE_ENV
@@ -83,6 +84,8 @@ let requestUri: string
   afterAll(async () => {
     if (environment === "test_api_database"){
       await app.databaseInstance?.connection.close();}
+      cron.getTasks().forEach((task) => task.stop());
+      cron.getTasks().clear();
       await app.appServer.stopServer();
   });
 });

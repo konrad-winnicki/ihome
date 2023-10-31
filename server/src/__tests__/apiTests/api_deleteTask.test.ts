@@ -145,9 +145,8 @@ let requestUri: string;
     }
 
 
-    cron.getTasks().forEach((task) => {
-      task.stop();
-    });
+    cron.getTasks().forEach((task) => task.stop());
+    cron.getTasks().clear();
 
 
     await app.appServer.stopServer();

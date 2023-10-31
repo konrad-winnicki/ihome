@@ -17,6 +17,7 @@ import {
 import { cleanupFiles } from "./auxilaryFunctionsForTests/fileCleanup";
 import { Connection } from "mongoose";
 import { Device } from "../../domain/Device";
+import cron from "node-cron";
 
 
 const environment = sanitizedConfig.NODE_ENV
@@ -169,6 +170,8 @@ describe("API DELETE DEVICE TEST", () => {
     if (environment === "test_api_database") {
       await app.databaseInstance?.connection.close();
     }
+    cron.getTasks().forEach((task) => task.stop());
+    cron.getTasks().clear();
     await app.appServer.stopServer();
   });
 });

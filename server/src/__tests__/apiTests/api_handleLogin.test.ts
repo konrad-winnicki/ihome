@@ -3,6 +3,7 @@ import { describe, afterAll, beforeAll, it } from "@jest/globals";
 import sanitizedConfig from "../../../config/config";
 import { initializeDependencias } from "../../dependencias";
 import { Application } from "../../dependencias";
+import cron from "node-cron";
 
 const environment = sanitizedConfig.NODE_ENV
 
@@ -37,6 +38,8 @@ describe("API HANDLE LOGIN TEST", () => {
   afterAll(async () => {
     if (environment === "test_api_database"){
       await app.databaseInstance?.connection.close();}
+      cron.getTasks().forEach((task) => task.stop());
+      cron.getTasks().clear();
       await app.appServer.stopServer();
   });
 });

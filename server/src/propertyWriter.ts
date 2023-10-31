@@ -32,6 +32,7 @@ export const propertyWriter = async (
   properties: PropertiesReader.Reader,
   propertiesPath: string
 ) => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   await properties.save(propertiesPath, function (error, _data) {
     if (error) {
       console.log("writer error", properties);

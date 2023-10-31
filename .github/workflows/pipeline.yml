@@ -21,23 +21,16 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Create test.env file
+      - name: Create .env file
        
         run: |
           cd server
-          echo "MONGO_URI"="mongodb://localhost:27017" >> test.env
-          echo "DATABASE"="raspberrypi_test" >> test.env
-          echo "NODE_ENV"="test" >> test.env
-          echo "PORT"="4001" >> test.env
-          echo "PAIR_PASSWORD"="testPassword" >> test.env
-          echo "JWT_SECRET"="74310907898vnmrbmvbipc734086n3e65jblppl4c9n" >> .env
-
+          echo "NODE_ENV"="test_mode" >> .env
          
-
       - name: Print .env file
         run: |
-          echo "Printing test.env:"
-          cat server/test.env
+          echo "Printing .env:"
+          cat server/.env
 
       - name: Install Node.js
         uses: actions/setup-node@v3
@@ -57,9 +50,13 @@ jobs:
           npm run build
         working-directory: ./server
 
-      - name: Run mongo_test
+      - name: Run api file tests
         run: |
-          npm run test_api
+          npm run test_api_file
+        working-directory: ./server
+      - name: Run api database tests
+        run: |
+          npm run test_api_database
         working-directory: ./server
       - name: Run domain_test
         run: |

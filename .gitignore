@@ -2,6 +2,7 @@
 **/dist/
 **/.DS_Store
 **/config.env
+.env
 production.env
 **/coverage/
 server/src/properties/app.properties

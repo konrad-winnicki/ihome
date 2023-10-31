@@ -36,24 +36,7 @@ function createMongoDocs(database: MongoDatabase) {
   return { deviceDoc, taskDoc };
 }
 
-/*
-function prepareDatabaseUrlAndName(environment: string) {
-  let databaseUrl = "";
-  let database = "";
 
-  if (environment === "production") {
-    if (appConfiguration.PERSISTENCIA === "mongoDatabase") {
-      databaseUrl = appConfiguration.DATABASE_URL;
-      database = appConfiguration.DATABASE;
-    }
-  } else {
-    databaseUrl = appConfiguration.DATABASE_URL;
-    database = appConfiguration.DATABASE;
-  }
-
-  return { databaseUrl, database };
-}
-*/
 async function choosePersistenciaType(environment: string) {
   if (
     appConfiguration.PERSISTENCIA === "mongoDatabase" ||
@@ -90,7 +73,6 @@ function createFileRepositories() {
 
 async function createDBRepositories() {
   const serverMessages = ServerMessages.getInstance();
-  //const databaseData = prepareDatabaseUrlAndName(ENVIRONMENT);
 
   const mongoDatabase = new MongoDatabase(
     appConfiguration.DATABASE_URL,

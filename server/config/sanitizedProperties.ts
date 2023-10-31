@@ -74,7 +74,7 @@ async function prepareApplicationProperties() {
     for (const [key, value] of Object.entries(config)) {
       if (value === null) {
         throw new Error(
-          `Missing key ${key} in .properties. \n Parth to file: ${propertiesPath}`
+          `Missing key ${key} in .properties. \n Path to file: ${propertiesPath}`
         );
       }
     }

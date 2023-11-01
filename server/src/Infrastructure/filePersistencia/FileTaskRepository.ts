@@ -21,7 +21,6 @@ export class FileTaskRepository implements TaskRepository {
     return this.helperMethods
       .readFile("tasks.json")
       .then((fileContent) => {
-          
         const isTaskExisting = this.helperMethods.findById(
           fileContent,
           task.id
@@ -33,16 +32,14 @@ export class FileTaskRepository implements TaskRepository {
         }
 
         fileContent[task.id] = task;
-       
+
         return this.helperMethods
           .writeFile("tasks.json", fileContent)
           .then(() => {
-
             const messageSuccess = this.serverMessages.addTask.SUCCESS;
             const resolveMessage = { [messageSuccess]: task.id };
             return Promise.resolve(resolveMessage);
-            
-          })
+          });
       })
       .catch((error) => {
         console.log("write task error", error);
@@ -51,8 +48,6 @@ export class FileTaskRepository implements TaskRepository {
           return Promise.reject({ [messageFailure]: error.message });
         }
         return Promise.reject({ [messageFailure]: error });
-
-        
       });
   }
 
@@ -91,7 +86,6 @@ export class FileTaskRepository implements TaskRepository {
         return this.helperMethods
           .readFile("devices.json")
           .then((devicesFileContent) => {
-
             return tasks.map((task: Task) => {
               const device = devicesFileContent[task.deviceId];
               return new AggregatedTask(
@@ -128,19 +122,28 @@ export class FileTaskRepository implements TaskRepository {
       .catch((error) => Promise.reject({ error: error }));
   }
 
-  async findById(taskId: string): Promise<AggregatedTask> {
-  
-   return this.listAll()
+  async findByIdAndAggregate(taskId: string): Promise<AggregatedTask> {
+    return this.listAll()
       .then((aggregatedTasks: AggregatedTask[]) => {
         const task = aggregatedTasks.find((task) => {
-          return task.id === taskId          
+          return task.id === taskId;
         });
         if (task) {
-          return task
+          return task;
         }
         return Promise.reject({ ["Wrong id"]: `Task not exists` });
       })
       .catch((error) => Promise.reject({ error: error }));
-      
+  }
+
+  async findById(taskId: string): Promise<Task> {
+    return this.helperMethods.readFile("tasks.json").then((fileContent) => {
+      const task = fileContent[taskId];
+
+      if (task) {
+        return Promise.resolve(task);
+      }
+      return Promise.reject({ '["WrongId"]': `Task not exists` });
+    });
   }
 }

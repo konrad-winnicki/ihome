@@ -1,6 +1,7 @@
 import cron from "node-cron";
 
 import { exec } from "child_process";
+import { ManagerResponse } from "../application/task/TaskManager";
 
 export class AppCron {
   async installTask(
@@ -24,17 +25,17 @@ export class AppCron {
       { name: taskId, scheduled: true, timezone: "Europe/Warsaw" }
     );
     task.start();
-    Promise.resolve({ taskId: taskId });
+    return Promise.resolve({ taskId: taskId });
   }
 
-  async deleteTask(taskId: string): Promise<string> {
+  async deleteTask(taskId: string): Promise< ManagerResponse<object | string>> {
     const memoryTaskList = cron.getTasks();
     const task = memoryTaskList.get(taskId);
     task?.stop();
     const isDeletedFromMemory = memoryTaskList.delete(taskId);
     return isDeletedFromMemory
-      ? Promise.resolve("Task deleted")
-      : Promise.reject(`Task with id ${taskId} doesn't exist.`);
+      ? Promise.resolve({["Task deleted"]: "No errors"})
+      : Promise.reject({error: `Task with id ${taskId} doesn't exist.`});
   }
 }
 

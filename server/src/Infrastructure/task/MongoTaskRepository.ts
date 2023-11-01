@@ -1,10 +1,9 @@
 import { TaskRepository } from "../../application/task/TaskRepository";
 import { Task } from "../../domain/Task";
-import  { Model} from "mongoose";
+import { Model } from "mongoose";
 import { AggregatedTask } from "../../domain/AggregatedTask";
 import { RepositoryResponse } from "../../application/task/TaskRepository";
 import { ServerMessages } from "../../ServerMessages";
-
 
 const taskAndDeviceAggregationPipeline = (taskId?: string) => [
   taskId ? { $match: { id: taskId } } : { $match: {} },
@@ -45,9 +44,10 @@ export class MongoTaskRepository implements TaskRepository {
       scheduledTime: task.scheduledTime,
     };
 
-    return this.taskDocument.create(newTask)
-    
-    .then((task) => {
+    return this.taskDocument
+      .create(newTask)
+
+      .then((task) => {
         const message = this.serverMessages.addTask.SUCCESS;
         return Promise.resolve({ [message]: task.id });
       })
@@ -79,7 +79,7 @@ export class MongoTaskRepository implements TaskRepository {
       });
   }
 
-  async findById(taskId: string): Promise<AggregatedTask> {
+  async findByIdAndAggregate(taskId: string): Promise<AggregatedTask> {
     return this.taskDocument
       .aggregate(taskAndDeviceAggregationPipeline(taskId))
       .then((aggregatedTasksList) => {
@@ -101,6 +101,17 @@ export class MongoTaskRepository implements TaskRepository {
       });
   }
 
+  async findById(taskId: string): Promise<Task> {
+    return this.taskDocument.findOne({ id: taskId }).then((task) => {
+      if (task) {
+        return Promise.resolve(
+          new Task(task.id, task.deviceId, task.onStatus, task.scheduledTime)
+        );
+      } else {
+        return Promise.reject({ '["WrongId"]': `Task not exists` });
+      }
+    });
+  }
   async listAll(): Promise<AggregatedTask[]> {
     return this.taskDocument
       .aggregate(taskAndDeviceAggregationPipeline())

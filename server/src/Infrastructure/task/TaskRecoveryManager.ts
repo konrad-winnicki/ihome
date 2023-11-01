@@ -1,19 +1,18 @@
 import { TaskRepository } from "../../application/task/TaskRepository";
 import { AggregatedTask } from "../../domain/AggregatedTask";
 import { TaskRecovery } from "../../application/task/TaskRecovery";
-import {
-  ManagerResponse,
-  TaskManager,
-} from "../../application/task/TaskManager";
+import { AppCron } from "../../domain/AppCron";
+import { ManagerResponse } from "../../application/task/TaskManager";
+
 //const appCron = new AppCron();
 
 export class TaskRecoveryManager implements TaskRecovery {
-  private taskManager: TaskManager;
+  private appCron: AppCron;
   private taskRepository: TaskRepository;
 
-  constructor(taskRepository: TaskRepository, taskManager: TaskManager) {
+  constructor(taskRepository: TaskRepository, appCron: AppCron) {
     this.taskRepository = taskRepository;
-    this.taskManager = taskManager;
+    this.appCron = appCron;
   }
 
   async transformTaskFromDbToCron(): Promise<ManagerResponse<object | string>> {
@@ -21,7 +20,16 @@ export class TaskRecoveryManager implements TaskRecovery {
       .listAll()
       .then((tasks) => {
         tasks.forEach((task: AggregatedTask) => {
-          this.taskManager.add(task);
+          this.appCron.installTask(
+            task.id,
+            task.minutes,
+            task.hour,
+            task.onStatus
+              ? task.commandOn
+              : task.commandOff
+              ? task.commandOff
+              : ""
+          );
         });
 
         return Promise.resolve({

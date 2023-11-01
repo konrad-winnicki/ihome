@@ -3,7 +3,6 @@ import { DeviceRunService } from "./application/device/DeviceRunService";
 import { MongoDatabase } from "./Infrastructure/databse/MongoDataBase";
 import { AppCron } from "./domain/AppCron";
 import { EventEmitter } from "node:events";
-import { CronTaskManager } from "./Infrastructure/task/CronTaskManager";
 import {
   recoveryInMemoryDeviceStorage,
   fillCronInMemoryWithData,
@@ -16,17 +15,18 @@ import { RunDeviceControllers } from "./controllers/runDeviceControllers";
 import { TaskControllers } from "./controllers/TaskControllers";
 import { LoginControllers } from "./controllers/LoginControllers";
 import { tokenGenerator } from "./domain/tokenGenerator";
-import { MongoTaskRepository } from "./Infrastructure/task/MongoTaskRepository";
 import { TaskRecoveryManager } from "./Infrastructure/task/TaskRecoveryManager";
 import { ServerMessages } from "./ServerMessages";
-import { TaskService } from "./application/task/TaskService";
 import { FileDeviceRepository } from "./Infrastructure/filePersistencia/FileDeviceRepository";
 import { FileRepositoryHelpers } from "./Infrastructure/filePersistencia/auxilaryFunctions";
-import { FileTaskRepository } from "./Infrastructure/filePersistencia/FileTaskRepository";
 import prepareApplicationProperties from "../config/sanitizedProperties";
 import { MongoDeviceRepository } from "./Infrastructure/device/MongoDeviceRepository";
 import { CacheDeviceRepository } from "./Infrastructure/device/CacheDeviceRepository";
 import { DeviceService } from "./application/device/DeviceService";
+import { CronTaskManager } from "./Infrastructure/task/CronTaskManager";
+import { FileTaskRepository } from "./Infrastructure/filePersistencia/FileTaskRepository";
+import { MongoTaskRepository } from "./Infrastructure/task/MongoTaskRepository";
+import { TaskService } from "./application/task/TaskService";
 
 const ENVIRONMENT = sanitizedConfig.NODE_ENV;
 
@@ -62,7 +62,7 @@ function createFileRepositories() {
     fileHelperMethods,
     serverMessages
   );
-
+ 
   const taskRepository = new FileTaskRepository(
     fileHelperMethods,
     serverMessages
@@ -83,11 +83,12 @@ async function createDBRepositories() {
     mongoDocs.deviceDoc,
     serverMessages
   );
+ 
+
   const taskRepository = new MongoTaskRepository(
     mongoDocs.taskDoc,
     serverMessages
   );
-
   return { deviceRepository, taskRepository, mongoDatabase };
 }
 
@@ -98,7 +99,6 @@ export async function initializeDependencias() {
   const eventEmitter = new EventEmitter();
 
   const devicesInMemory = InMemoryDeviceStorage.getInstance();
- 
 
   const persistenciaType = await choosePersistenciaType(ENVIRONMENT);
 
@@ -108,27 +108,25 @@ export async function initializeDependencias() {
     serverMessages
   );
 
-  const deviceService = new DeviceService(
-    cacheDeviceRepository,
-    eventEmitter
-  );
+  const deviceService = new DeviceService(cacheDeviceRepository, eventEmitter);
 
   const appCorn = new AppCron();
-  const cronTaskManager = new CronTaskManager(appCorn, serverMessages);
+  const cronTaskManager = new CronTaskManager(
+    appCorn,
+    persistenciaType.taskRepository,
+    serverMessages
+  );
 
   const taskService = new TaskService(
-    persistenciaType.taskRepository,
     cronTaskManager,
     deviceService,
     serverMessages,
     eventEmitter
   );
-
   const deviceRunService = new DeviceRunService(cacheDeviceRepository);
 
   const deviceRunControllerDep = new RunDeviceControllers(deviceRunService);
 
-  //prueba con deviceservice2, ha cambiado dependecia in devceConrollers a deviceService2
   const deviceControllers = new DeviceControllers(deviceService);
   const taskControlles = new TaskControllers(taskService);
   const loginControllers = new LoginControllers(tokenGenerator);
@@ -143,11 +141,18 @@ export async function initializeDependencias() {
   const appServer = new AppServer(appRouter);
 
   await recoveryInMemoryDeviceStorage(deviceService, devicesInMemory);
-
+  /*
   const cronTaskRepository = new TaskRecoveryManager(
     persistenciaType.taskRepository,
     cronTaskManager
   );
+  */
+
+  const cronTaskRepository = new TaskRecoveryManager(
+    persistenciaType.taskRepository,
+    appCorn
+  );
+
   await fillCronInMemoryWithData(cronTaskRepository);
 
   const port = Number(appConfiguration.PORT);

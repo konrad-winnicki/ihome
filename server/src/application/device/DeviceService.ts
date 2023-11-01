@@ -1,9 +1,7 @@
 import { Meter } from "../../domain/Meter";
 import { Device } from "../../domain/Device";
 import { Switch } from "../../domain/Switch";
-import { InMemoryDeviceStorage } from "../../domain/InMemoryDeviceStorage";
 import { EventEmitter } from "node:events";
-import { ServerMessages } from "../../ServerMessages";
 import { ManagerResponse } from "../task/TaskManager";
 import { DeviceRepository } from "./DeviceRepository";
 
@@ -11,136 +9,30 @@ import { DeviceRepository } from "./DeviceRepository";
 //mongo lub file impelement devicePersistence intrtface
 
 export class DeviceService {
-  private cacheRepository: DeviceRepository;
   private persistenceDeviceRepository: DeviceRepository;
   private eventEmitter: EventEmitter;
-  private serverMessages: ServerMessages;
 
   constructor(
-    cacheRepository: DeviceRepository,
     persistenceDeviceRepository: DeviceRepository,
-    eventEmitter: EventEmitter,
-    serverMessages: ServerMessages
+    eventEmitter: EventEmitter
   ) {
     this.persistenceDeviceRepository = persistenceDeviceRepository;
-    this.cacheRepository = cacheRepository;
     this.eventEmitter = eventEmitter;
-    this.serverMessages = serverMessages;
   }
 
   async addDevice(device: Device): Promise<ManagerResponse<object | string>> {
-    return this.cacheRepository
-      .add(device)
-      .catch((err) => {
-        const messageFailure = this.serverMessages.addDevice.FAILURE;
-        return Promise.reject({ [messageFailure]: err });
-      })
-      .then((addingCompleted) =>
-        this.persistenceDeviceRepository
-          .add(device)
-          .then(() => Promise.resolve(addingCompleted))
-          .catch((deviceRepositoryError) =>
-            this.compensateDeviceAdditionToMemory(device.id)
-              .catch((compensationError) => {
-                const rejectMessage = {
-                  Error: deviceRepositoryError,
-                  compensation: compensationError,
-                };
-                console.log(rejectMessage);
-                return Promise.reject(rejectMessage);
-              })
-              .then((compensationResult) => {
-                const rejectMessage = {
-                  Error: deviceRepositoryError,
-                  compensation: compensationResult,
-                };
-                console.log(rejectMessage);
-                return Promise.reject(rejectMessage);
-              })
-          )
-      );
-  }
-
-  private async compensateDeviceAdditionToMemory(
-    deviceId: string
-  ): Promise<ManagerResponse<object | string>> {
-    return this.cacheRepository
-      .delete(deviceId)
-      .then((response) => {
-        const messageSuccess = this.serverMessages.compensation.SUCCESS;
-        const resolveMessage = {
-          [messageSuccess]: response,
-        };
-        return Promise.resolve(resolveMessage);
-      })
-      .catch((err) => {
-        const messageFailure = this.serverMessages.compensation.FAILURE;
-        const rejectMessage = { [messageFailure]: err };
-
-        console.log(rejectMessage);
-        return Promise.reject(rejectMessage);
-      });
+    return this.persistenceDeviceRepository.add(device);
   }
 
   async deleteDevice(
     deviceId: string
   ): Promise<ManagerResponse<object | string>> {
-    const device = InMemoryDeviceStorage.getInstance().devices.get(
-      deviceId
-    ) as Device;
-
-    return this.cacheRepository
+    return this.persistenceDeviceRepository
       .delete(deviceId)
-      .catch((err) => {
-        return Promise.reject(err);
-      })
-      .then((response) =>
-        this.persistenceDeviceRepository
-          .delete(deviceId)
-          .catch((deviceRepositoryError) =>
-            this.compensateDeviceDelationFromMemory(device)
-              .then((compensationResult: ManagerResponse<object | string>) => {
-                const rejectMessage = {
-                  error: deviceRepositoryError,
-                  compensation: compensationResult,
-                };
-                return Promise.reject(rejectMessage);
-              })
-              .catch((compensationError: ManagerResponse<object | string>) => {
-                const rejectMessage = {
-                  error: deviceRepositoryError,
-                  compensation: compensationError,
-                };
-                return Promise.reject(rejectMessage);
-              })
-          )
-          .then(() => {
-            console.log(response);
-            this.eventEmitter.emit("deviceDeleted", deviceId);
-            return Promise.resolve(response);
-          })
-      );
-  }
-
-  private async compensateDeviceDelationFromMemory(
-    device: Device
-  ): Promise<ManagerResponse<object | string>> {
-    return this.cacheRepository
-      .add(device)
       .then((response) => {
-        const messageSuccess = this.serverMessages.compensation.SUCCESS;
-        const resolveMessage = {
-          [messageSuccess]: response,
-        };
-        console.log(resolveMessage);
-        return Promise.resolve(resolveMessage);
-      })
-      .catch((err) => {
-        const messageFailure = this.serverMessages.compensation.FAILURE;
-        const rejectMessage = { [messageFailure]: err };
-
-        console.log(rejectMessage);
-        return Promise.reject(rejectMessage);
+        console.log(response);
+        this.eventEmitter.emit("deviceDeleted", deviceId);
+        return Promise.resolve(response);
       });
   }
 
@@ -169,8 +61,8 @@ export class DeviceService {
   }
 
   async getById(deviceId: string): Promise<Device> {
-    return this.persistenceDeviceRepository
-      .getById(deviceId)
+    return this.persistenceDeviceRepository.getById(deviceId);
+    /*
       .then((device) =>
         device
           ? Promise.resolve(device)
@@ -179,5 +71,6 @@ export class DeviceService {
             })
       )
       .catch((error) => Promise.reject(error));
+      */
   }
 }

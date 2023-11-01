@@ -2,8 +2,6 @@ import sanitizedConfig from "../config/config";
 import { DeviceRunService } from "./application/device/DeviceRunService";
 import { MongoDatabase } from "./Infrastructure/databse/MongoDataBase";
 import { AppCron } from "./domain/AppCron";
-import { DeviceService } from "./application/device/DeviceService";
-import { CacheDeviceRepository } from "./Infrastructure/device/CacheDeviceRepository";
 import { EventEmitter } from "node:events";
 import { CronTaskManager } from "./Infrastructure/task/CronTaskManager";
 import {
@@ -21,12 +19,14 @@ import { tokenGenerator } from "./domain/tokenGenerator";
 import { MongoTaskRepository } from "./Infrastructure/task/MongoTaskRepository";
 import { TaskRecoveryManager } from "./Infrastructure/task/TaskRecoveryManager";
 import { ServerMessages } from "./ServerMessages";
-import { MongoDeviceRepository } from "./Infrastructure/device/MongoDeviceRepository";
 import { TaskService } from "./application/task/TaskService";
 import { FileDeviceRepository } from "./Infrastructure/filePersistencia/FileDeviceRepository";
 import { FileRepositoryHelpers } from "./Infrastructure/filePersistencia/auxilaryFunctions";
 import { FileTaskRepository } from "./Infrastructure/filePersistencia/FileTaskRepository";
 import prepareApplicationProperties from "../config/sanitizedProperties";
+import { MongoDeviceRepository } from "./Infrastructure/device/MongoDeviceRepository";
+import { CacheDeviceRepository } from "./Infrastructure/device/CacheDeviceRepository";
+import { DeviceService } from "./application/device/DeviceService";
 
 const ENVIRONMENT = sanitizedConfig.NODE_ENV;
 
@@ -35,7 +35,6 @@ function createMongoDocs(database: MongoDatabase) {
   const taskDoc = database.createTaskerDoc();
   return { deviceDoc, taskDoc };
 }
-
 
 async function choosePersistenciaType(environment: string) {
   if (
@@ -94,22 +93,24 @@ async function createDBRepositories() {
 
 export async function initializeDependencias() {
   global.appConfiguration = await prepareApplicationProperties();
-  
+
   const serverMessages = ServerMessages.getInstance();
   const eventEmitter = new EventEmitter();
 
   const devicesInMemory = InMemoryDeviceStorage.getInstance();
+ 
+
+  const persistenciaType = await choosePersistenciaType(ENVIRONMENT);
+
   const cacheDeviceRepository = new CacheDeviceRepository(
     devicesInMemory,
+    persistenciaType.deviceRepository,
     serverMessages
   );
 
-  const persistenciaType = await choosePersistenciaType(ENVIRONMENT);
   const deviceService = new DeviceService(
     cacheDeviceRepository,
-    persistenciaType.deviceRepository,
-    eventEmitter,
-    serverMessages
+    eventEmitter
   );
 
   const appCorn = new AppCron();
@@ -127,6 +128,7 @@ export async function initializeDependencias() {
 
   const deviceRunControllerDep = new RunDeviceControllers(deviceRunService);
 
+  //prueba con deviceservice2, ha cambiado dependecia in devceConrollers a deviceService2
   const deviceControllers = new DeviceControllers(deviceService);
   const taskControlles = new TaskControllers(taskService);
   const loginControllers = new LoginControllers(tokenGenerator);

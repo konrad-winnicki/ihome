@@ -41,23 +41,10 @@ export async function prepareAppProperties(
   properties: PropertiesReader.Reader,
   propertiesPath: string
 ) {
-  let isCollectUserData = true;
-  const isPropertyFileValid = checkIfValidPropertyFile(properties);
-  if (isPropertyFileValid) {
-    isCollectUserData = await changeExistingProperties()
-      .then((result) => {
-        if (result.PROPERTY_CHANGE_CONFIRMATION) {
-          return Promise.resolve(true);
-        }
-        return Promise.resolve(false);
-      })
-      .catch((err) => {
-        console.log("err", err);
-        process.exit(1);
-      });
-  }
+  const fileIsInvalid = !checkIfValidPropertyFile(properties);
+  const collectProperties = fileIsInvalid || (await userWantsToRecreate());
 
-  if (isCollectUserData) {
+  if (collectProperties) {
     return collectUserData()
       .then((response) => {
         const responseKeys = Object.keys(response);
@@ -65,6 +52,15 @@ export async function prepareAppProperties(
         properties.set("JWT_SECRET", v4());
         return propertyWriter(properties, propertiesPath);
       })
+      .catch((err) => {
+        console.log("err", err);
+        process.exit(1);
+      });
+  }
+
+  async function userWantsToRecreate() {
+    return changeExistingProperties()
+      .then((result) => result.PROPERTY_CHANGE_CONFIRMATION)
       .catch((err) => {
         console.log("err", err);
         process.exit(1);

@@ -19,17 +19,14 @@ import { Connection } from "mongoose";
 import { Device } from "../../domain/Device";
 import cron from "node-cron";
 
-
-const environment = sanitizedConfig.NODE_ENV
-  
-
+const environment = sanitizedConfig.NODE_ENV;
 
 describe("API DELETE DEVICE TEST", () => {
   let app: Application;
   let token: string;
   let switch1Id: string;
   let switch2Id: string;
-  let requestUri:string;
+  let requestUri: string;
   let listDevices: () => Promise<Device[]>;
   let getDevice: (deviceId: string) => Promise<Device[]>;
   beforeAll(async () => {
@@ -38,13 +35,11 @@ describe("API DELETE DEVICE TEST", () => {
       const connection = app.databaseInstance?.connection as Connection;
       listDevices = produceGetAllDevicesFromDB(connection);
       getDevice = produceGetDeviceFromDB(connection);
-    }
-    else if (environment === "test_api_file") {
+    } else if (environment === "test_api_file") {
       listDevices = produceGetAllDevicesFromFiles("devices.json");
       getDevice = produceGetDeviceFromFiles("devices.json");
     }
     requestUri = `http://localhost:${appConfiguration.PORT}`;
-
   });
 
   beforeEach(async () => {
@@ -56,7 +51,7 @@ describe("API DELETE DEVICE TEST", () => {
       console.log("sfter cleanup", app.devicesInMemory.devices);
     }
     if (environment === "test_api_file") {
-      await cleanupFiles(['devices.json']);
+      await cleanupFiles(["devices.json", 'tasks.json']);
     }
     app.devicesInMemory.devices.clear();
     token = await loginUser(requestUri, "testPassword");
@@ -87,10 +82,14 @@ describe("API DELETE DEVICE TEST", () => {
       .set("Authorization", token)
       .expect(500)
       .expect("Content-Type", /application\/json/);
+
+
     const devicesInDB = await listDevices();
     const [device1, device2] = app.devicesInMemory.devices.values();
     expect(response.body).toEqual({
-      "Device not deleted": "device not exists",
+      ["Device not deleted"]: {
+        NonExistsError: "Device with id nonExisitingId does not exist.",
+      },
     });
     expect(devicesInDB).toMatchObject([
       {
@@ -168,7 +167,11 @@ describe("API DELETE DEVICE TEST", () => {
   });
   afterAll(async () => {
     if (environment === "test_api_database") {
+     // await app.databaseInstance?.connection.dropDatabase()
       await app.databaseInstance?.connection.close();
+    }
+    if (environment === "test_api_file") {
+      await cleanupFiles(["devices.json"]);
     }
     cron.getTasks().forEach((task) => task.stop());
     cron.getTasks().clear();

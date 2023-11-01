@@ -16,8 +16,7 @@ import { Device } from "../../domain/Device";
 //import appConfiguration from "../../../config/sanitizedProperties";
 import cron from "node-cron";
 
-const environment = sanitizedConfig.NODE_ENV;
-
+const environment = sanitizedConfig.NODE_ENV
 
 describe("API ADD DEVICE TEST", () => {
   const badRequestResponse = {
@@ -428,18 +427,14 @@ describe("API ADD DEVICE TEST", () => {
       .expect(409)
       .expect("Content-Type", /application\/json/);
 
-    console.log(JSON.stringify(response.body));
+    console.log('RESSSS', response.body);
 
     expect(response.body).toEqual({
-      Error: {
         "Device not added": {
           error: "Unique violation error: NameConflictError",
         },
-      },
-      compensation: {
-        "Compensation succeded": { "Device deleted": "No errors" },
-      },
-    });
+      }
+     );
 
     const [...devicesInMemoryKeys] = app.devicesInMemory.devices.keys();
     const deviceInMemory = app.devicesInMemory.devices.get(deviceId);
@@ -461,12 +456,20 @@ describe("API ADD DEVICE TEST", () => {
       commandOn: "switch on",
       commandOff: "switch off",
     });
+
+    
   });
 
   afterAll(async () => {
     if (environment === "test_api_database") {
+      //await app.databaseInstance?.connection.dropDatabase()
+
       await app.databaseInstance?.connection.close();
     }
+    if (environment === "test_api_file") {
+      await cleanupFiles(['devices.json', 'tasks.json']);
+    }
+    
     cron.getTasks().forEach((task) => task.stop());
     cron.getTasks().clear();
     await app.appServer.stopServer();

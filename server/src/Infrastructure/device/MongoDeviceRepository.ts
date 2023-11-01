@@ -79,8 +79,6 @@ export class MongoDeviceRepository implements DeviceRepository {
           })
     );
 
-    // console.log("STH:" + sth.toString());
-    // console.log(typeof sth);
-    // return sth;
+   
   }
 }

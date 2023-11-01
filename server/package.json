@@ -13,8 +13,8 @@
     "dev_file": "cross-env NODE_ENV=dev_file node ./dist/src/server.js",
     "test_domain": "npx jest --runInBand --coverage --testPathPattern=./__tests__/domain",
     "test_infrastructure": "npx jest --runInBand --coverage --testPathPattern=./__tests__/infrastructure",
-    "test_api_database": "cross-env NODE_ENV=test_api_database npx jest --silent=false --runInBand --coverage  --testPathPattern=./__tests__/apiTests",
-    "test_api_file": "cross-env NODE_ENV=test_api_file npx jest --silent=false --runInBand --coverage  --testPathPattern=./__tests__/apiTests"
+    "test_api_database": "cross-env NODE_ENV=test_api_database npx jest --silent=true --runInBand --coverage  --testPathPattern=./__tests__/apiTests",
+    "test_api_file": "cross-env NODE_ENV=test_api_file npx jest --silent=true --runInBand --coverage  --testPathPattern=./__tests__/apiTests"
 
   },
   "author": "Konrad Winnicki",

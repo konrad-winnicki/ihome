@@ -6,6 +6,7 @@ import { Application } from "../../dependencias";
 import { loginUser } from "./auxilaryFunctionsForTests/loginUser";
 //import appConfiguration from "../../../config/sanitizedProperties";
 import cron from "node-cron";
+import { cleanupFiles } from "./auxilaryFunctionsForTests/fileCleanup";
 
 const environment = sanitizedConfig.NODE_ENV
 
@@ -57,7 +58,11 @@ describe("API RENEW SESSION TEST", () => {
 
   afterAll(async () => {
     if (environment === "test_api_database"){
+      //await app.databaseInstance?.connection.dropDatabase()
       await app.databaseInstance?.connection.close();}
+      if (environment === "test_api_file") {
+        await cleanupFiles(['devices.json', 'tasks.json']);
+      }
       cron.getTasks().forEach((task) => task.stop());
       cron.getTasks().clear();
       await app.appServer.stopServer();

@@ -91,6 +91,7 @@ export class FileTaskRepository implements TaskRepository {
         return this.helperMethods
           .readFile("devices.json")
           .then((devicesFileContent) => {
+
             return tasks.map((task: Task) => {
               const device = devicesFileContent[task.deviceId];
               return new AggregatedTask(

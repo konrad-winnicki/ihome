@@ -34,7 +34,7 @@ export class TaskService {
   async add(task: Task): Promise<ManagerResponse<object | string>> {
     return this.dviceService
       .getById(task.deviceId)
-      .catch((error) => Promise.reject(error))
+      .catch((error: ManagerResponse<object | string>) => Promise.reject(error))
       .then(() =>
         this.taskRepository
           .add(task)

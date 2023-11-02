@@ -23,20 +23,22 @@ export class FileDeviceRepository implements DeviceRepository {
     return this.helperMethods
       .readFile("devices.json")
       .then((fileContent) => {
-        const isDeviceExisting = this.helperMethods.findById(
+        const isDeviceExisting = this.helperMethods.findByIdInFile(
           fileContent,
           device.id
         );
         if (isDeviceExisting) {
           throw new Error(this.serverMessages.uniqueViolation.ID_DUPLICATION);
         }
-        const isNameExisting = this.helperMethods.findIfNameExists(
-          fileContent,
+        const isNameExisting = this.helperMethods.findIfDeviceNameExists(
+          fileContent as {[key:string]: Device},
           device.name
         );
         if (isNameExisting) {
           //throw new Error(this.serverMessages.uniqueViolation.NAME_DUPLICATION);
-        return Promise.reject({error: this.serverMessages.uniqueViolation.NAME_DUPLICATION})
+          return Promise.reject({
+            error: this.serverMessages.uniqueViolation.NAME_DUPLICATION,
+          });
         }
         fileContent[device.id] = device;
         return this.helperMethods
@@ -60,7 +62,7 @@ export class FileDeviceRepository implements DeviceRepository {
     return this.helperMethods
       .readFile("devices.json")
       .then((fileContent) => {
-        const isExisting = this.helperMethods.findById(fileContent, id);
+        const isExisting = this.helperMethods.findByIdInFile(fileContent, id);
         if (!isExisting) {
           throw new Error(`Device ${id} does not exists.`);
         }
@@ -84,6 +86,8 @@ export class FileDeviceRepository implements DeviceRepository {
   }
 
   async listByType(deviceType: string): Promise<Device[]> {
+    const persistencieError = this.serverMessages.persistenceError;
+
     return this.helperMethods.readFile("devices.json").then((fileContent) => {
       const devices = Object.values(fileContent) as Device[];
       const typedDevices = devices.filter((device) => {
@@ -92,17 +96,21 @@ export class FileDeviceRepository implements DeviceRepository {
         }
       });
       return Promise.resolve(typedDevices);
-    });
+    }).catch((error) => Promise.reject({ [persistencieError]: error }));
+
   }
 
   async getById(deviceId: string): Promise<Device> {
+    const persistenceError = this.serverMessages.persistenceError;
+
     return this.helperMethods.readFile("devices.json").then((fileContent) => {
-      const device = this.helperMethods.findById(fileContent, deviceId);
+      const device = this.helperMethods.findByIdInFile(fileContent, deviceId);
       return device
         ? Promise.resolve(device as Device)
         : Promise.reject({
             NonExistsError: `Device with id ${deviceId} does not exist.`,
           });
-    });
+    }).catch((error) => Promise.reject({ [persistenceError]: error }));
+
   }
 }

@@ -1,5 +1,4 @@
 export class ServerMessages {
-
   private static instance: ServerMessages | null = null;
   public compensation = {
     SUCCESS: "Compensation succeded",
@@ -29,15 +28,16 @@ export class ServerMessages {
   public uniqueViolation = {
     NAME_DUPLICATION: "Unique violation error: NameConflictError",
     ID_DUPLICATION: "Unique violation error: IdConflictError",
-
   };
 
-  public static getInstance(
-    ) {
+  public idError = "Wrong id";
+  public notFound = "Item not found";
+  public persistenceError = "Persistence error";
+  public fileError = "Reading file error";
+  public static getInstance() {
     if (!ServerMessages.instance) {
       ServerMessages.instance = new ServerMessages();
     }
     return ServerMessages.instance;
   }
- 
 }

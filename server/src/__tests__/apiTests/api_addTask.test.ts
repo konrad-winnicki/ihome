@@ -144,7 +144,7 @@ describe("API ADD TASK TEST", () => {
       .expect("Content-Type", /application\/json/);
 
     expect(responseTask1.body).toStrictEqual({
-      NonExistsError: "Device with id notExistingId does not exist.",
+     "Persistence error": {NonExistsError: "Device with id notExistingId does not exist."},
     });
   });
 

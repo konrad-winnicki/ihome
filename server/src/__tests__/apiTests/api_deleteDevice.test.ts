@@ -87,9 +87,9 @@ describe("API DELETE DEVICE TEST", () => {
     const devicesInDB = await listDevices();
     const [device1, device2] = app.devicesInMemory.devices.values();
     expect(response.body).toEqual({
-      ["Device not deleted"]: {
+      ["Device not deleted"]: {"Persistence error": {
         NonExistsError: "Device with id nonExisitingId does not exist.",
-      },
+      }},
     });
     expect(devicesInDB).toMatchObject([
       {

@@ -65,20 +65,26 @@ export class MongoDeviceRepository implements DeviceRepository {
   }
 
   async listByType(deviceType: string): Promise<Device[]> {
+    const persistencieError = this.serverMessages.persistenceError;
+
     return this.deviceDocument
       .find({ deviceType: deviceType })
-      .then((devices) => Promise.resolve(devices));
+      .then((devices) => Promise.resolve(devices))
+      .catch((error) => Promise.reject({ [persistencieError]: error }));
   }
 
+  // jak zwrocic database error?
   async getById(deviceId: string): Promise<Device> {
-    return this.deviceDocument.findOne({ id: deviceId }).then((device) =>
-      device
-        ? Promise.resolve(device)
-        : Promise.reject({
-            NonExistsError: `Device with id ${deviceId} does not exist.`,
-          })
-    );
-
-   
+    const persistenceError = this.serverMessages.persistenceError;
+    return this.deviceDocument
+      .findOne({ id: deviceId })
+      .then((device) =>
+        device
+          ? Promise.resolve(device)
+          : Promise.reject({
+              NonExistsError: `Device with id ${deviceId} does not exist.`,
+            })
+      )
+      .catch((error) => Promise.reject({ [persistenceError]: error }));
   }
 }

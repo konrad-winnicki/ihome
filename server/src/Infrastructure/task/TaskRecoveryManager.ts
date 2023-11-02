@@ -29,7 +29,7 @@ export class TaskRecoveryManager implements TaskRecovery {
               : task.commandOff
               ? task.commandOff
               : ""
-          );
+          )
         });
 
         return Promise.resolve({

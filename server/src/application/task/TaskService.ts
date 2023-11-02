@@ -1,7 +1,6 @@
 import { DeviceService } from "../device/DeviceService";
 import { TaskManager } from "./TaskManager";
 import { Task } from "../../domain/Task";
-import { ServerMessages } from "../../ServerMessages";
 import EventEmitter from "node:events";
 
 type ManagerResponse<T> = {
@@ -12,17 +11,14 @@ export class TaskService {
   private taskManager: TaskManager;
   private dviceService: DeviceService;
 
-  private serverMessages: ServerMessages;
 
   constructor(
     taskManager: TaskManager,
     deviceService: DeviceService,
-    serverMessages: ServerMessages,
     eventEmitter: EventEmitter
   ) {
     this.taskManager = taskManager;
     this.dviceService = deviceService;
-    this.serverMessages = serverMessages;
     this.handleEvent = this.handleEvent.bind(this);
     eventEmitter.on("deviceDeleted", this.handleEvent);
   }
@@ -30,7 +26,7 @@ export class TaskService {
   async add(task: Task): Promise<ManagerResponse<object | string>> {
     return this.dviceService
       .getById(task.deviceId)
-      .catch((error: ManagerResponse<object | string>) => Promise.reject(error))
+      .catch((error: ManagerResponse<object>) => Promise.reject(error))
       .then(() => this.taskManager.add(task));
   }
 

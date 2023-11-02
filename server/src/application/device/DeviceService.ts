@@ -30,7 +30,7 @@ export class DeviceService {
     return this.persistenceDeviceRepository
       .delete(deviceId)
       .then((response) => {
-        console.log(response);
+        console.log('DELETE device',response);
         this.eventEmitter.emit("deviceDeleted", deviceId);
         return Promise.resolve(response);
       });

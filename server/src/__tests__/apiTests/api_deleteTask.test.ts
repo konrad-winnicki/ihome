@@ -110,7 +110,7 @@ let requestUri: string;
 
 
       console.log('TASK WRONG ID', response.body)
-    expect(response.body).toEqual({ 'Task not deleted': { '["WrongId"]': 'Task not exists' } });
+    expect(response.body).toEqual({ 'Task not deleted': { 'Item not found': 'Task not exists' } });
   });
 
   test("Should not delete task if not valid token:", async () => {

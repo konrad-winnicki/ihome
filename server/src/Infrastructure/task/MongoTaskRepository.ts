@@ -36,7 +36,7 @@ export class MongoTaskRepository implements TaskRepository {
     this.serverMessages = serverMessages;
   }
 
-  async add(task: Task): Promise<RepositoryResponse<object>> {
+  public async add(task: Task): Promise<RepositoryResponse<object>> {
     const newTask = {
       id: task.id,
       deviceId: task.deviceId,
@@ -58,28 +58,33 @@ export class MongoTaskRepository implements TaskRepository {
       });
   }
 
-  async delete(taskId: string): Promise<RepositoryResponse<object>> {
+  public async delete(taskId: string): Promise<RepositoryResponse<object>> {
+    const messageSucces = this.serverMessages.deleteTask.SUCCESS;
+    const messageFailure = this.serverMessages.deleteTask.FAILURE;
     return this.taskDocument
       .deleteOne({ id: taskId })
-      .then((response) => {
-        const messageSucces = this.serverMessages.deleteTask.SUCCESS;
-        const messageFailure = this.serverMessages.deleteTask.FAILURE;
-        const resolveMessage = { [messageSucces]: response };
-        const rejectMessage = { [messageFailure]: response };
+      .then((databaseResponse) => {
+        const resolveMessage = { [messageSucces]: databaseResponse };
+        const rejectMessage = { [messageFailure]: databaseResponse };
 
-        return response.acknowledged && response.deletedCount == 1
+        return databaseResponse.acknowledged &&
+          databaseResponse.deletedCount == 1
           ? Promise.resolve(resolveMessage)
           : Promise.reject(rejectMessage);
       })
       .catch((error) => {
-        const messageFailure = this.serverMessages.deleteTask.FAILURE;
         const rejectMessage = { [messageFailure]: error };
 
         return Promise.reject(rejectMessage);
       });
   }
 
-  async findByIdAndAggregate(taskId: string): Promise<AggregatedTask> {
+  public async findByIdAndAggregateWithDevice(
+    taskId: string
+  ): Promise<AggregatedTask> {
+    const persistenceError = this.serverMessages.persistenceError
+    const notFound = this.serverMessages.notFound;
+
     return this.taskDocument
       .aggregate(taskAndDeviceAggregationPipeline(taskId))
       .then((aggregatedTasksList) => {
@@ -97,22 +102,32 @@ export class MongoTaskRepository implements TaskRepository {
             )
           );
         }
-        return Promise.reject({ ["Wrong id"]: `Task not exists` });
+        return Promise.reject({ [notFound]: `Task not exists` });
+      }).catch((error)=> Promise.reject({[persistenceError]:error}) )
+  }
+
+  public async findById(taskId: string): Promise<Task> {
+    const notFoundMessage = this.serverMessages.notFound;
+
+    return this.taskDocument
+      .findOne({ id: taskId })
+      .then((task) => {
+        if (task) {
+          return Promise.resolve(
+            new Task(task.id, task.deviceId, task.onStatus, task.scheduledTime)
+          );
+        } else {
+          return Promise.reject(`Task not exists`);
+        }
+      })
+      .catch((error) => {
+        return Promise.reject({ [notFoundMessage]: error });
       });
   }
 
-  async findById(taskId: string): Promise<Task> {
-    return this.taskDocument.findOne({ id: taskId }).then((task) => {
-      if (task) {
-        return Promise.resolve(
-          new Task(task.id, task.deviceId, task.onStatus, task.scheduledTime)
-        );
-      } else {
-        return Promise.reject({ '["WrongId"]': `Task not exists` });
-      }
-    });
-  }
-  async listAll(): Promise<AggregatedTask[]> {
+  public async listAll(): Promise<AggregatedTask[]> {
+    const persistenceError = this.serverMessages.persistenceError;
+
     return this.taskDocument
       .aggregate(taskAndDeviceAggregationPipeline())
       .then((aggregatedTasks) => {
@@ -129,17 +144,15 @@ export class MongoTaskRepository implements TaskRepository {
         );
         return Promise.resolve(tasks);
       })
-      .catch((error) =>
-        Promise.reject({ ["Fetching all tasks failed due error"]: error })
-      );
+      .catch((error) => Promise.reject({ [persistenceError]: error }));
   }
 
-  async getByDevice(deviceId: string): Promise<Task[]> {
+  public async getByDevice(deviceId: string): Promise<Task[]> {
+    const databaseError = this.serverMessages.persistenceError;
+
     return this.taskDocument
       .find({ deviceId: deviceId })
       .then((tasks) => tasks)
-      .catch((error) =>
-        Promise.reject({ ["Fetching task for device failed due error"]: error })
-      );
+      .catch((error) => Promise.reject({ [databaseError]: error }));
   }
 }

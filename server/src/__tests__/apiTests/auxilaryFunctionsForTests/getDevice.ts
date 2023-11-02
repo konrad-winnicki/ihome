@@ -4,28 +4,30 @@ import fs from "fs/promises";
 import { FileRepositoryHelpers } from "../../../Infrastructure/filePersistencia/auxilaryFunctions";
 
 export function produceGetDeviceFromDB(connection: Connection) {
-  return async (deviceId: string
-  ): Promise<Device[]> =>{
+  return async (deviceId: string): Promise<Device[]> => {
     const database = connection.useDb("raspberrypi_test");
     const collection = database.collection("devices");
-    const response = (await collection.find({ id: deviceId }).toArray()) as unknown as Device[]
+    const response = (await collection
+      .find({ id: deviceId })
+      .toArray()) as unknown as Device[];
     return response;
-  }
+  };
 }
 
 // domkniecie, clojure, HOF
 export function produceGetDeviceFromFiles(path: string) {
-  return async (deviceId: string): Promise<Device[]> =>{
-
-    const fileRepositoryMethods = new FileRepositoryHelpers()
+  return async (deviceId: string): Promise<Device[]> => {
+    const fileRepositoryMethods = new FileRepositoryHelpers();
     return fs
       .readFile(path, "utf-8")
       .then((fileContent) => {
         const jsonObject = JSON.parse(fileContent);
-        const device = (fileRepositoryMethods.findById(jsonObject, deviceId)) as Device
-        return device? Promise.resolve([device]): Promise.resolve([])
+        const device = fileRepositoryMethods.findByIdInFile(
+          jsonObject,
+          deviceId
+        ) as Device;
+        return device ? Promise.resolve([device]) : Promise.resolve([]);
       })
       .catch((error) => Promise.reject(error));
-}
-
+  };
 }

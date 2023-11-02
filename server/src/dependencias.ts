@@ -120,7 +120,6 @@ export async function initializeDependencias() {
   const taskService = new TaskService(
     cronTaskManager,
     deviceService,
-    serverMessages,
     eventEmitter
   );
   const deviceRunService = new DeviceRunService(cacheDeviceRepository);

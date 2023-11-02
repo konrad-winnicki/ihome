@@ -25,7 +25,6 @@ export class DeviceControllers {
         ctx.body = response;
       })
       .catch((error) => {
-        console.log("CONTROLLER", error);
         if (JSON.stringify(error).includes("NameConflictError")) {
           ctx.status = 409;
           return (ctx.body = error);

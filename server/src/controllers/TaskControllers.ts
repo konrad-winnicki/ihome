@@ -1,10 +1,5 @@
 import Koa from "koa";
 import { TaskService } from "../application/task/TaskService";
-/*
-export type DeviceControllers = {
-  addDevice: (ctx: Koa.Context) => Promise<void>;
-};
-*/
 
 export class TaskControllers {
   private taskService: TaskService;
@@ -35,6 +30,7 @@ export class TaskControllers {
     return this.taskService
       .delete(taskId)
       .then((response) => {
+
         ctx.status = 200;
         ctx.body = response;
       })

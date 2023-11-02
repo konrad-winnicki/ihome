@@ -4,6 +4,8 @@ import { FileRepositoryHelpers } from "./auxilaryFunctions";
 import { TaskRepository } from "../../application/task/TaskRepository";
 import { AggregatedTask } from "../../domain/AggregatedTask";
 import { Task } from "../../domain/Task";
+import { Meter } from "../../domain/Meter";
+import { Switch } from "../../domain/Switch";
 
 export class FileTaskRepository implements TaskRepository {
   private helperMethods: FileRepositoryHelpers;
@@ -17,11 +19,11 @@ export class FileTaskRepository implements TaskRepository {
     this.serverMessages = serverMessages;
   }
 
-  async add(task: Task): Promise<ManagerResponse<object | string>> {
+  async add(task: Task): Promise<ManagerResponse<object|string>> {
     return this.helperMethods
       .readFile("tasks.json")
       .then((fileContent) => {
-        const isTaskExisting = this.helperMethods.findById(
+        const isTaskExisting = this.helperMethods.findByIdInFile(
           fileContent,
           task.id
         );
@@ -42,7 +44,6 @@ export class FileTaskRepository implements TaskRepository {
           });
       })
       .catch((error) => {
-        console.log("write task error", error);
         const messageFailure = this.serverMessages.addTask.FAILURE;
         if (error instanceof Error) {
           return Promise.reject({ [messageFailure]: error.message });
@@ -55,9 +56,11 @@ export class FileTaskRepository implements TaskRepository {
     return this.helperMethods
       .readFile("tasks.json")
       .then((fileContent) => {
-        const isExisting = this.helperMethods.findById(fileContent, id);
+        const isExisting = this.helperMethods.findByIdInFile(fileContent, id);
         if (!isExisting) {
-          throw new Error(`Task ${id} does not exists.`);
+          const notFoundError= this.serverMessages.notFound
+
+          return Promise.reject({[notFoundError]: `Task ${id} does not exists.`});
         }
         delete fileContent[id];
 
@@ -70,7 +73,7 @@ export class FileTaskRepository implements TaskRepository {
           });
       })
       .catch((error) => {
-        const messageFailure = this.serverMessages.addTask.FAILURE;
+        const messageFailure = this.serverMessages.deleteTask.FAILURE;
         if (error instanceof Error) {
           return Promise.reject({ [messageFailure]: error.message });
         }
@@ -79,71 +82,71 @@ export class FileTaskRepository implements TaskRepository {
   }
 
   async listAll(): Promise<AggregatedTask[]> {
-    return this.helperMethods
-      .readFile("tasks.json")
-      .then((tasksFileContent) => {
-        const tasks = Object.values(tasksFileContent) as Task[];
-        return this.helperMethods
-          .readFile("devices.json")
-          .then((devicesFileContent) => {
-            return tasks.map((task: Task) => {
-              const device = devicesFileContent[task.deviceId];
-              return new AggregatedTask(
-                task.id,
-                task.onStatus,
-                Number(task.scheduledTime.hour),
-                Number(task.scheduledTime.minutes),
-                device.commandOn,
-                device.commandOff
-              );
-            });
-          });
-      })
-      .catch((error) =>
-        Promise.reject({ ["Fetching all tasks failed due error"]: error })
-      );
+    return this.helperMethods.readFile("tasks.json").then((taskMap) => {
+      const tasks = Object.values(taskMap) as Task[];
+      return this.helperMethods.readFile("devices.json").then((deviceMap) => {
+        return tasks.map((task: Task) => {
+          const device = (deviceMap[task.deviceId]) as Meter & Switch
+          return new AggregatedTask(
+            task.id,
+            task.onStatus,
+            Number(task.scheduledTime.hour),
+            Number(task.scheduledTime.minutes),
+            device.commandOn,
+            device.commandOff
+          );
+        });
+      });
+    });
   }
 
   async getByDevice(deviceId: string): Promise<Task[]> {
-    return this.helperMethods
-      .readFile("tasks.json")
-      .then((fileContent) => {
-        const tasks = Object.values(fileContent) as Task[];
-        const filteredTasks = tasks.filter((task) => {
-          if (task.deviceId === deviceId) {
-            return task;
-          }
-        });
-        if (filteredTasks.length > 0) {
-          return Promise.resolve(filteredTasks);
-        }
-        return Promise.reject({ error: "Tasks not found" });
-      })
-      .catch((error) => Promise.reject({ error: error }));
-  }
+    const notFoundError = this.serverMessages.notFound;
+    const persistenceError = this.serverMessages.persistenceError
 
-  async findByIdAndAggregate(taskId: string): Promise<AggregatedTask> {
-    return this.listAll()
-      .then((aggregatedTasks: AggregatedTask[]) => {
-        const task = aggregatedTasks.find((task) => {
-          return task.id === taskId;
-        });
-        if (task) {
+    return this.helperMethods.readFile("tasks.json").then((taskMap) => {
+      const tasks = Object.values(taskMap) as Task[];
+      const tasksFilteredById = tasks.filter((task) => {
+        if (task.deviceId === deviceId) {
           return task;
         }
-        return Promise.reject({ ["Wrong id"]: `Task not exists` });
-      })
-      .catch((error) => Promise.reject({ error: error }));
+      });
+      if (tasksFilteredById.length > 0) {
+        return Promise.resolve(tasksFilteredById);
+      }
+      return Promise.reject({ [notFoundError]: "No task for this device" });
+    }).catch((error)=> Promise.reject({[persistenceError]:error}) )
+  }
+
+  async findByIdAndAggregateWithDevice(
+    taskId: string
+  ): Promise<AggregatedTask> {
+    const notFoundMessage = this.serverMessages.notFound;
+    const persistenceError = this.serverMessages.persistenceError
+
+    return this.listAll().then((aggregatedTasks: AggregatedTask[]) => {
+      const task = aggregatedTasks.find((aggregatedTaskl) => {
+        return aggregatedTaskl.id === taskId;
+      });
+      if (task) {
+        return task;
+      }
+      return Promise.reject({ [notFoundMessage]: `Task not exists` });
+    }).catch((error)=> Promise.reject({[persistenceError]:error}) )
   }
 
   async findById(taskId: string): Promise<Task> {
-    return this.helperMethods.readFile("tasks.json").then((fileContent) => {
-      const task = fileContent[taskId];
+    const notFoundMessage = this.serverMessages.notFound;
+
+    return this.helperMethods.readFile("tasks.json").then((tasks) => {
+      const task = tasks[taskId];
 
       if (task) {
-        return Promise.resolve(task);
+        return Promise.resolve(task as Task);
       }
-      return Promise.reject({ '["WrongId"]': `Task not exists` });
+      return Promise.reject(`Task not exists`);
+    }).catch((error) => {
+      return Promise.reject({ [notFoundMessage]: error });
     });
   }
 }

@@ -3,49 +3,41 @@ import * as sync from "node:fs";
 import { Device } from "../../domain/Device";
 
 export class FileRepositoryHelpers {
-  async writeFile(path: string, data: object) {
-    const content = JSON.stringify(data);
+  public async writeFile(path: string, data: object): Promise<void> {
+    const contentToWrite = JSON.stringify(data);
     return fs
-      .writeFile(path, content)
-      .catch((err) => Promise.reject({ error: err }));
+      .writeFile(path, contentToWrite)
+      .catch((err) => Promise.reject({ ["Write file error"]: err }));
   }
 
-  async readFile(path: string) {
+  //czy lepiej zwracac generyczny object czy Task | Device
+  public async readFile(path: string): Promise<{ [key: string]: object}> {
     if (!sync.existsSync(path)) {
       await this.writeFile(path, {});
     }
     return fs
       .readFile(path, "utf-8")
       .then((fileContent) => {
-        const jsonObject = JSON.parse(fileContent);
-        return Promise.resolve(jsonObject);
+        const fileContentInJSON = JSON.parse(fileContent);
+        return Promise.resolve(fileContentInJSON);
       })
-      .catch((error) => Promise.reject(error));
+      .catch((error) => Promise.reject({ ["Read file error"]: error }));
   }
 
-  findById(content: { [key: string]: object }, searchedKey: string) {
-    const resultValue = content[searchedKey];
-    if (resultValue) {
-      return resultValue;
+  public findByIdInFile(fileContent: { [key: string]: object}, searchedKey: string): object | null {
+    const foundValue = fileContent[searchedKey];
+    if (foundValue) {
+      return foundValue;
     }
     return null;
   }
-
-  findTasksByDeviceId(content: { [key: string]: object }, searchedKey: string) {
-    const resultValue = content[searchedKey];
-    if (resultValue) {
-      return resultValue;
-    }
-    return null;
-  }
-
-  findIfNameExists(content: { [key: string]: Device }, searchedName: string) {
-    const devices = Object.values(content);
-    for (const device of devices) {
-      if (device.name === searchedName) {
-        return true;
-      }
-    }
-    return false;
+ 
+  public findIfDeviceNameExists(
+    fileContent: { [key: string]: Device },
+    searchedName: string
+  ): Device|undefined {
+    const devices = Object.values(fileContent);
+    const device = devices.find((device)=> device.name === searchedName)
+    return device
   }
 }

@@ -26,9 +26,11 @@ export class MongoDeviceRepository implements DeviceRepository {
         return Promise.resolve(resolveMessage);
       })
       .catch((error) => {
+        const errorToPass = error instanceof Error? this.translateDbError(error): error
+
         const messageFailure = this.serverMessages.addDevice.FAILURE;
         const rejectMessage = {
-          [messageFailure]: this.translateDbError(error),
+          [messageFailure]: errorToPass,
         };
         return Promise.reject(rejectMessage);
       });

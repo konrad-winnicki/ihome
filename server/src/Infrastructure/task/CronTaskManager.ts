@@ -25,7 +25,6 @@ export class CronTaskManager implements TaskManager {
     this.serverMessages = serverMessages;
   }
 
-
   public async add(task: Task): Promise<ManagerResponse<object | string>> {
     return this.delegate
       .add(task)
@@ -36,48 +35,50 @@ export class CronTaskManager implements TaskManager {
         return this.delegate
           .findByIdAndAggregateWithDevice(justAddedTaskId)
           .then((aggregatedTask) => {
-            return this.appCron
-              .installTask(
-                aggregatedTask.id,
-                aggregatedTask.minutes,
-                aggregatedTask.hour,
-                aggregatedTask.onStatus
-                  ? aggregatedTask.commandOn
-                  : aggregatedTask.commandOff
-                  ? aggregatedTask.commandOff
-                  : ""
-              )
-              .catch((delegateError) => {
-                return this.compensateTaskAddition(task.id)
-                  .catch((compensationError) => {
-                    const rejectMessage = {
-                      Error: delegateError,
-                      compensation: compensationError,
-                    };
-                    console.log(rejectMessage);
-                    return Promise.reject(rejectMessage);
-                  })
-                  .then((compensationResult) => {
-                    const rejectMessage = {
-                      Error: delegateError,
-                      compensation: compensationResult,
-                    };
-                    console.log(rejectMessage);
-                    return Promise.reject(rejectMessage);
-                  });
+            return this.appCron.installTask(
+              aggregatedTask.id,
+              aggregatedTask.minutes,
+              aggregatedTask.hour,
+              aggregatedTask.onStatus
+                ? aggregatedTask.commandOn
+                : aggregatedTask.commandOff
+                ? aggregatedTask.commandOff
+                : ""
+            );
+          })
+          .catch((error) => {
+            const errorToPass = error instanceof Error ? error.message : error;
+            return this.compensateTaskAddition(task.id)
+              .catch((compensationError) => {
+                const rejectMessage = {
+                  Error: errorToPass,
+                  compensation: compensationError,
+                };
+                console.log(rejectMessage);
+                return Promise.reject(rejectMessage);
+              })
+              .then((compensationResult) => {
+                const rejectMessage = {
+                  Error: errorToPass,
+                  compensation: compensationResult,
+                };
+                console.log(rejectMessage);
+                return Promise.reject(rejectMessage);
               });
           });
       })
-      .catch((cronError) => {
+      .catch((error) => {
+
         const message = this.serverMessages.addTask.FAILURE;
-        const rejectMessage = { [message]: cronError };
+        const rejectMessage = { [message]: error };
         return Promise.reject(rejectMessage);
       });
   }
 
-
   //TODO czy findBy Id powinno byc w interface CronTask Managera?
-  public async delete(taskId: string): Promise<ManagerResponse<object | string>> {
+  public async delete(
+    taskId: string
+  ): Promise<ManagerResponse<object | string>> {
     return this.delegate
       .findById(taskId)
       .then((task) => this.deleteTask(task))
@@ -87,13 +88,11 @@ export class CronTaskManager implements TaskManager {
       });
   }
 
- public async listAll(): Promise<AggregatedTask[]> {
+  public async listAll(): Promise<AggregatedTask[]> {
     return this.delegate.listAll();
   }
 
- 
-
- public async getByDevice(deviceId: string): Promise<Task[]> {
+  public async getByDevice(deviceId: string): Promise<Task[]> {
     return this.delegate.getByDevice(deviceId);
   }
 

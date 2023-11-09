@@ -1,6 +1,6 @@
 import { TaskRepository } from "../../application/task/TaskRepository";
 import { Task } from "../../domain/Task";
-import { Model } from "mongoose";
+import { Model, mongo } from "mongoose";
 import { AggregatedTask } from "../../domain/AggregatedTask";
 import { RepositoryResponse } from "../../application/task/TaskRepository";
 import { ServerMessages } from "../../ServerMessages";
@@ -52,12 +52,29 @@ export class MongoTaskRepository implements TaskRepository {
         return Promise.resolve({ [message]: task.id });
       })
       .catch((error) => {
+        const errorToPass = error instanceof Error? this.translateDbError(error): error
+
         const message = this.serverMessages.addTask.FAILURE;
-        const rejectMessage = { [message]: error };
+        const rejectMessage = { [message]: errorToPass };
         return Promise.reject(rejectMessage);
+
       });
   }
 
+
+  private translateDbError(error: Error) {
+    return error instanceof mongo.MongoServerError
+      ? this.uniqueViolationErrorHandler(error)
+      : { error: error.message };
+  }
+
+  uniqueViolationErrorHandler(err: mongo.MongoServerError) {
+    const isUniqueViolation = err.code === 11000;
+    if (isUniqueViolation && err.errmsg.includes("name")) {
+      return { error: this.serverMessages.uniqueViolation.NAME_DUPLICATION };
+    }
+    return { error: err.message };
+  }
   public async delete(taskId: string): Promise<RepositoryResponse<object>> {
     const messageSucces = this.serverMessages.deleteTask.SUCCESS;
     const messageFailure = this.serverMessages.deleteTask.FAILURE;
@@ -82,7 +99,6 @@ export class MongoTaskRepository implements TaskRepository {
   public async findByIdAndAggregateWithDevice(
     taskId: string
   ): Promise<AggregatedTask> {
-    const persistenceError = this.serverMessages.persistenceError
     const notFound = this.serverMessages.notFound;
 
     return this.taskDocument
@@ -103,13 +119,11 @@ export class MongoTaskRepository implements TaskRepository {
           );
         }
         return Promise.reject({ [notFound]: `Task not exists` });
-      }).catch((error)=> Promise.reject({[persistenceError]:error}) )
+      }).catch((error)=> Promise.reject({error:error}) )
   }
 
   public async findById(taskId: string): Promise<Task> {
-    const notFoundMessage = this.serverMessages.notFound;
-
-    return this.taskDocument
+        return this.taskDocument
       .findOne({ id: taskId })
       .then((task) => {
         if (task) {
@@ -121,13 +135,12 @@ export class MongoTaskRepository implements TaskRepository {
         }
       })
       .catch((error) => {
-        return Promise.reject({ [notFoundMessage]: error });
+        return Promise.reject({ error: error });
       });
   }
 
   public async listAll(): Promise<AggregatedTask[]> {
     const persistenceError = this.serverMessages.persistenceError;
-
     return this.taskDocument
       .aggregate(taskAndDeviceAggregationPipeline())
       .then((aggregatedTasks) => {

@@ -25,11 +25,13 @@ export class CacheDeviceRepository implements DeviceRepository {
         const messageSuccess = this.serverMessages.addDevice.SUCCESS;
         const resolveMessage = { [messageSuccess]: device.id };
         resolve(resolveMessage);
-      }).catch((delegateError) =>
-        this.compensateDeviceAddition(device.id)
+      }).catch((error) => {
+        const errorToPass = error instanceof Error? error.message: error
+
+        return this.compensateDeviceAddition(device.id)
           .catch((compensationError) => {
             const rejectMessage = {
-              Error: delegateError,
+              Error: errorToPass,
               compensation: compensationError,
             };
             console.log(rejectMessage);
@@ -37,13 +39,13 @@ export class CacheDeviceRepository implements DeviceRepository {
           })
           .then((compensationResult) => {
             const rejectMessage = {
-              Error: delegateError,
+              Error: errorToPass,
               compensation: compensationResult,
             };
             console.log(rejectMessage);
             return Promise.reject(rejectMessage);
           })
-      );
+      });
     });
   }
 
@@ -51,6 +53,7 @@ export class CacheDeviceRepository implements DeviceRepository {
     return this.getById(deviceId)
       .then((device) => this.deleteDevice(device))
       .catch((error) => {
+        console.log("__final delete", error)
         const messageFailure = this.serverMessages.deleteDevice.FAILURE;
         return Promise.reject({ [messageFailure]: error });
       });
@@ -60,30 +63,30 @@ export class CacheDeviceRepository implements DeviceRepository {
     device: Device
   ): Promise<ManagerResponse<object | string>> {
     const deviceId = device.id;
-    return this.delegate.delete(deviceId).then(() => {
-      return new Promise<ManagerResponse<object | string>>(
-        (resolve) => {
-          this.cachedDevices.delete(deviceId);
-          const messageSuccess = this.serverMessages.deleteDevice.SUCCESS;
-          resolve({ [messageSuccess]: "No errors" });
-        }
-      ).catch((delegateError) =>
-        this.compensateDeviceDelation(device)
+    return this.delegate.delete(deviceId).then((res) => {
+      console.log('delegate res', res)
+      return new Promise<ManagerResponse<object | string>>((resolve) => {
+        this.cachedDevices.delete(deviceId);
+        const messageSuccess = this.serverMessages.deleteDevice.SUCCESS;
+        resolve({ [messageSuccess]: "No errors" });
+      }).catch((error) =>
+      
+      {
+        
+        const errorToPass = error instanceof Error? error.message: error
+        return this.compensateDeviceDelation(device)
           .then((compensationResult: ManagerResponse<object | string>) => {
-            const rejectMessage = {
-              error: delegateError,
-              compensation: compensationResult,
-            };
-            return Promise.reject(rejectMessage);
+            
+            return Promise.reject(compensationResult);
           })
           .catch((compensationError: ManagerResponse<object | string>) => {
             const rejectMessage = {
-              error: delegateError,
+              "error": errorToPass,
               compensation: compensationError,
             };
             return Promise.reject(rejectMessage);
           })
-      );
+        });
     });
   }
 

@@ -12,7 +12,6 @@ export function prepareCronTaskManagerForDatabasePersistenceWithMockParameters(
   taskDocument: Model<Task>
 ) {
   const serverMessages = new ServerMessages();
-
   const mongoTaskManager = new MongoTaskRepository(
     taskDocument,
     serverMessages
@@ -22,8 +21,6 @@ export function prepareCronTaskManagerForDatabasePersistenceWithMockParameters(
     mongoTaskManager,
     serverMessages
   );
-
-  //const taskManager = new TaskManager(cronTaskManager, eventEmitter);
 
   return cronTaskManager;
 }

@@ -24,11 +24,12 @@ export class TaskRecoveryManager implements TaskRecovery {
             task.id,
             task.minutes,
             task.hour,
-            task.onStatus
-              ? task.commandOn
-              : task.commandOff
-              ? task.commandOff
-              : ""
+            task.onStatus,
+            task.commandOn,
+             task.commandOff,
+             task.deviceId
+            
+             
           )
         });
 

@@ -1,15 +1,51 @@
 import { describe } from "@jest/globals";
 import { expect, test } from "@jest/globals";
 import {
+  AddToDatabaseStatus,
+  DeleteFromDBStatus,
+  FindOneById,
   deviceDocumentWithMockMetods,
   prepareMongoDeviceRepositoryWithMockPerameters,
 } from "./mockForMongoDevicePersistence";
 import {
+  MemeoryStatusType,
   inMemoryStoreWithMockMethods,
   prepareCacheDeviceRepositoryWithMockPerameters,
 } from "./mockForCacheDeviceRepository";
 
 describe("CacheDeviceReposiotory with database persistence CLASS TEST - delete device", () => {
+  const dependency = (
+    addToMemoryStatus: MemeoryStatusType,
+    deleteFromMemoryStatus: MemeoryStatusType,
+    addToDBStatus: AddToDatabaseStatus,
+    deleteFromDBStatus: DeleteFromDBStatus,
+    findOneByIdStatus: FindOneById
+  ) => {
+    const inMemoryStorage = inMemoryStoreWithMockMethods(
+      addToMemoryStatus,
+      deleteFromMemoryStatus
+    );
+
+    const deviceDokumentMock = deviceDocumentWithMockMetods(
+      addToDBStatus,
+      deleteFromDBStatus,
+      findOneByIdStatus
+    );
+
+    const mongoDeviceRepository =
+      prepareMongoDeviceRepositoryWithMockPerameters(deviceDokumentMock);
+
+    const cacheDeviceRepository =
+      prepareCacheDeviceRepositoryWithMockPerameters(
+        inMemoryStorage,
+        mongoDeviceRepository
+      );
+    return cacheDeviceRepository;
+  };
+  
+  
+  
+  
   let consoleSpy: jest.SpyInstance;
 
   beforeEach(() => {
@@ -24,24 +60,14 @@ describe("CacheDeviceReposiotory with database persistence CLASS TEST - delete d
     const addToDBStatus = "success";
     const deleteFromDBStatus = "success";
     const findOneByIdStatus = "success";
-    const deviceDokumentMock = deviceDocumentWithMockMetods(
+    
+    const cacheDeviceRepository = dependency(
+      addToMemoryStatus,
+      deleteFromMemoryStatus,
       addToDBStatus,
       deleteFromDBStatus,
-      findOneByIdStatus
+      findOneByIdStatus 
     );
-
-    const mongoDeviceRepository =
-      prepareMongoDeviceRepositoryWithMockPerameters(deviceDokumentMock);
-
-    const inMemoryStorage = inMemoryStoreWithMockMethods(
-      addToMemoryStatus,
-      deleteFromMemoryStatus
-    );
-    const cacheDeviceRepository =
-      prepareCacheDeviceRepositoryWithMockPerameters(
-        inMemoryStorage,
-        mongoDeviceRepository
-      );
 
     await cacheDeviceRepository
       .delete("12345")
@@ -60,26 +86,15 @@ describe("CacheDeviceReposiotory with database persistence CLASS TEST - delete d
     const addToDBStatus = "success";
     const deleteFromDBStatus = "success";
     const findOneByIdStatus = null;
-    const deviceDokumentMock = deviceDocumentWithMockMetods(
+    
+    const cacheDeviceRepository = dependency(
+      addToMemoryStatus,
+      deleteFromMemoryStatus,
       addToDBStatus,
       deleteFromDBStatus,
-      findOneByIdStatus
+      findOneByIdStatus 
     );
 
-    const mongoDeviceRepository =
-      prepareMongoDeviceRepositoryWithMockPerameters(deviceDokumentMock);
-
-    const inMemoryStorage = inMemoryStoreWithMockMethods(
-      addToMemoryStatus,
-      deleteFromMemoryStatus
-    );
-    const cacheDeviceRepository =
-      prepareCacheDeviceRepositoryWithMockPerameters(
-        inMemoryStorage,
-        mongoDeviceRepository
-      );
-
-    
     await cacheDeviceRepository.delete("12345").catch((result) =>
       expect(result).toEqual({
         "Device not deleted": {
@@ -100,24 +115,14 @@ describe("CacheDeviceReposiotory with database persistence CLASS TEST - delete d
     const addToDBStatus = "success";
     const deleteFromDBStatus = "success";
     const findOneByIdStatus = "error";
-    const deviceDokumentMock = deviceDocumentWithMockMetods(
+    
+    const cacheDeviceRepository = dependency(
+      addToMemoryStatus,
+      deleteFromMemoryStatus,
       addToDBStatus,
       deleteFromDBStatus,
-      findOneByIdStatus
+      findOneByIdStatus 
     );
-
-    const mongoDeviceRepository =
-      prepareMongoDeviceRepositoryWithMockPerameters(deviceDokumentMock);
-
-    const inMemoryStorage = inMemoryStoreWithMockMethods(
-      addToMemoryStatus,
-      deleteFromMemoryStatus
-    );
-    const cacheDeviceRepository =
-      prepareCacheDeviceRepositoryWithMockPerameters(
-        inMemoryStorage,
-        mongoDeviceRepository
-      );
 
     await cacheDeviceRepository.delete("12345").catch((result) =>
       expect(result).toEqual({
@@ -138,24 +143,14 @@ describe("CacheDeviceReposiotory with database persistence CLASS TEST - delete d
     const addToDBStatus = "success";
     const deleteFromDBStatus = "success";
     const findOneByIdStatus = "success";
-    const deviceDokumentMock = deviceDocumentWithMockMetods(
+    
+    const cacheDeviceRepository = dependency(
+      addToMemoryStatus,
+      deleteFromMemoryStatus,
       addToDBStatus,
       deleteFromDBStatus,
-      findOneByIdStatus
+      findOneByIdStatus 
     );
-
-    const mongoDeviceRepository =
-      prepareMongoDeviceRepositoryWithMockPerameters(deviceDokumentMock);
-
-    const inMemoryStorage = inMemoryStoreWithMockMethods(
-      addToMemoryStatus,
-      deleteFromMemoryStatus
-    );
-    const cacheDeviceRepository =
-      prepareCacheDeviceRepositoryWithMockPerameters(
-        inMemoryStorage,
-        mongoDeviceRepository
-      );
 
     await cacheDeviceRepository.delete("12345").catch((result: object) => {
       console.log(JSON.stringify(result));
@@ -182,24 +177,14 @@ describe("CacheDeviceReposiotory with database persistence CLASS TEST - delete d
     const addToDBStatus = "success";
     const deleteFromDBStatus = "error";
     const findOneByIdStatus = "success";
-    const deviceDokumentMock = deviceDocumentWithMockMetods(
+    
+    const cacheDeviceRepository = dependency(
+      addToMemoryStatus,
+      deleteFromMemoryStatus,
       addToDBStatus,
       deleteFromDBStatus,
-      findOneByIdStatus
+      findOneByIdStatus 
     );
-
-    const mongoDeviceRepository =
-      prepareMongoDeviceRepositoryWithMockPerameters(deviceDokumentMock);
-
-    const inMemoryStorage = inMemoryStoreWithMockMethods(
-      addToMemoryStatus,
-      deleteFromMemoryStatus
-    );
-    const cacheDeviceRepository =
-      prepareCacheDeviceRepositoryWithMockPerameters(
-        inMemoryStorage,
-        mongoDeviceRepository
-      );
 
     await cacheDeviceRepository.delete("12345").catch((result: object) => {
       console.log(JSON.stringify(result));
@@ -220,24 +205,14 @@ describe("CacheDeviceReposiotory with database persistence CLASS TEST - delete d
     const addToDBStatus = "error";
     const deleteFromDBStatus = "success";
     const findOneByIdStatus = "success";
-    const deviceDokumentMock = deviceDocumentWithMockMetods(
+    
+    const cacheDeviceRepository = dependency(
+      addToMemoryStatus,
+      deleteFromMemoryStatus,
       addToDBStatus,
       deleteFromDBStatus,
-      findOneByIdStatus
+      findOneByIdStatus 
     );
-
-    const mongoDeviceRepository =
-      prepareMongoDeviceRepositoryWithMockPerameters(deviceDokumentMock);
-
-    const inMemoryStorage = inMemoryStoreWithMockMethods(
-      addToMemoryStatus,
-      deleteFromMemoryStatus
-    );
-    const cacheDeviceRepository =
-      prepareCacheDeviceRepositoryWithMockPerameters(
-        inMemoryStorage,
-        mongoDeviceRepository
-      );
 
     await cacheDeviceRepository.delete("12345").catch((result: object) => {
       console.log(JSON.stringify(result));

@@ -1,12 +1,49 @@
 import { describe } from "@jest/globals";
 import { expect, test } from "@jest/globals";
 import {
+  AddToDatabaseStatus,
+  DeleteFromDBStatus,
+  FindOneById,
   deviceDocumentWithMockMetods,
   prepareMongoDeviceRepositoryWithMockPerameters,
 } from "./mockForMongoDevicePersistence";
-import { inMemoryStoreWithMockMethods, prepareCacheDeviceRepositoryWithMockPerameters } from "./mockForCacheDeviceRepository";
+import {
+  MemeoryStatusType,
+  inMemoryStoreWithMockMethods,
+  prepareCacheDeviceRepositoryWithMockPerameters,
+} from "./mockForCacheDeviceRepository";
 
 describe("CacheDeviceReposiotory with database persistence CLASS TEST - add device", () => {
+  const dependency = (
+    addToMemoryStatus: MemeoryStatusType,
+    deleteFromMemoryStatus: MemeoryStatusType,
+    addToDBStatus: AddToDatabaseStatus,
+    deleteFromDBStatus: DeleteFromDBStatus,
+    findOneByIdStatus: FindOneById
+
+  ) => {
+    const inMemoryStorage = inMemoryStoreWithMockMethods(
+      addToMemoryStatus,
+      deleteFromMemoryStatus
+    );
+
+    const deviceDokumentMock = deviceDocumentWithMockMetods(
+      addToDBStatus,
+      deleteFromDBStatus,
+      findOneByIdStatus
+    );
+
+    const mongoDeviceRepository =
+      prepareMongoDeviceRepositoryWithMockPerameters(deviceDokumentMock);
+
+    const cacheDeviceRepository =
+      prepareCacheDeviceRepositoryWithMockPerameters(
+        inMemoryStorage,
+        mongoDeviceRepository
+      );
+    return cacheDeviceRepository;
+  };
+
   const deviceToAdd = {
     id: "12345",
     deviceType: "switch",
@@ -18,20 +55,16 @@ describe("CacheDeviceReposiotory with database persistence CLASS TEST - add devi
     const addToMemoryStatus = "success";
     const deleteFromMemoryStatus = "success";
     const addToDBStatus = "success";
+    const deleteFromDBStatus = undefined;
+    const findOneByIdStatus = undefined;
 
-    const deviceDokumentMock = deviceDocumentWithMockMetods(addToDBStatus);
-
-    const mongoDeviceRepository =
-      prepareMongoDeviceRepositoryWithMockPerameters(deviceDokumentMock);
-    const inMemoryStorage = inMemoryStoreWithMockMethods(
+    const cacheDeviceRepository = dependency(
       addToMemoryStatus,
-      deleteFromMemoryStatus
+      deleteFromMemoryStatus,
+      addToDBStatus,
+      deleteFromDBStatus,
+      findOneByIdStatus 
     );
-    const cacheDeviceRepository =
-      prepareCacheDeviceRepositoryWithMockPerameters(
-        inMemoryStorage,
-        mongoDeviceRepository
-      );
 
     await cacheDeviceRepository
       .add(deviceToAdd)
@@ -42,28 +75,22 @@ describe("CacheDeviceReposiotory with database persistence CLASS TEST - add devi
     const addToMemoryStatus = "success";
     const deleteFromMemoryStatus = "success";
     const addToDBStatus = "error";
+    const deleteFromDBStatus = undefined;
+    const findOneByIdStatus = undefined;
 
-    const deviceDokumentMock = deviceDocumentWithMockMetods(addToDBStatus);
-
-    const mongoDeviceRepository =
-      prepareMongoDeviceRepositoryWithMockPerameters(deviceDokumentMock);
-    const inMemoryStorage = inMemoryStoreWithMockMethods(
+    const cacheDeviceRepository = dependency(
       addToMemoryStatus,
-      deleteFromMemoryStatus
+      deleteFromMemoryStatus,
+      addToDBStatus,
+      deleteFromDBStatus,
+      findOneByIdStatus 
     );
-    const cacheDeviceRepository =
-      prepareCacheDeviceRepositoryWithMockPerameters(
-        inMemoryStorage,
-        mongoDeviceRepository
-      );
 
-    await cacheDeviceRepository
-      .add(deviceToAdd)
-      .catch((result) =>
-        expect(result).toEqual({
-          "Device not added": { error: "Adding to database failed" },
-        })
-      );
+    await cacheDeviceRepository.add(deviceToAdd).catch((result) =>
+      expect(result).toEqual({
+        "Device not added": { error: "Adding to database failed" },
+      })
+    );
   });
 
   test("Should not add device and compensate if not added to cache", async () => {
@@ -71,23 +98,15 @@ describe("CacheDeviceReposiotory with database persistence CLASS TEST - add devi
     const deleteFromMemoryStatus = "success";
     const addToDBStatus = "success";
     const deleteFromDBStatus = "success";
+    const findOneByIdStatus = undefined;
 
-    const deviceDokumentMock = deviceDocumentWithMockMetods(
-      addToDBStatus,
-      deleteFromDBStatus
-    );
-
-    const mongoDeviceRepository =
-      prepareMongoDeviceRepositoryWithMockPerameters(deviceDokumentMock);
-    const inMemoryStorage = inMemoryStoreWithMockMethods(
+    const cacheDeviceRepository = dependency(
       addToMemoryStatus,
-      deleteFromMemoryStatus
+      deleteFromMemoryStatus,
+      addToDBStatus,
+      deleteFromDBStatus,
+      findOneByIdStatus 
     );
-    const cacheDeviceRepository =
-      prepareCacheDeviceRepositoryWithMockPerameters(
-        inMemoryStorage,
-        mongoDeviceRepository
-      );
 
     await cacheDeviceRepository
       .add(deviceToAdd)
@@ -107,23 +126,15 @@ describe("CacheDeviceReposiotory with database persistence CLASS TEST - add devi
     const deleteFromMemoryStatus = "success";
     const addToDBStatus = "success";
     const deleteFromDBStatus = "error";
+    const findOneByIdStatus = undefined;
 
-    const deviceDokumentMock = deviceDocumentWithMockMetods(
-      addToDBStatus,
-      deleteFromDBStatus
-    );
-
-    const mongoDeviceRepository =
-      prepareMongoDeviceRepositoryWithMockPerameters(deviceDokumentMock);
-    const inMemoryStorage = inMemoryStoreWithMockMethods(
+    const cacheDeviceRepository = dependency(
       addToMemoryStatus,
-      deleteFromMemoryStatus
+      deleteFromMemoryStatus,
+      addToDBStatus,
+      deleteFromDBStatus,
+      findOneByIdStatus 
     );
-    const cacheDeviceRepository =
-      prepareCacheDeviceRepositoryWithMockPerameters(
-        inMemoryStorage,
-        mongoDeviceRepository
-      );
 
     await cacheDeviceRepository
       .add(deviceToAdd)
@@ -139,5 +150,4 @@ describe("CacheDeviceReposiotory with database persistence CLASS TEST - add devi
         })
       );
   });
-
 });

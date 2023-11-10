@@ -5,6 +5,7 @@ import { DeviceRunInterface } from "./DeviceRunInterface";
 import { Switch } from "../../domain/Switch";
 import util from "util";
 import { DeviceRepository } from "./DeviceRepository";
+import { RunningSwitches } from "../../domain/RunningSwitches";
 
 const execAsync = util.promisify(exec);
 
@@ -19,6 +20,11 @@ export class DeviceRunService implements DeviceRunInterface {
     return this.persistenceRepository
       .getById(deviceId)
       .then((device) => {
+        if (device.deviceType === "switch") {
+          const runningSwitches = RunningSwitches.getInstance();
+          runningSwitches.add(deviceId);
+          console.log(runningSwitches.switchDevices);
+        }
         return this.executeScriptAndCollectSdtout(device.commandOn);
       })
       .catch((error) =>
@@ -31,6 +37,9 @@ export class DeviceRunService implements DeviceRunInterface {
       .getById(deviceId)
       .then((device) => {
         if (device.deviceType === "switch") {
+          const runningSwitches = RunningSwitches.getInstance();
+          runningSwitches.delete(deviceId);
+
           const switchDevice = device as Switch;
           return this.executeScriptAndCollectSdtout(switchDevice.commandOff);
         }
@@ -39,6 +48,14 @@ export class DeviceRunService implements DeviceRunInterface {
       .catch((error) =>
         Promise.reject({ ["Error occured during switching off"]: error })
       );
+  }
+
+  async listRunningSwitches(): Promise<Array<string>> {
+    console.log('finction callled')
+    return new Promise<Array<string>>((resolve) => {
+      const runningSwitches = RunningSwitches.getInstance();
+      resolve(runningSwitches.switchDevices);
+    });
   }
 
   async executeScriptAndCollectSdtout(command: string): Promise<string> {
@@ -55,7 +72,7 @@ export class DeviceRunService implements DeviceRunInterface {
         () => {
           resolve("Timeout: Proccess not ended. Not waiting more for stdout.");
         },
-        sanitizedConfig.NODE_ENV.includes('test') ? 500 : 60000
+        sanitizedConfig.NODE_ENV.includes("test") ? 500 : 60000
       );
     });
 

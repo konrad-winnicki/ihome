@@ -19,6 +19,12 @@ export function initAppRouter(
   appRouter.post("/login", loginController.handleLogin);
   appRouter.get("/renew", authenticate, loginController.renewSession);
 
+  appRouter.get(
+    "/running",
+    authenticate,
+    deviceRunControllers.listRunningSwitches
+  );
+
   appRouter.post(
     "/meters/run/:id",
     authenticate,

@@ -18,9 +18,11 @@ export function prepareCacheDeviceRepositoryWithMockPerameters(
     return cacheDeviceRepository;
   }
 
+export type MemeoryStatusType = 'success'|'error'
+
   export function inMemoryStoreWithMockMethods(
-    addToMemoryStatus: string,
-    deleteFromMemoryStatus: string
+    addToMemoryStatus: MemeoryStatusType,
+    deleteFromMemoryStatus: MemeoryStatusType
   ) {
     const inMemoryStorageMock = InMemoryDeviceStorage.getInstance();
   

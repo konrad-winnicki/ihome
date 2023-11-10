@@ -3,12 +3,46 @@ import { SpiedFunction } from "jest-mock";
 import { expect, jest, test } from "@jest/globals";
 
 import {
+  AggregateStatus,
+  DeleteFromDBOptions,
   taskDocumentWithMockMetods,
 } from "./mockForMongoTaskPersistence";
 import { appCronMockMethods, prepareCronTaskManagerForDatabasePersistenceWithMockParameters} from "./mockForCronManager";
+import { MemeoryStatusType } from "./mockForCacheDeviceRepository";
+import { AddToDatabaseStatus, DeleteFromDBStatus, FindOneById } from "./mockForMongoDevicePersistence";
 
 describe("cronTaskManager with database persistence CLASS TEST - delete task", () => {
-  const taskId = "678910";
+  const dependency = (
+    addToCronStatus: MemeoryStatusType,
+    deleteFromCronStatus: MemeoryStatusType,
+    addToDBStatus: AddToDatabaseStatus,
+    deleteFromDBStatus: DeleteFromDBStatus,
+    deleteFromDBOptions: DeleteFromDBOptions,
+    aggregateStatus: AggregateStatus,
+    findOneByIdStatus: FindOneById
+  ) => {
+    const appCron = appCronMockMethods(addToCronStatus, deleteFromCronStatus);
+
+    const taskDokumentMock = taskDocumentWithMockMetods(
+      addToDBStatus,
+      deleteFromDBStatus,
+      deleteFromDBOptions,
+      aggregateStatus,
+      findOneByIdStatus
+    );
+
+    const cronTaskManager =
+      prepareCronTaskManagerForDatabasePersistenceWithMockParameters(
+        appCron,
+        taskDokumentMock
+      );
+
+    return cronTaskManager;
+  };
+
+  
+  
+  const taskToDelete = "678910";
   let consoleSpy: SpiedFunction;
 
   beforeEach(() => {
@@ -27,23 +61,18 @@ describe("cronTaskManager with database persistence CLASS TEST - delete task", (
     const findOneByIdStatus = "success";
     const aggregateStatus = undefined;
 
-    const appCron = appCronMockMethods(addToCronStatus, deleteFromCronStatus);
 
-    const taskDokumentMock = taskDocumentWithMockMetods(
+    const cronTaskManager = dependency (
+      addToCronStatus,
+      deleteFromCronStatus,
       addToDBStatus,
       deleteFromDBStatus,
       deleteFromDBOptions,
       aggregateStatus,
-      findOneByIdStatus
-    );
-
-    const cronTaskManager = prepareCronTaskManagerForDatabasePersistenceWithMockParameters(
-      appCron,
-      taskDokumentMock
-    );
+      findOneByIdStatus)
 
     await cronTaskManager
-      .delete(taskId)
+      .delete(taskToDelete)
       .then((result) =>
         expect(result).toEqual({ "Task deleted": "No errors" })
       );
@@ -58,22 +87,16 @@ describe("cronTaskManager with database persistence CLASS TEST - delete task", (
     const aggregateStatus = undefined;
     const findOneByIdStatus = "success";
 
-    const appCron = appCronMockMethods(addToCronStatus, deleteFromCronStatus);
-
-    const taskDokumentMock = taskDocumentWithMockMetods(
+    const cronTaskManager = dependency (
+      addToCronStatus,
+      deleteFromCronStatus,
       addToDBStatus,
       deleteFromDBStatus,
       deleteFromDBOptions,
       aggregateStatus,
-      findOneByIdStatus
-    );
+      findOneByIdStatus)
 
-    const cronTaskManager = prepareCronTaskManagerForDatabasePersistenceWithMockParameters(
-      appCron,
-      taskDokumentMock
-    );
-
-    await cronTaskManager.delete(taskId).catch((result) =>
+    await cronTaskManager.delete(taskToDelete).catch((result) =>
       expect(result).toEqual({
         "Task not deleted": {
           "Task not deleted":
@@ -92,22 +115,16 @@ describe("cronTaskManager with database persistence CLASS TEST - delete task", (
     const aggregateStatus = undefined;
     const findOneByIdStatus = "success";
 
-    const appCron = appCronMockMethods(addToCronStatus, deleteFromCronStatus);
-
-    const taskDokumentMock = taskDocumentWithMockMetods(
+    const cronTaskManager = dependency (
+      addToCronStatus,
+      deleteFromCronStatus,
       addToDBStatus,
       deleteFromDBStatus,
       deleteFromDBOptions,
       aggregateStatus,
-      findOneByIdStatus
-    );
+      findOneByIdStatus)
 
-    const cronTaskManager = prepareCronTaskManagerForDatabasePersistenceWithMockParameters(
-      appCron,
-      taskDokumentMock
-    );
-
-    await cronTaskManager.delete(taskId).catch((result) =>
+    await cronTaskManager.delete(taskToDelete).catch((result) =>
       expect(result).toEqual({
         "Task not deleted": {
           error: "Cron error during deletion.",
@@ -133,22 +150,16 @@ describe("cronTaskManager with database persistence CLASS TEST - delete task", (
     const aggregateStatus = undefined;
     const findOneByIdStatus = "success";
 
-    const appCron = appCronMockMethods(addToCronStatus, deleteFromCronStatus);
-
-    const taskDokumentMock = taskDocumentWithMockMetods(
+    const cronTaskManager = dependency (
+      addToCronStatus,
+      deleteFromCronStatus,
       addToDBStatus,
       deleteFromDBStatus,
       deleteFromDBOptions,
       aggregateStatus,
-      findOneByIdStatus
-    );
+      findOneByIdStatus)
 
-    const cronTaskManager = prepareCronTaskManagerForDatabasePersistenceWithMockParameters(
-      appCron,
-      taskDokumentMock
-    );
-
-    await cronTaskManager.delete(taskId).catch((result) =>
+    await cronTaskManager.delete(taskToDelete).catch((result) =>
       expect(result).toEqual({
         "Task not deleted": {
           error: "Cron error during deletion.",
@@ -177,22 +188,16 @@ describe("cronTaskManager with database persistence CLASS TEST - delete task", (
     const aggregateStatus = undefined;
     const findOneByIdStatus = null;
 
-    const appCron = appCronMockMethods(addToCronStatus, deleteFromCronStatus);
-
-    const taskDokumentMock = taskDocumentWithMockMetods(
+    const cronTaskManager = dependency (
+      addToCronStatus,
+      deleteFromCronStatus,
       addToDBStatus,
       deleteFromDBStatus,
       deleteFromDBOptions,
       aggregateStatus,
-      findOneByIdStatus
-    );
+      findOneByIdStatus)
 
-    const cronTaskManager = prepareCronTaskManagerForDatabasePersistenceWithMockParameters(
-      appCron,
-      taskDokumentMock
-    );
-
-    await cronTaskManager.delete(taskId).catch((result) =>
+    await cronTaskManager.delete(taskToDelete).catch((result) =>
       expect(result).toEqual({
         "Task not deleted": { error: "Task not exists" },
       })
@@ -208,22 +213,16 @@ describe("cronTaskManager with database persistence CLASS TEST - delete task", (
     const aggregateStatus = undefined;
     const findOneByIdStatus = "error";
 
-    const appCron = appCronMockMethods(addToCronStatus, deleteFromCronStatus);
-
-    const taskDokumentMock = taskDocumentWithMockMetods(
+    const cronTaskManager = dependency (
+      addToCronStatus,
+      deleteFromCronStatus,
       addToDBStatus,
       deleteFromDBStatus,
       deleteFromDBOptions,
       aggregateStatus,
-      findOneByIdStatus
-    );
+      findOneByIdStatus)
 
-    const cronTaskManager = prepareCronTaskManagerForDatabasePersistenceWithMockParameters(
-      appCron,
-      taskDokumentMock
-    );
-
-    await cronTaskManager.delete(taskId).catch((result) =>
+    await cronTaskManager.delete(taskToDelete).catch((result) =>
       expect(result).toEqual({
         "Task not deleted": { error: "Internal database error" },
       })

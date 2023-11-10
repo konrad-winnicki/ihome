@@ -22,11 +22,21 @@ export function prepareMongoDeviceRepositoryWithMockPerameters(
   return mongoDeviceRepository;
 }
 
+export type AddToDatabaseStatus =
+  | "success"
+  | "error"
+  | "DuplicationError"
+  | "DuplicatedId"
+  | "MongoServerError"
+  | "MongoError"
+  |undefined;
 
+export type DeleteFromDBStatus = "success" | "error" | undefined;
+export type FindOneById = "success" | "error" | null | undefined;
 export function deviceDocumentWithMockMetods(
-  addToDBStatus: string,
-  deleteFromDBStatus?: string,
-  findOneByIdStatus?: string |null
+  addToDBStatus: AddToDatabaseStatus,
+  deleteFromDBStatus: DeleteFromDBStatus,
+  findOneByIdStatus: FindOneById
 ) {
   const databaseCreateMock = jest.fn().mockImplementation((device: Device) => {
     switch (addToDBStatus) {
@@ -61,7 +71,7 @@ export function deviceDocumentWithMockMetods(
     }
   });
 
-  const databaseFindOneMock = jest.fn().mockImplementation(()=>{
+  const databaseFindOneMock = jest.fn().mockImplementation(() => {
     switch (findOneByIdStatus) {
       case "success":
         return Promise.resolve({
@@ -73,18 +83,16 @@ export function deviceDocumentWithMockMetods(
       case "error":
         return Promise.reject("Item not found");
 
-        case null:
-          return Promise.resolve(null);
+      case null:
+        return Promise.resolve(null);
     }
-  })
+  });
 
   const deviceDokumentMock = {
     create: databaseCreateMock,
     deleteOne: databaseDeleteOneMock,
-    findOne: databaseFindOneMock
-    
+    findOne: databaseFindOneMock,
   } as unknown as Model<Device>;
 
   return deviceDokumentMock;
 }
-

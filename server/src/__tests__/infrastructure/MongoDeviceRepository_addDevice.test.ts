@@ -1,6 +1,9 @@
 import { describe } from "@jest/globals";
 import { expect, test } from "@jest/globals";
 import {
+  AddToDatabaseStatus,
+  DeleteFromDBStatus,
+  FindOneById,
   deviceDocumentWithMockMetods,
   prepareMongoDeviceRepositoryWithMockPerameters,
 } from "./mockForMongoDevicePersistence";
@@ -13,13 +16,30 @@ describe("MongoDeviceReposiotory CLASS TEST - add device", () => {
     commandOn: "switch on",
   };
 
+  const prepareMongoDeviceRepository = (
+    addToDBStatus: AddToDatabaseStatus,
+    deleteFromDBStatus: DeleteFromDBStatus,
+    findOneByIdStatus: FindOneById
+  ) => {
+    const deviceDokumentMock = deviceDocumentWithMockMetods(
+      addToDBStatus,
+      deleteFromDBStatus,
+      findOneByIdStatus
+    );
+
+    return prepareMongoDeviceRepositoryWithMockPerameters(deviceDokumentMock);
+  };
+
   test("Should add device database", async () => {
     const addToDBStatus = "success";
+    const deleteFromDBStatus = undefined;
+    const findOneByIdStatus = undefined;
 
-    const deviceDokumentMock = deviceDocumentWithMockMetods(addToDBStatus);
-
-    const mongoDeviceRepository =
-      prepareMongoDeviceRepositoryWithMockPerameters(deviceDokumentMock);
+    const mongoDeviceRepository = prepareMongoDeviceRepository(
+      addToDBStatus,
+      deleteFromDBStatus,
+      findOneByIdStatus
+    );
 
     await mongoDeviceRepository
       .add(deviceToAdd)
@@ -53,14 +73,17 @@ describe("MongoDeviceReposiotory CLASS TEST - add device", () => {
     },
   ].forEach(({ description, parameter, result }) => {
     it(`Shoud not add device if ${description}`, async () => {
-      const deviceDokumentMock = deviceDocumentWithMockMetods(
-        parameter.addToDBStatus
+      const addToDBStatus = parameter.addToDBStatus as AddToDatabaseStatus;
+      const deleteFromDBStatus = undefined;
+      const findOneByIdStatus = undefined;
+
+      const mongoDeviceRepository = prepareMongoDeviceRepository(
+        addToDBStatus,
+        deleteFromDBStatus,
+        findOneByIdStatus
       );
 
-      const mongoDeviceManager =
-        prepareMongoDeviceRepositoryWithMockPerameters(deviceDokumentMock);
-
-      await mongoDeviceManager
+      await mongoDeviceRepository
         .add(deviceToAdd)
         .catch((err) => expect(err).toEqual(result));
     });

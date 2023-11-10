@@ -1,33 +1,39 @@
 import { Model } from "mongoose";
 import { Device } from "../../domain/Device";
 import { Task } from "../../domain/Task";
-import { CustomMongoServerError } from "./mockForMongoDevicePersistence";
+import {
+  AddToDatabaseStatus,
+  CustomMongoServerError,
+  DeleteFromDBStatus,
+  FindOneById,
+} from "./mockForMongoDevicePersistence";
 
-
-
+export type AggregateStatus = "success" | "internalError" | "emptyArray" | undefined;
+export type DeleteFromDBOptions = {
+  acknowledged: boolean;
+  deletedCount: number;
+};
 export function taskDocumentWithMockMetods(
-  addToDBStatus: string,
-  deleteFromDBStatus: string,
-  deleteFromDBOptions: object,
-  aggregateStatus?: string,
-  findOneByIdStatus?: string | null
+  addToDBStatus: AddToDatabaseStatus,
+  deleteFromDBStatus: DeleteFromDBStatus,
+  deleteFromDBOptions: DeleteFromDBOptions,
+  aggregateStatus: AggregateStatus,
+  findOneByIdStatus: FindOneById
 ) {
   const databaseCreateMock = jest.fn().mockImplementation((device: Device) => {
     switch (addToDBStatus) {
       case "success":
         return Promise.resolve(device);
-        case "duplicatedId":
-          return Promise.reject(
-            new CustomMongoServerError(11000, { errmsg: "Duplicated id" })
-          );
+      case "DuplicatedId":
+        return Promise.reject(
+          new CustomMongoServerError(11000, { errmsg: "Duplicated id" })
+        );
       case "error":
         return Promise.reject("Adding to database failed");
     }
   });
 
   const databaseDeleteOneMock = jest.fn().mockImplementation(() => {
-    console.log("delete from db", deleteFromDBStatus);
-
     switch (deleteFromDBStatus) {
       case "success":
         return Promise.resolve(deleteFromDBOptions);
@@ -46,7 +52,7 @@ export function taskDocumentWithMockMetods(
             id: "678910",
             onStatus: true,
             scheduledTime: { hour: 10, minutes: 56 },
-            device: { commandOn: "switch on", commandOff: "switch off" },
+            device: { commandOn: "switch on", commandOff: "switch off", id: '12345' },
           },
         ]);
       case "internalError":
@@ -81,5 +87,3 @@ export function taskDocumentWithMockMetods(
 
   return taskDokumentMock;
 }
-
-

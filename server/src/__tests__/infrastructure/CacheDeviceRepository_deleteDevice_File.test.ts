@@ -2,6 +2,7 @@ import { describe } from "@jest/globals";
 import { expect, test } from "@jest/globals";
 
 import {
+  MemeoryStatusType,
   inMemoryStoreWithMockMethods,
   prepareCacheDeviceRepositoryWithMockPerameters,
 } from "./mockForCacheDeviceRepository";
@@ -9,10 +10,53 @@ import { FileRepositoryHelpers } from "../../Infrastructure/filePersistencia/aux
 import { prepareFileDeviceRepositoryWithMockPerameters } from "./mockForFileDevicePersistence";
 import {
   DeviceTaskError,
+  EmptyObject,
+  ReadFileMockReturnValues,
   fsModuleMockForDevices,
 } from "./mockForFileRepositoryHeplers";
 
 describe("CacheDeviceReposiotory with file persistence CLASS TEST - delete device", () => {
+  const dependency = (
+    addToMemoryStatus: MemeoryStatusType,
+    deleteFromMemoryStatus: MemeoryStatusType,
+    writeFileMockImplementationCalls: DeviceTaskError[],
+    readFileMockImplemenmtationCalls: DeviceTaskError[],
+    readFileMockReturnValues: (ReadFileMockReturnValues | EmptyObject)[]
+  ) => {
+    const inMemoryStorage = inMemoryStoreWithMockMethods(
+      addToMemoryStatus,
+      deleteFromMemoryStatus
+    );
+
+    fsModuleMockForDevices(
+      writeFileMockImplementationCalls,
+      readFileMockImplemenmtationCalls,
+      readFileMockReturnValues
+    );
+    const helperMock = new FileRepositoryHelpers();
+
+    const fileDeviceRepository =
+      prepareFileDeviceRepositoryWithMockPerameters(helperMock);
+
+    const cacheDeviceRepository =
+      prepareCacheDeviceRepositoryWithMockPerameters(
+        inMemoryStorage,
+        fileDeviceRepository
+      );
+
+    return cacheDeviceRepository;
+  };
+
+  const deviceMockValue = {
+    "12345": {
+      id: "12345",
+      deviceType: "switch",
+      name: "switch1",
+      commandOn: "switch on",
+      commandOff: "switch off",
+    },
+  };
+
   let consoleSpy: jest.SpyInstance;
 
   beforeEach(() => {
@@ -22,126 +66,85 @@ describe("CacheDeviceReposiotory with file persistence CLASS TEST - delete devic
     consoleSpy.mockRestore();
   });
 
-  /*
   test("Should delete device from database and memory", async () => {
     const addToMemoryStatus = "success";
     const deleteFromMemoryStatus = "success";
-    const writeFileStatus = "device";
-    const readFileStatus = (["device", "device"]) as DeviceTaskError[]
-    const itemToRead = [{
-      "12345": {
-        id: "12345",
-        deviceType: "switch",
-        name: "switch1",
-        commandOn: "switch on",
-        commandOff: "switch off",
-      },
-  }, {
-    "12345": {
-      id: "12345",
-      deviceType: "switch",
-      name: "switch1",
-      commandOn: "switch on",
-      commandOff: "switch off",
-    },
-}]
+    const writeFileMockImplementationCalls = [
+      "write",
+      "write",
+      "write",
+      "write",
+    ] as DeviceTaskError[];
+    const readFileMockImplemenmtationCalls = ["device", "device"] as DeviceTaskError[];
+    const readFileMockReturnValues = [deviceMockValue, deviceMockValue];
 
-    fsModuleMock(writeFileStatus, readFileStatus, itemToRead);
-    const helperMock = new FileRepositoryHelpers();
 
-    const fileDeviceRepository =
-      prepareFileDeviceRepositoryWithMockPerameters(helperMock);
-    const inMemoryStorage = inMemoryStoreWithMockMethods(
+    
+    const cacheDeviceRepository = dependency(
       addToMemoryStatus,
-      deleteFromMemoryStatus
+      deleteFromMemoryStatus,
+      writeFileMockImplementationCalls,
+      readFileMockImplemenmtationCalls,
+      readFileMockReturnValues
     );
-    const cacheDeviceRepository =
-      prepareCacheDeviceRepositoryWithMockPerameters(
-        inMemoryStorage,
-        fileDeviceRepository
-      );
-
-   
 
     await cacheDeviceRepository
       .delete("12345")
       .then((result) =>
         expect(result).toEqual({ "Device deleted": "No errors" })
       );
-    
   });
 
   test("Should not delete device if device not exists", async () => {
     const addToMemoryStatus = "success";
     const deleteFromMemoryStatus = "success";
-    const writeFileStatus = "device";
-    const readFileStatus = (["device"]) as DeviceTaskError[]
-    const itemToRead = [{
-      "nonExistingID": {
+    const writeFileMockImplementationCalls = ["write", "write"] as DeviceTaskError[];
+    const readFileMockImplemenmtationCalls = ["device"] as DeviceTaskError[];
+
+    const deviceWithNonExistingItem = {
+      nonExistingID: {
         id: "nonExistingID",
         deviceType: "switch",
         name: "switch1",
         commandOn: "switch on",
         commandOff: "switch off",
       },
-  }]
+    };
+    const readFileMockReturnValues = [deviceWithNonExistingItem];
 
-    fsModuleMock(writeFileStatus, readFileStatus, itemToRead);
-    const helperMock = new FileRepositoryHelpers();
-
-    const fileDeviceRepository =
-      prepareFileDeviceRepositoryWithMockPerameters(helperMock);
-    const inMemoryStorage = inMemoryStoreWithMockMethods(
+    const cacheDeviceRepository = dependency(
       addToMemoryStatus,
-      deleteFromMemoryStatus
+      deleteFromMemoryStatus,
+      writeFileMockImplementationCalls,
+      readFileMockImplemenmtationCalls,
+      readFileMockReturnValues
     );
-    const cacheDeviceRepository =
-      prepareCacheDeviceRepositoryWithMockPerameters(
-        inMemoryStorage,
-        fileDeviceRepository
-      );
 
     await cacheDeviceRepository.delete("12345").catch((result) =>
       expect(result).toEqual({
         "Device not deleted": {
-          "Persistence error": {"NonExistsError": "Device with id 12345 does not exist."},
+          "Persistence error": {
+            NonExistsError: "Device with id 12345 does not exist.",
+          },
         },
       })
     );
-    
   });
 
-
-  test("Should not delete device if findById error", async () => {
+  test("Should not delete device if reading from file error during finding item", async () => {
     const addToMemoryStatus = "success";
     const deleteFromMemoryStatus = "success";
-    const writeFileStatus = "device";
-    const readFileStatus = (["error"]) as DeviceTaskError[]
-    const itemToRead = [{
-      "nonExistingID": {
-        id: "nonExistingID",
-        deviceType: "switch",
-        name: "switch1",
-        commandOn: "switch on",
-        commandOff: "switch off",
-      },
-  }]
+    const writeFileMockImplementationCalls = ["write"] as DeviceTaskError[];
+    const readFileMockImplemenmtationCalls = ["error"] as DeviceTaskError[];
+    const readFileMockReturnValues = [deviceMockValue];
 
-    fsModuleMock(writeFileStatus, readFileStatus, itemToRead);
-    const helperMock = new FileRepositoryHelpers();
-
-    const fileDeviceRepository =
-      prepareFileDeviceRepositoryWithMockPerameters(helperMock);
-    const inMemoryStorage = inMemoryStoreWithMockMethods(
+    const cacheDeviceRepository = dependency(
       addToMemoryStatus,
-      deleteFromMemoryStatus
+      deleteFromMemoryStatus,
+      writeFileMockImplementationCalls,
+      readFileMockImplemenmtationCalls,
+      readFileMockReturnValues
     );
-    const cacheDeviceRepository =
-      prepareCacheDeviceRepositoryWithMockPerameters(
-        inMemoryStorage,
-        fileDeviceRepository
-      );
-
     await cacheDeviceRepository.delete("12345").catch((result) =>
       expect(result).toEqual({
         "Device not deleted": {
@@ -151,59 +154,55 @@ describe("CacheDeviceReposiotory with file persistence CLASS TEST - delete devic
         },
       })
     );
-
-    expect(consoleSpy).not.toHaveBeenCalledWith({
-      "Compensation succeded": { deviceId: "12345" },
-    });
   });
 
-  
+  test("Should not delete device if reading from file error during finding item", async () => {
+    const addToMemoryStatus = "success";
+    const deleteFromMemoryStatus = "success";
+    const writeFileMockImplementationCalls = ["error"] as DeviceTaskError[];
+    const readFileMockImplemenmtationCalls = ["device"] as DeviceTaskError[];
+    const readFileMockReturnValues = [deviceMockValue];
+
+    const cacheDeviceRepository = dependency(
+      addToMemoryStatus,
+      deleteFromMemoryStatus,
+      writeFileMockImplementationCalls,
+      readFileMockImplemenmtationCalls,
+      readFileMockReturnValues
+    );
+    await cacheDeviceRepository.delete("12345").catch((result) =>
+      expect(result).toEqual({
+        "Device not deleted": {
+          "Persistence error": {
+            "Write file error": "Internal write error",
+          },
+        },
+      })
+    );
+  });
 
   test("Should not delete device and do compensation if not deleted from memory", async () => {
     const addToMemoryStatus = "success";
     const deleteFromMemoryStatus = "error";
-    const writeFileStatus = "device";
-    const readFileStatus = ["device", "device", "device"] as DeviceTaskError[];
-    const itemToRead = [
-      {
-        "12345": {
-          id: "12345",
-          deviceType: "switch",
-          name: "switch1",
-          commandOn: "switch on",
-          commandOff: "switch off",
-        },
-      },
-      {
-        "12345": {
-          id: "12345",
-          deviceType: "switch",
-          name: "switch1",
-          commandOn: "switch on",
-          commandOff: "switch off",
-        },
-      },
-      {},
-    ];
+    const writeFileMockImplementationCalls = [
+      "write",
+      "write",
+      "write",
+      "write",
+      "write",
+    ] as DeviceTaskError[];
+    const readFileMockImplemenmtationCalls = ["device", "device", "device"] as DeviceTaskError[];
+    const readFileMockReturnValues = [deviceMockValue, deviceMockValue, {}];
 
-    fsModuleMock(writeFileStatus, readFileStatus, itemToRead);
-    const helperMock = new FileRepositoryHelpers();
-
-    const fileDeviceRepository =
-      prepareFileDeviceRepositoryWithMockPerameters(helperMock);
-    const inMemoryStorage = inMemoryStoreWithMockMethods(
+    const cacheDeviceRepository = dependency(
       addToMemoryStatus,
-      deleteFromMemoryStatus
+      deleteFromMemoryStatus,
+      writeFileMockImplementationCalls,
+      readFileMockImplemenmtationCalls,
+      readFileMockReturnValues
     );
-    const cacheDeviceRepository =
-      prepareCacheDeviceRepositoryWithMockPerameters(
-        inMemoryStorage,
-        fileDeviceRepository
-      );
 
-    
-    await cacheDeviceRepository.delete("12345").catch((result: object) => {
-      console.log(JSON.stringify(result));
+    await cacheDeviceRepository.delete("12345").catch((result) => {
       expect(result).toEqual({
         "Device not deleted": {
           error: "Deletion from storage failed",
@@ -211,121 +210,77 @@ describe("CacheDeviceReposiotory with file persistence CLASS TEST - delete devic
         },
       });
     });
-
-    expect(consoleSpy).toHaveBeenCalledWith({
-      "Compensation succeded": { deviceId: "12345" },
-    });
   });
 
-  
-  test("Should not delete if not deleted from database", async () => {
+  test("Should not delete if reading from file failed", async () => {
     const addToMemoryStatus = "success";
     const deleteFromMemoryStatus = "success";
-    const writeFileStatus = "error";
-    const readFileStatus = ["device"] as DeviceTaskError[];
-    const itemToRead = [
-      {
-        "12345": {
-          id: "12345",
-          deviceType: "switch",
-          name: "switch1",
-          commandOn: "switch on",
-          commandOff: "switch off",
-        },
-      },
-      
-    ];
+    const writeFileMockImplementationCalls = ["write", "write"] as DeviceTaskError[];
+    const readFileMockImplemenmtationCalls = ["error"] as DeviceTaskError[];
+    const readFileMockReturnValues = [deviceMockValue];
 
-    fsModuleMock(writeFileStatus, readFileStatus, itemToRead);
-    const helperMock = new FileRepositoryHelpers();
-
-    const fileDeviceRepository =
-      prepareFileDeviceRepositoryWithMockPerameters(helperMock);
-    const inMemoryStorage = inMemoryStoreWithMockMethods(
+    const cacheDeviceRepository = dependency(
       addToMemoryStatus,
-      deleteFromMemoryStatus
+      deleteFromMemoryStatus,
+      writeFileMockImplementationCalls,
+      readFileMockImplemenmtationCalls,
+      readFileMockReturnValues
     );
-    const cacheDeviceRepository =
-      prepareCacheDeviceRepositoryWithMockPerameters(
-        inMemoryStorage,
-        fileDeviceRepository
-      );
 
-    await cacheDeviceRepository.delete("12345").catch((result: object) => {
-      console.log(JSON.stringify(result));
+    await cacheDeviceRepository.delete("12345").catch((result) => {
       expect(result).toEqual({
         "Device not deleted": {
-          "Persistence error": {"Write file error": "Internal write error"},
+          "Persistence error": { "Read file error": "Internal read error" },
         },
       });
     });
-    expect(consoleSpy).not.toHaveBeenCalledWith({
-      "Compensation succeded": { deviceId: "12345" },
+  });
+
+  test("Should not delete if writing to file failed", async () => {
+    const addToMemoryStatus = "success";
+    const deleteFromMemoryStatus = "success";
+    const writeFileMockImplementationCalls = ["error"] as DeviceTaskError[];
+    const readFileMockImplemenmtationCalls = ["device"] as DeviceTaskError[];
+    const readFileMockReturnValues = [deviceMockValue];
+
+    const cacheDeviceRepository = dependency(
+      addToMemoryStatus,
+      deleteFromMemoryStatus,
+      writeFileMockImplementationCalls,
+      readFileMockImplemenmtationCalls,
+      readFileMockReturnValues
+    );
+
+    await cacheDeviceRepository.delete("12345").catch((result) => {
+      expect(result).toEqual({
+        "Device not deleted": {
+          "Persistence error": { "Write file error": "Internal write error" },
+        },
+      });
     });
   });
-*/
+
   test("Compensation should fail if write to file fails", async () => {
     const addToMemoryStatus = "success";
     const deleteFromMemoryStatus = "error";
-    const writeFileStatus = [
+    const writeFileMockImplementationCalls = [
       "write",
       "write",
       "write",
       "error",
     ] as DeviceTaskError[];
-    const readFileStatus = ["write", "write", "write"] as DeviceTaskError[];
-    const itemToRead = [
-      {
-        "12345": {
-          id: "12345",
-          deviceType: "switch",
-          name: "switch1",
-          commandOn: "switch on",
-          commandOff: "switch off",
-        },
-      },
-      {
-        "12345": {
-          id: "12345",
-          deviceType: "switch",
-          name: "switch1",
-          commandOn: "switch on",
-          commandOff: "switch off",
-        },
-      },
-      {
-        "12345": {
-          id: "12345",
-          deviceType: "switch",
-          name: "switch1",
-          commandOn: "switch on",
-          commandOff: "switch off",
-        },
-      },
-      {},
-    ];
+    const readFileMockImplemenmtationCalls = ["device", "device"] as DeviceTaskError[];
+    const readFileMockReturnValues = [deviceMockValue, deviceMockValue, deviceMockValue, {}];
 
-    fsModuleMockForDevices(writeFileStatus, readFileStatus, itemToRead);
-    const helperMock = new FileRepositoryHelpers();
-
-    const fileDeviceRepository =
-      prepareFileDeviceRepositoryWithMockPerameters(helperMock);
-    const inMemoryStorage = inMemoryStoreWithMockMethods(
+    const cacheDeviceRepository = dependency(
       addToMemoryStatus,
-      deleteFromMemoryStatus
+      deleteFromMemoryStatus,
+      writeFileMockImplementationCalls,
+      readFileMockImplemenmtationCalls,
+      readFileMockReturnValues
     );
-    const cacheDeviceRepository =
-      prepareCacheDeviceRepositoryWithMockPerameters(
-        inMemoryStorage,
-        fileDeviceRepository
-      );
-    /*
-    await cacheDeviceRepository
-      .delete("12345")
-      .catch((result) => console.log("RESSSS", JSON.stringify(result)));
-*/
-    await cacheDeviceRepository.delete("12345").catch((result: object) => {
-      console.log(JSON.stringify(result));
+
+    await cacheDeviceRepository.delete("12345").catch((result) => {
       expect(result).toEqual({
         "Device not deleted": {
           error: "Deletion from storage failed",
@@ -351,51 +306,24 @@ describe("CacheDeviceReposiotory with file persistence CLASS TEST - delete devic
   test("Compensation should fail if read from file fails", async () => {
     const addToMemoryStatus = "success";
     const deleteFromMemoryStatus = "error";
-    const writeFileStatus = [
+    const writeFileMockImplementationCalls = [
       "write",
       "write",
       "write",
       "write",
     ] as DeviceTaskError[];
-    const readFileStatus = ["write", "write", "error"] as DeviceTaskError[];
-    const itemToRead = [
-      {
-        "12345": {
-          id: "12345",
-          deviceType: "switch",
-          name: "switch1",
-          commandOn: "switch on",
-          commandOff: "switch off",
-        },
-      },
-      {
-        "12345": {
-          id: "12345",
-          deviceType: "switch",
-          name: "switch1",
-          commandOn: "switch on",
-          commandOff: "switch off",
-        },
-      },
-    ];
+    const readFileMockImplemenmtationCalls = ["device", "device", "error"] as DeviceTaskError[];
+    const readFileMockReturnValues = [deviceMockValue, deviceMockValue];
 
-    fsModuleMockForDevices(writeFileStatus, readFileStatus, itemToRead);
-    const helperMock = new FileRepositoryHelpers();
-
-    const fileDeviceRepository =
-      prepareFileDeviceRepositoryWithMockPerameters(helperMock);
-    const inMemoryStorage = inMemoryStoreWithMockMethods(
+    const cacheDeviceRepository = dependency(
       addToMemoryStatus,
-      deleteFromMemoryStatus
+      deleteFromMemoryStatus,
+      writeFileMockImplementationCalls,
+      readFileMockImplemenmtationCalls,
+      readFileMockReturnValues
     );
-    const cacheDeviceRepository =
-      prepareCacheDeviceRepositoryWithMockPerameters(
-        inMemoryStorage,
-        fileDeviceRepository
-      );
 
-    await cacheDeviceRepository.delete("12345").catch((result: object) => {
-      console.log(JSON.stringify(result));
+    await cacheDeviceRepository.delete("12345").catch((result) => {
       expect(result).toEqual({
         "Device not deleted": {
           error: "Deletion from storage failed",

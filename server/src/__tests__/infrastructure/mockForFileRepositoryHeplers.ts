@@ -1,25 +1,33 @@
 import fs from "fs/promises";
+import { Device } from "../../domain/Device";
+import { Task } from "../../domain/Task";
 
 jest.mock("fs");
 
 export type DeviceTaskError = "device" | "task" | "write" | "error";
+export type EmptyObject = {
+  [key: string]: string;
+};
 
+export type ReadFileMockReturnValues = {
+  [key: string]: Device | Task;
+};
 export function fsModuleMockForDevices(
   writeFile: DeviceTaskError[],
   readFile: DeviceTaskError[],
-  itemToRead: Array<object>
+  itemToRead: (ReadFileMockReturnValues | EmptyObject)[]
 ) {
   const mockWriteFile = jest
     .fn()
     .mockImplementationOnce(() => {
       switch (writeFile[0]) {
         case "write":
-          return Promise.resolve();  
+          return Promise.resolve();
         case "error":
           return Promise.reject("Internal write error");
       }
     })
-    
+
     .mockImplementationOnce(() => {
       switch (writeFile[1]) {
         case "write":
@@ -43,21 +51,23 @@ export function fsModuleMockForDevices(
         case "error":
           return Promise.reject("Internal write error");
       }
-    }).mockImplementationOnce(() => {
+    })
+    .mockImplementationOnce(() => {
       switch (writeFile[4]) {
         case "write":
           return Promise.resolve();
         case "error":
           return Promise.reject("Internal write error");
       }
-    }).mockImplementationOnce(() => {
+    })
+    .mockImplementationOnce(() => {
       switch (writeFile[5]) {
         case "write":
           return Promise.resolve();
         case "error":
           return Promise.reject("Internal write error");
       }
-    })
+    });
 
   const mockReadFile = jest
     .fn()
@@ -90,7 +100,8 @@ export function fsModuleMockForDevices(
         case "error":
           return Promise.reject("Internal read error");
       }
-    }).mockImplementationOnce(() => {
+    })
+    .mockImplementationOnce(() => {
       switch (readFile[3]) {
         case "device":
           return Promise.resolve(JSON.stringify(itemToRead[3]));
@@ -99,7 +110,8 @@ export function fsModuleMockForDevices(
         case "error":
           return Promise.reject("Internal read error");
       }
-    }).mockImplementationOnce(() => {
+    })
+    .mockImplementationOnce(() => {
       switch (readFile[4]) {
         case "device":
           return Promise.resolve(JSON.stringify(itemToRead[4]));
@@ -108,7 +120,8 @@ export function fsModuleMockForDevices(
         case "error":
           return Promise.reject("Internal read error");
       }
-    }).mockImplementationOnce(() => {
+    })
+    .mockImplementationOnce(() => {
       switch (readFile[5]) {
         case "device":
           return Promise.resolve(JSON.stringify(itemToRead[5]));
@@ -117,7 +130,8 @@ export function fsModuleMockForDevices(
         case "error":
           return Promise.reject("Internal read error");
       }
-    }).mockImplementationOnce(() => {
+    })
+    .mockImplementationOnce(() => {
       switch (readFile[6]) {
         case "device":
           return Promise.resolve(JSON.stringify(itemToRead[6]));
@@ -126,10 +140,8 @@ export function fsModuleMockForDevices(
         case "error":
           return Promise.reject("Internal read error");
       }
-    })
+    });
 
   fs.writeFile = mockWriteFile;
   fs.readFile = mockReadFile;
 }
-
-

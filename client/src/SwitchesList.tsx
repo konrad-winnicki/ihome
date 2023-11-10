@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { RxDropdownMenu } from "react-icons/rx";
-import { getSwitches } from "./services";
+import { getSwitches, listRunningSwitches } from "./services";
 import SwitchModule from "./SwitchModule";
 import TaskList from "./TaskList";
 
@@ -16,10 +16,12 @@ export interface SwitchInterface {
 
 const SwitchesList: React.FC = () => {
   const [switches, setSwitches] = useState<SwitchInterface[]>([]);
+  const [runningSwitches, setRunningSwitches] = useState<[]>([]);
+
   const [showSwitches, setShowSwitches] = useState<boolean>(false);
   const [deviceShowsTaskModule, setDeviceShowTaskModule] =
     useState<SwitchInterface | null>(null);
-    const [refreshList, setRefreshList] = useState(false)
+  const [refreshList, setRefreshList] = useState(false);
 
   const token = localStorage.getItem("token");
 
@@ -31,15 +33,28 @@ const SwitchesList: React.FC = () => {
     }
   }
 
+  async function getRunning(){
+    const response = await listRunningSwitches(token);
+    if (response.ok) {
+      const data = await response.json();
+      setRunningSwitches(data);
+      console.log('running', data, runningSwitches)
+
+    }
+  }
+
   useEffect(() => {
+    if (!showSwitches){
+    getRunning()}
     if (showSwitches) {
+      
       getSwitchList();
     }
     if (deviceShowsTaskModule) {
       setShowSwitches(false);
     }
-    if(refreshList){
-      setRefreshList(false)
+    if (refreshList) {
+      setRefreshList(false);
     }
   }, [showSwitches, deviceShowsTaskModule, refreshList]);
 
@@ -58,12 +73,15 @@ const SwitchesList: React.FC = () => {
       <div className=" overflow-y-auto ">
         {showSwitches
           ? switches.map((switchDevice: SwitchInterface) => {
-              return (
+            const isRunning = runningSwitches.find((value)=> value === switchDevice.id )  
+            
+            return (
                 <div key={switchDevice.id}>
                   <SwitchModule
                     switchDevice={switchDevice}
                     setShowTaskDetails={setDeviceShowTaskModule}
                     setRefreshList={setRefreshList}
+                    onStatus= {isRunning? true: false}
                   ></SwitchModule>
                 </div>
               );
@@ -73,14 +91,10 @@ const SwitchesList: React.FC = () => {
 
       <div className="flex-row">
         {deviceShowsTaskModule ? (
-        
-            
-
-            <TaskList
-              setDeviceShowTaskModule={setDeviceShowTaskModule}
-              device={deviceShowsTaskModule}
-            ></TaskList>
-         
+          <TaskList
+            setDeviceShowTaskModule={setDeviceShowTaskModule}
+            device={deviceShowsTaskModule}
+          ></TaskList>
         ) : (
           ""
         )}

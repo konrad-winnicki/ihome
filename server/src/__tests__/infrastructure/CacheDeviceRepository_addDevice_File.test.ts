@@ -1,6 +1,7 @@
 import { describe } from "@jest/globals";
 import { expect, test } from "@jest/globals";
 import {
+  MemeoryStatusType,
   inMemoryStoreWithMockMethods,
   prepareCacheDeviceRepositoryWithMockPerameters,
 } from "./mockForCacheDeviceRepository";
@@ -8,10 +9,43 @@ import { prepareFileDeviceRepositoryWithMockPerameters } from "./mockForFileDevi
 import { FileRepositoryHelpers } from "../../Infrastructure/filePersistencia/auxilaryFunctions";
 import {
   DeviceTaskError,
+  EmptyObject,
+  ReadFileMockReturnValues,
   fsModuleMockForDevices,
 } from "./mockForFileRepositoryHeplers";
 
 describe("CacheDeviceReposiotory with file persistence CLASS TEST - add device", () => {
+  const dependency = (
+    addToMemoryStatus: MemeoryStatusType,
+    deleteFromMemoryStatus: MemeoryStatusType,
+    writeFileMockImplementationCalls: DeviceTaskError[],
+    readFileMockImplemenmtationCalls: DeviceTaskError[],
+    readFileMockReturnValues: (ReadFileMockReturnValues | EmptyObject)[]
+  ) => {
+    const inMemoryStorage = inMemoryStoreWithMockMethods(
+      addToMemoryStatus,
+      deleteFromMemoryStatus
+    );
+
+    fsModuleMockForDevices(
+      writeFileMockImplementationCalls,
+      readFileMockImplemenmtationCalls,
+      readFileMockReturnValues
+    );
+    const helperMock = new FileRepositoryHelpers();
+
+    const fileDeviceRepository =
+      prepareFileDeviceRepositoryWithMockPerameters(helperMock);
+
+    const cacheDeviceRepository =
+      prepareCacheDeviceRepositoryWithMockPerameters(
+        inMemoryStorage,
+        fileDeviceRepository
+      );
+
+    return cacheDeviceRepository;
+  };
+
   const deviceToAdd = {
     id: "12345",
     deviceType: "switch",
@@ -19,27 +53,36 @@ describe("CacheDeviceReposiotory with file persistence CLASS TEST - add device",
     commandOn: "switch on",
   };
 
+  const deviceMockValue = {
+    "12345": {
+      id: "12345",
+      deviceType: "switch",
+      name: "switch2",
+      commandOn: "switch on",
+      commandOff: "switch off",
+    },
+  };
+
   test("Should add device", async () => {
     const addToMemoryStatus = "success";
     const deleteFromMemoryStatus = "success";
-    const writeFileStatus = ["write", "write"] as DeviceTaskError[];
-    const readFileStatus = ["device","device",] as DeviceTaskError[];
-    const itemToRead = [{}];
+    const writeFileMockImplementationCalls = [
+      "write",
+      "write",
+    ] as DeviceTaskError[];
+    const readFileMockImplementationCalls = [
+      "device",
+      "device",
+    ] as DeviceTaskError[];
+    const readFileMockReturnValues = [{}];
 
-    fsModuleMockForDevices(writeFileStatus, readFileStatus, itemToRead);
-    const helperMock = new FileRepositoryHelpers();
-
-    const fileDeviceRepository =
-      prepareFileDeviceRepositoryWithMockPerameters(helperMock);
-    const inMemoryStorage = inMemoryStoreWithMockMethods(
+    const cacheDeviceRepository = dependency(
       addToMemoryStatus,
-      deleteFromMemoryStatus
+      deleteFromMemoryStatus,
+      writeFileMockImplementationCalls,
+      readFileMockImplementationCalls,
+      readFileMockReturnValues
     );
-    const cacheDeviceRepository =
-      prepareCacheDeviceRepositoryWithMockPerameters(
-        inMemoryStorage,
-        fileDeviceRepository
-      );
 
     await cacheDeviceRepository
       .add(deviceToAdd)
@@ -49,24 +92,20 @@ describe("CacheDeviceReposiotory with file persistence CLASS TEST - add device",
   test("Should not add device if writing to file failed", async () => {
     const addToMemoryStatus = "success";
     const deleteFromMemoryStatus = "success";
-    const writeFileStatus = ["write", "error"] as DeviceTaskError[];
-    const readFileStatus = ["device",] as DeviceTaskError[];
-    const itemToRead = [{}];
+    const writeFileMockImplementationCalls = [
+      "write",
+      "error",
+    ] as DeviceTaskError[];
+    const readFileMockImplementationCalls = ["device"] as DeviceTaskError[];
+    const readFileMockReturnValues = [{}];
 
-    fsModuleMockForDevices(writeFileStatus, readFileStatus, itemToRead);
-    const helperMock = new FileRepositoryHelpers();
-
-    const fileDeviceRepository =
-      prepareFileDeviceRepositoryWithMockPerameters(helperMock);
-    const inMemoryStorage = inMemoryStoreWithMockMethods(
+    const cacheDeviceRepository = dependency(
       addToMemoryStatus,
-      deleteFromMemoryStatus
+      deleteFromMemoryStatus,
+      writeFileMockImplementationCalls,
+      readFileMockImplementationCalls,
+      readFileMockReturnValues
     );
-    const cacheDeviceRepository =
-      prepareCacheDeviceRepositoryWithMockPerameters(
-        inMemoryStorage,
-        fileDeviceRepository
-      );
 
     await cacheDeviceRepository.add(deviceToAdd).catch((result) =>
       expect(result).toEqual({
@@ -78,24 +117,20 @@ describe("CacheDeviceReposiotory with file persistence CLASS TEST - add device",
   test("Should not add device if reading from file failed", async () => {
     const addToMemoryStatus = "success";
     const deleteFromMemoryStatus = "success";
-    const writeFileStatus = ["write", "write"] as DeviceTaskError[];
-    const readFileStatus = ["error"] as DeviceTaskError[];
-    const itemToRead = [{}];
+    const writeFileMockImplementationCalls = [
+      "write",
+      "write",
+    ] as DeviceTaskError[];
+    const readFileMockImplementationCalls = ["error"] as DeviceTaskError[];
+    const readFileMockReturnValues = [{}];
 
-    fsModuleMockForDevices(writeFileStatus, readFileStatus, itemToRead);
-    const helperMock = new FileRepositoryHelpers();
-
-    const fileDeviceRepository =
-      prepareFileDeviceRepositoryWithMockPerameters(helperMock);
-    const inMemoryStorage = inMemoryStoreWithMockMethods(
+    const cacheDeviceRepository = dependency(
       addToMemoryStatus,
-      deleteFromMemoryStatus
+      deleteFromMemoryStatus,
+      writeFileMockImplementationCalls,
+      readFileMockImplementationCalls,
+      readFileMockReturnValues
     );
-    const cacheDeviceRepository =
-      prepareCacheDeviceRepositoryWithMockPerameters(
-        inMemoryStorage,
-        fileDeviceRepository
-      );
 
     await cacheDeviceRepository.add(deviceToAdd).catch((result) =>
       expect(result).toEqual({
@@ -107,24 +142,17 @@ describe("CacheDeviceReposiotory with file persistence CLASS TEST - add device",
   test("Should not add device if writing to file failed", async () => {
     const addToMemoryStatus = "success";
     const deleteFromMemoryStatus = "success";
-    const writeFileStatus = ["error"] as DeviceTaskError[];
-    const readFileStatus = ["device",] as DeviceTaskError[];
-    const itemToRead = [{}];
+    const writeFileMockImplementationCalls = ["error"] as DeviceTaskError[];
+    const readFileMockImplementationCalls = ["device"] as DeviceTaskError[];
+    const readFileMockReturnValues = [{}];
 
-    fsModuleMockForDevices(writeFileStatus, readFileStatus, itemToRead);
-    const helperMock = new FileRepositoryHelpers();
-
-    const fileDeviceRepository =
-      prepareFileDeviceRepositoryWithMockPerameters(helperMock);
-    const inMemoryStorage = inMemoryStoreWithMockMethods(
+    const cacheDeviceRepository = dependency(
       addToMemoryStatus,
-      deleteFromMemoryStatus
+      deleteFromMemoryStatus,
+      writeFileMockImplementationCalls,
+      readFileMockImplementationCalls,
+      readFileMockReturnValues
     );
-    const cacheDeviceRepository =
-      prepareCacheDeviceRepositoryWithMockPerameters(
-        inMemoryStorage,
-        fileDeviceRepository
-      );
 
     await cacheDeviceRepository.add(deviceToAdd).catch((result) =>
       expect(result).toEqual({
@@ -142,35 +170,20 @@ describe("CacheDeviceReposiotory with file persistence CLASS TEST - add device",
     };
     const addToMemoryStatus = "success";
     const deleteFromMemoryStatus = "success";
-    const writeFileStatus = ["write", "write"] as DeviceTaskError[];
-    const readFileStatus = ["device",] as DeviceTaskError[];
-    const itemToRead = [
-      {
-        "12345": {
-          id: "12345",
-          deviceType: "switch",
-          name: "switch2",
-          commandOn: "switch on",
-          commandOff: "switch off",
-        },
-      },
-    ];
+    const writeFileMockImplementationCalls = [
+      "write",
+      "write",
+    ] as DeviceTaskError[];
+    const readFileMockImplementationCalls = ["device"] as DeviceTaskError[];
+    const readFileMockReturnValues = [deviceMockValue];
 
-    fsModuleMockForDevices(writeFileStatus, readFileStatus, itemToRead);
-    const helperMock = new FileRepositoryHelpers();
-
-    const fileDeviceRepository =
-      prepareFileDeviceRepositoryWithMockPerameters(helperMock);
-    const inMemoryStorage = inMemoryStoreWithMockMethods(
+    const cacheDeviceRepository = dependency(
       addToMemoryStatus,
-      deleteFromMemoryStatus
+      deleteFromMemoryStatus,
+      writeFileMockImplementationCalls,
+      readFileMockImplementationCalls,
+      readFileMockReturnValues
     );
-    const cacheDeviceRepository =
-      prepareCacheDeviceRepositoryWithMockPerameters(
-        inMemoryStorage,
-        fileDeviceRepository
-      );
-
     await cacheDeviceRepository.add(deviceWithExistingId).catch((result) =>
       expect(result).toEqual({
         "Device not added": "Unique violation error: IdConflictError",
@@ -187,34 +200,20 @@ describe("CacheDeviceReposiotory with file persistence CLASS TEST - add device",
     };
     const addToMemoryStatus = "success";
     const deleteFromMemoryStatus = "success";
-    const writeFileStatus = ["write", "write"] as DeviceTaskError[];
-    const readFileStatus = ["device","device",] as DeviceTaskError[];
-    const itemToRead = [
-      {
-        "543211": {
-          id: "543211",
-          deviceType: "switch",
-          name: "switch1",
-          commandOn: "switch on",
-          commandOff: "switch off",
-        },
-      },
-    ];
+    const writeFileMockImplementationCalls = [
+      "write",
+      "write",
+    ] as DeviceTaskError[];
+    const readFileMockImplementationCalls = ["device"] as DeviceTaskError[];
+    const readFileMockReturnValues = [deviceMockValue];
 
-    fsModuleMockForDevices(writeFileStatus, readFileStatus, itemToRead);
-    const helperMock = new FileRepositoryHelpers();
-
-    const fileDeviceRepository =
-      prepareFileDeviceRepositoryWithMockPerameters(helperMock);
-    const inMemoryStorage = inMemoryStoreWithMockMethods(
+    const cacheDeviceRepository = dependency(
       addToMemoryStatus,
-      deleteFromMemoryStatus
+      deleteFromMemoryStatus,
+      writeFileMockImplementationCalls,
+      readFileMockImplementationCalls,
+      readFileMockReturnValues
     );
-    const cacheDeviceRepository =
-      prepareCacheDeviceRepositoryWithMockPerameters(
-        inMemoryStorage,
-        fileDeviceRepository
-      );
 
     await cacheDeviceRepository.add(deviceWithExistingName).catch((result) =>
       expect(result).toEqual({
@@ -228,40 +227,25 @@ describe("CacheDeviceReposiotory with file persistence CLASS TEST - add device",
   test("Should not add device and compensate if not added to cache", async () => {
     const addToMemoryStatus = "error";
     const deleteFromMemoryStatus = "success";
-    const writeFileStatus = [
+    const writeFileMockImplementationCalls = [
       "write",
       "write",
       "write",
       "write",
     ] as DeviceTaskError[];
-    const readFileStatus = ["device","device",] as DeviceTaskError[];
-    const itemToRead = [
-      {},
-      {
-        "12345": {
-          id: "12345",
-          deviceType: "switch",
-          name: "switch1",
-          commandOn: "switch on",
-          commandOff: "switch off",
-        },
-      },
-    ];
+    const readFileMockImplementationCalls = [
+      "device",
+      "device",
+    ] as DeviceTaskError[];
+    const readFileMockReturnValues = [{}, deviceMockValue];
 
-    fsModuleMockForDevices(writeFileStatus, readFileStatus, itemToRead);
-    const helperMock = new FileRepositoryHelpers();
-
-    const fileDeviceRepository =
-      prepareFileDeviceRepositoryWithMockPerameters(helperMock);
-    const inMemoryStorage = inMemoryStoreWithMockMethods(
+    const cacheDeviceRepository = dependency(
       addToMemoryStatus,
-      deleteFromMemoryStatus
+      deleteFromMemoryStatus,
+      writeFileMockImplementationCalls,
+      readFileMockImplementationCalls,
+      readFileMockReturnValues
     );
-    const cacheDeviceRepository =
-      prepareCacheDeviceRepositoryWithMockPerameters(
-        inMemoryStorage,
-        fileDeviceRepository
-      );
 
     await cacheDeviceRepository.add(deviceToAdd).catch((result) =>
       expect(result).toStrictEqual({
@@ -276,32 +260,24 @@ describe("CacheDeviceReposiotory with file persistence CLASS TEST - add device",
   test("Compensation should fail if reading from file fails", async () => {
     const addToMemoryStatus = "error";
     const deleteFromMemoryStatus = "success";
-    const writeFileStatus = ["write", "write", "write"] as DeviceTaskError[];
-    const readFileStatus = ["device","error",] as DeviceTaskError[];
-    const itemToRead = [{}, {
-      "12345": {
-        id: "12345",
-        deviceType: "switch",
-        name: "switch1",
-        commandOn: "switch on",
-        commandOff: "switch off",
-      },
-    }];
+    const writeFileMockImplementationCalls = [
+      "write",
+      "write",
+      "write",
+    ] as DeviceTaskError[];
+    const readFileMockImplementationCalls = [
+      "device",
+      "error",
+    ] as DeviceTaskError[];
+    const readFileMockReturnValues = [{}, deviceMockValue];
 
-    fsModuleMockForDevices(writeFileStatus, readFileStatus, itemToRead);
-    const helperMock = new FileRepositoryHelpers();
-
-    const fileDeviceRepository =
-      prepareFileDeviceRepositoryWithMockPerameters(helperMock);
-    const inMemoryStorage = inMemoryStoreWithMockMethods(
+    const cacheDeviceRepository = dependency(
       addToMemoryStatus,
-      deleteFromMemoryStatus
+      deleteFromMemoryStatus,
+      writeFileMockImplementationCalls,
+      readFileMockImplementationCalls,
+      readFileMockReturnValues
     );
-    const cacheDeviceRepository =
-      prepareCacheDeviceRepositoryWithMockPerameters(
-        inMemoryStorage,
-        fileDeviceRepository
-      );
 
     await cacheDeviceRepository.add(deviceToAdd).catch((result) =>
       expect(result).toStrictEqual({
@@ -318,35 +294,24 @@ describe("CacheDeviceReposiotory with file persistence CLASS TEST - add device",
   test("Compensation should fail if writing file fails", async () => {
     const addToMemoryStatus = "error";
     const deleteFromMemoryStatus = "success";
-    const writeFileStatus = ["write", "write", "error"] as DeviceTaskError[];
-    const readFileStatus = ["device","device",] as DeviceTaskError[];
-    const itemToRead = [
-      {},
-      {
-        "12345": {
-          id: "12345",
-          deviceType: "switch",
-          name: "switch1",
-          commandOn: "switch on",
-          commandOff: "switch off",
-        },
-      },
-    ];
+    const writeFileMockImplementationCalls = [
+      "write",
+      "write",
+      "error",
+    ] as DeviceTaskError[];
+    const readFileMockImplementationCalls = [
+      "device",
+      "device",
+    ] as DeviceTaskError[];
+    const readFileMockReturnValues = [{}, deviceMockValue];
 
-    fsModuleMockForDevices(writeFileStatus, readFileStatus, itemToRead);
-    const helperMock = new FileRepositoryHelpers();
-
-    const fileDeviceRepository =
-      prepareFileDeviceRepositoryWithMockPerameters(helperMock);
-    const inMemoryStorage = inMemoryStoreWithMockMethods(
+    const cacheDeviceRepository = dependency(
       addToMemoryStatus,
-      deleteFromMemoryStatus
+      deleteFromMemoryStatus,
+      writeFileMockImplementationCalls,
+      readFileMockImplementationCalls,
+      readFileMockReturnValues
     );
-    const cacheDeviceRepository =
-      prepareCacheDeviceRepositoryWithMockPerameters(
-        inMemoryStorage,
-        fileDeviceRepository
-      );
 
     await cacheDeviceRepository.add(deviceToAdd).catch((result) =>
       expect(result).toStrictEqual({
@@ -359,6 +324,4 @@ describe("CacheDeviceReposiotory with file persistence CLASS TEST - add device",
       })
     );
   });
-
-  
 });

@@ -83,6 +83,19 @@ export async function getSwitches(token: string | null) {
   return response;
 }
 
+export async function listRunningSwitches(token: string | null) {
+  const URL = prepareURL()
+
+  const response = await fetch(`${URL}:${PORT}/running`, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+  });
+  return response;
+}
+
 export async function getTasksWhereDeviceId(deviceId:string, token: string | null ) {
   const URL = prepareURL()
 

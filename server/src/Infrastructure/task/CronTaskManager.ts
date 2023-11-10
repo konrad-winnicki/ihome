@@ -39,11 +39,11 @@ export class CronTaskManager implements TaskManager {
               aggregatedTask.id,
               aggregatedTask.minutes,
               aggregatedTask.hour,
-              aggregatedTask.onStatus
-                ? aggregatedTask.commandOn
-                : aggregatedTask.commandOff
-                ? aggregatedTask.commandOff
-                : ""
+              aggregatedTask.onStatus,
+              aggregatedTask.commandOn,
+              aggregatedTask.commandOff,
+              task.deviceId
+                
             );
           })
           .catch((error) => {

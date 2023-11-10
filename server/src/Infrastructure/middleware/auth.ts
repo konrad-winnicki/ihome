@@ -13,6 +13,7 @@ const authenticate = async (ctx: Koa.Context, next: Next) => {
   return tokenValidation(token)
     .then(() => next())
     .catch((error) => {
+      console.log('errr', error)
       ctx.status = 401;
       return (ctx.body = {"Token validation error": error});
     });
@@ -35,12 +36,13 @@ const authenticate = async (ctx: Koa.Context, next: Next) => {
 
 
 const tokenValidation = (token: string) => {
-
+  console.log('tonenvalidation', token)
   
   return new Promise<string>((resolve) => {
     jwt.verify(token, appConfiguration.JWT_SECRET, {
       ignoreExpiration: false,
     }) as JwtPayload;
+    console.log('resolve')
     resolve("access granted");
   }).catch((error:Error) => 
    error.message === "jwt expired"

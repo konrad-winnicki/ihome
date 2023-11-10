@@ -62,7 +62,7 @@ function createFileRepositories() {
     fileHelperMethods,
     serverMessages
   );
- 
+
   const taskRepository = new FileTaskRepository(
     fileHelperMethods,
     serverMessages
@@ -83,7 +83,6 @@ async function createDBRepositories() {
     mongoDocs.deviceDoc,
     serverMessages
   );
- 
 
   const taskRepository = new MongoTaskRepository(
     mongoDocs.taskDoc,
@@ -138,8 +137,16 @@ export async function initializeDependencias() {
   );
 
   const appServer = new AppServer(appRouter);
-
-  await recoveryInMemoryDeviceStorage(deviceService, devicesInMemory);
+  try {
+    const result = await recoveryInMemoryDeviceStorage(
+      deviceService,
+      devicesInMemory,
+      deviceRunService
+    );
+    console.log(result);
+  } catch (err) {
+    console.log(err);
+  }
   /*
   const cronTaskRepository = new TaskRecoveryManager(
     persistenciaType.taskRepository,

@@ -98,7 +98,8 @@ export class FileTaskRepository implements TaskRepository {
               Number(task.scheduledTime.hour),
               Number(task.scheduledTime.minutes),
               device.commandOn,
-              device.commandOff
+              device.commandOff,
+              device.id
             );
           });
         });

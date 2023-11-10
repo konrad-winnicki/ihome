@@ -22,7 +22,7 @@ const taskAndDeviceAggregationPipeline = (taskId?: string) => [
       id: 1,
       onStatus: 1,
       scheduledTime: 1,
-      device: { commandOn: 1, commandOff: 1 },
+      device: { commandOn: 1, commandOff: 1, id: 1},
     },
   },
 ];
@@ -114,7 +114,8 @@ export class MongoTaskRepository implements TaskRepository {
               aggregatedTask.scheduledTime.hour,
               aggregatedTask.scheduledTime.minutes,
               aggregatedTask.device.commandOn,
-              aggregatedTask.device.commandOff
+              aggregatedTask.device.commandOff,
+              aggregatedTask.device.id
             )
           );
         }
@@ -152,7 +153,9 @@ export class MongoTaskRepository implements TaskRepository {
               task.scheduledTime.hour,
               task.scheduledTime.minutes,
               task.device.commandOn,
-              task.device.commandOff
+              task.device.commandOff,
+              task.device.id
+
             )
         );
         return Promise.resolve(tasks);

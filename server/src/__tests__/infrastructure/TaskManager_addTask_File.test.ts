@@ -9,16 +9,62 @@ import {
 import { FileRepositoryHelpers } from "../../Infrastructure/filePersistencia/auxilaryFunctions";
 import {
   DeviceTaskError,
+  EmptyObject,
+  ReadFileMockReturnValues,
   fsModuleMockForDevices,
 } from "./mockForFileRepositoryHeplers";
+import { MemeoryStatusType } from "./mockForCacheDeviceRepository";
 
 describe("CronTaskManager with file persistence CLASS TEST - add task", () => {
+  const dependency = (
+    addToCronStatus: MemeoryStatusType,
+    deleteFromCronStatus: MemeoryStatusType,
+    writeFileMockImplementationCalls: DeviceTaskError[],
+    readFileMockImplemenmtationCalls: DeviceTaskError[],
+    readFileMockReturnValues: (ReadFileMockReturnValues | EmptyObject)[]
+  ) => {
+    const appCron = appCronMockMethods(addToCronStatus, deleteFromCronStatus);
+
+    fsModuleMockForDevices(
+      writeFileMockImplementationCalls,
+      readFileMockImplemenmtationCalls,
+      readFileMockReturnValues
+    );
+    const helperMock = new FileRepositoryHelpers();
+
+    const cronTaskManager =
+      prepareCronTaskManagerForFilePersistenceWithMockParameters(
+        appCron,
+        helperMock
+      );
+
+    return cronTaskManager;
+  };
+
   let consoleSpy: SpiedFunction;
   const taskToAdd = {
     id: "678910",
     deviceId: "12345",
     onStatus: true,
     scheduledTime: { hour: "10", minutes: "45" },
+  };
+
+  const taskMockValue = {
+    "678910": {
+      id: "678910",
+      deviceId: "12345",
+      onStatus: false,
+      scheduledTime: { hour: "10", minutes: "10" },
+    },
+  };
+  const deviceMockValue = {
+    "12345": {
+      id: "12345",
+      deviceType: "switch",
+      name: "switch1",
+      commandOn: "switch on",
+      commandOff: "switch off",
+    },
   };
 
   beforeEach(() => {
@@ -31,86 +77,63 @@ describe("CronTaskManager with file persistence CLASS TEST - add task", () => {
   test("Should add task to cron and database", async () => {
     const addToCronStatus = "success";
     const deleteFromCronStatus = "success";
-    const writeFileStatus = [
+    const writeFileMockImplementationCalls = [
       "write",
       "write",
       "write",
       "write",
     ] as DeviceTaskError[];
-    const readFileStatus = [
+    const readFileMockImplementationCalls = [
       "task",
       "task",
       "device",
       "task",
     ] as DeviceTaskError[];
 
-    const task = {
-      "678910": {
-        id: "678910",
-        deviceId: "12345",
-        onStatus: false,
-        scheduledTime: { hour: "10", minutes: "10" },
-      },
-    };
-    const device = {
-      "12345": {
-        id: "12345",
-        deviceType: "switch",
-        name: "switch1",
-        commandOn: "switch on",
-        commandOff: "switch off",
-      },
-    };
-    const itemToRead = [{}, task, device, task];
-    const appCron = appCronMockMethods(addToCronStatus, deleteFromCronStatus);
+    const readFileMockReturnValues = [
+      {},
+      taskMockValue,
+      deviceMockValue,
+      taskMockValue,
+    ];
 
-    fsModuleMockForDevices(writeFileStatus, readFileStatus, itemToRead);
-    const helperMock = new FileRepositoryHelpers();
-
-    const cronTaskManager =
-      prepareCronTaskManagerForFilePersistenceWithMockParameters(
-        appCron,
-        helperMock
-      );
+    const cronTaskManager = dependency(
+      addToCronStatus,
+      deleteFromCronStatus,
+      writeFileMockImplementationCalls,
+      readFileMockImplementationCalls,
+      readFileMockReturnValues
+    );
 
     await cronTaskManager
       .add(taskToAdd)
       .then((result) => expect(result).toEqual({ taskId: "678910" }));
   });
 
-
   test("Should not add task if task id exists", async () => {
     const addToCronStatus = "success";
     const deleteFromCronStatus = "success";
-    const writeFileStatus = ["write", "write"] as DeviceTaskError[];
-    const readFileStatus = ["task"] as DeviceTaskError[];
+    const writeFileMockImplementationCalls = [
+      "write",
+      "write",
+    ] as DeviceTaskError[];
+    const readFileMockImplementationCalls = ["task"] as DeviceTaskError[];
 
-    const task = {
-      "678910": {
-        id: "678910",
-        deviceId: "12345",
-        onStatus: false,
-        scheduledTime: { hour: "10", minutes: "10" },
-        additionalParameter: "additionalParameter",
-      },
-    };
-   
-    const itemToRead = [task];
-    const appCron = appCronMockMethods(addToCronStatus, deleteFromCronStatus);
-
-    fsModuleMockForDevices(writeFileStatus, readFileStatus, itemToRead);
-    const helperMock = new FileRepositoryHelpers();
-
-    const cronTaskManager =
-      prepareCronTaskManagerForFilePersistenceWithMockParameters(
-        appCron,
-        helperMock
-      );
+    const readFileMockReturnValues = [taskMockValue];
+    const cronTaskManager = dependency(
+      addToCronStatus,
+      deleteFromCronStatus,
+      writeFileMockImplementationCalls,
+      readFileMockImplementationCalls,
+      readFileMockReturnValues
+    );
 
     await cronTaskManager.add(taskToAdd).catch((err) =>
       expect(err).toEqual({
         "Task not added": {
-          "Task not added": { "error": "Unique violation error: IdConflictError" },
+          "Task not added": {
+            error: "Unique violation error: IdConflictError",
+          },
         },
       })
     );
@@ -119,30 +142,20 @@ describe("CronTaskManager with file persistence CLASS TEST - add task", () => {
   test("Should not add task if writing to file failed", async () => {
     const addToCronStatus = "success";
     const deleteFromCronStatus = "success";
-    const writeFileStatus = ["write", "error"] as DeviceTaskError[];
-    const readFileStatus = ["task"] as DeviceTaskError[];
+    const writeFileMockImplementationCalls = [
+      "write",
+      "error",
+    ] as DeviceTaskError[];
+    const readFileMockImplementationCalls = ["task"] as DeviceTaskError[];
 
-    const task = {
-      "678910": {
-        id: "678910",
-        deviceId: "12345",
-        onStatus: false,
-        scheduledTime: { hour: "10", minutes: "10" },
-        additionalParameter: "additionalParameter",
-      },
-    };
-   
-    const itemToRead = [{}, task];
-    const appCron = appCronMockMethods(addToCronStatus, deleteFromCronStatus);
-
-    fsModuleMockForDevices(writeFileStatus, readFileStatus, itemToRead);
-    const helperMock = new FileRepositoryHelpers();
-
-    const cronTaskManager =
-      prepareCronTaskManagerForFilePersistenceWithMockParameters(
-        appCron,
-        helperMock
-      );
+    const readFileMockReturnValues = [{}, taskMockValue];
+    const cronTaskManager = dependency(
+      addToCronStatus,
+      deleteFromCronStatus,
+      writeFileMockImplementationCalls,
+      readFileMockImplementationCalls,
+      readFileMockReturnValues
+    );
 
     await cronTaskManager.add(taskToAdd).catch((err) =>
       expect(err).toEqual({
@@ -156,38 +169,17 @@ describe("CronTaskManager with file persistence CLASS TEST - add task", () => {
   test("Should not add task if reading from file failed", async () => {
     const addToCronStatus = "success";
     const deleteFromCronStatus = "success";
-    const writeFileStatus = ["write"] as DeviceTaskError[];
-    const readFileStatus = ["error"] as DeviceTaskError[];
+    const writeFileMockImplementationCalls = ["write"] as DeviceTaskError[];
+    const readFileMockImplementationCalls = ["error"] as DeviceTaskError[];
 
-    const task = {
-      "678910": {
-        id: "678910",
-        deviceId: "12345",
-        onStatus: false,
-        scheduledTime: { hour: "10", minutes: "10" },
-        additionalParameter: "additionalParameter",
-      },
-    };
-    const device = {
-      "12345": {
-        id: "12345",
-        deviceType: "switch",
-        name: "switch1",
-        commandOn: "switch on",
-        commandOff: "switch off",
-      },
-    };
-    const itemToRead = [{}, task, device];
-    const appCron = appCronMockMethods(addToCronStatus, deleteFromCronStatus);
-
-    fsModuleMockForDevices(writeFileStatus, readFileStatus, itemToRead);
-    const helperMock = new FileRepositoryHelpers();
-
-    const cronTaskManager =
-      prepareCronTaskManagerForFilePersistenceWithMockParameters(
-        appCron,
-        helperMock
-      );
+    const readFileMockReturnValues = [{}, taskMockValue, deviceMockValue];
+    const cronTaskManager = dependency(
+      addToCronStatus,
+      deleteFromCronStatus,
+      writeFileMockImplementationCalls,
+      readFileMockImplementationCalls,
+      readFileMockReturnValues
+    );
 
     await cronTaskManager.add(taskToAdd).catch((err) =>
       expect(err).toEqual({
@@ -201,7 +193,7 @@ describe("CronTaskManager with file persistence CLASS TEST - add task", () => {
   test("Should not add task and compensate if adding to cron failed", async () => {
     const addToCronStatus = "error";
     const deleteFromCronStatus = "success";
-    const writeFileStatus = [
+    const writeFileMockImplementationCalls = [
       "write",
       "write",
       "write",
@@ -209,42 +201,26 @@ describe("CronTaskManager with file persistence CLASS TEST - add task", () => {
       "write",
       "write",
     ] as DeviceTaskError[];
-    const readFileStatus = [
+    const readFileMockImplementationCalls = [
       "task",
       "task",
       "device",
       "task",
     ] as DeviceTaskError[];
 
-    const task = {
-      "678910": {
-        id: "678910",
-        deviceId: "12345",
-        onStatus: false,
-        scheduledTime: { hour: "10", minutes: "10" },
-      },
-    };
-    const device = {
-      "12345": {
-        id: "12345",
-        deviceType: "switch",
-        name: "switch1",
-        commandOn: "switch on",
-        commandOff: "switch off",
-      },
-    };
-
-    const itemToRead = [{}, task, device, task];
-    const appCron = appCronMockMethods(addToCronStatus, deleteFromCronStatus);
-
-    fsModuleMockForDevices(writeFileStatus, readFileStatus, itemToRead);
-    const helperMock = new FileRepositoryHelpers();
-
-    const cronTaskManager =
-      prepareCronTaskManagerForFilePersistenceWithMockParameters(
-        appCron,
-        helperMock
-      );
+    const readFileMockReturnValues = [
+      {},
+      taskMockValue,
+      deviceMockValue,
+      taskMockValue,
+    ];
+    const cronTaskManager = dependency(
+      addToCronStatus,
+      deleteFromCronStatus,
+      writeFileMockImplementationCalls,
+      readFileMockImplementationCalls,
+      readFileMockReturnValues
+    );
 
     await cronTaskManager.add(taskToAdd).catch((err) =>
       expect(err).toEqual({
@@ -265,7 +241,7 @@ describe("CronTaskManager with file persistence CLASS TEST - add task", () => {
   test("Compensation fails reading file fails if during task deletion", async () => {
     const addToCronStatus = "error";
     const deleteFromCronStatus = "success";
-    const writeFileStatus = [
+    const writeFileMockImplementationCalls = [
       "write",
       "write",
       "write",
@@ -273,42 +249,26 @@ describe("CronTaskManager with file persistence CLASS TEST - add task", () => {
       "write",
       "write",
     ] as DeviceTaskError[];
-    const readFileStatus = [
+    const readFileMockImplementationCalls = [
       "task",
       "task",
       "device",
       "error",
     ] as DeviceTaskError[];
 
-    const task = {
-      "678910": {
-        id: "678910",
-        deviceId: "12345",
-        onStatus: false,
-        scheduledTime: { hour: "10", minutes: "10" },
-      },
-    };
-    const device = {
-      "12345": {
-        id: "12345",
-        deviceType: "switch",
-        name: "switch1",
-        commandOn: "switch on",
-        commandOff: "switch off",
-      },
-    };
-
-    const itemToRead = [{}, task, device, task];
-    const appCron = appCronMockMethods(addToCronStatus, deleteFromCronStatus);
-
-    fsModuleMockForDevices(writeFileStatus, readFileStatus, itemToRead);
-    const helperMock = new FileRepositoryHelpers();
-
-    const cronTaskManager =
-      prepareCronTaskManagerForFilePersistenceWithMockParameters(
-        appCron,
-        helperMock
-      );
+    const readFileMockReturnValues = [
+      {},
+      taskMockValue,
+      deviceMockValue,
+      taskMockValue,
+    ];
+    const cronTaskManager = dependency(
+      addToCronStatus,
+      deleteFromCronStatus,
+      writeFileMockImplementationCalls,
+      readFileMockImplementationCalls,
+      readFileMockReturnValues
+    );
 
     await cronTaskManager.add(taskToAdd).catch((err) =>
       expect(err).toEqual({
@@ -333,7 +293,7 @@ describe("CronTaskManager with file persistence CLASS TEST - add task", () => {
   test("Compensation fails if reading file fails during task deletion", async () => {
     const addToCronStatus = "error";
     const deleteFromCronStatus = "success";
-    const writeFileStatus = [
+    const writeFileMockImplementationCalls = [
       "write",
       "write",
       "write",
@@ -341,42 +301,27 @@ describe("CronTaskManager with file persistence CLASS TEST - add task", () => {
       "write",
       "error",
     ] as DeviceTaskError[];
-    const readFileStatus = [
+    const readFileMockImplementationCalls = [
       "task",
       "task",
       "device",
       "task",
     ] as DeviceTaskError[];
 
-    const task = {
-      "678910": {
-        id: "678910",
-        deviceId: "12345",
-        onStatus: false,
-        scheduledTime: { hour: "10", minutes: "10" },
-      },
-    };
-    const device = {
-      "12345": {
-        id: "12345",
-        deviceType: "switch",
-        name: "switch1",
-        commandOn: "switch on",
-        commandOff: "switch off",
-      },
-    };
+    const readFileMockReturnValues = [
+      {},
+      taskMockValue,
+      deviceMockValue,
+      taskMockValue,
+    ];
 
-    const itemToRead = [{}, task, device, task];
-    const appCron = appCronMockMethods(addToCronStatus, deleteFromCronStatus);
-
-    fsModuleMockForDevices(writeFileStatus, readFileStatus, itemToRead);
-    const helperMock = new FileRepositoryHelpers();
-
-    const cronTaskManager =
-      prepareCronTaskManagerForFilePersistenceWithMockParameters(
-        appCron,
-        helperMock
-      );
+    const cronTaskManager = dependency(
+      addToCronStatus,
+      deleteFromCronStatus,
+      writeFileMockImplementationCalls,
+      readFileMockImplementationCalls,
+      readFileMockReturnValues
+    );
 
     await cronTaskManager.add(taskToAdd).catch((err) =>
       expect(err).toEqual({
@@ -403,7 +348,7 @@ describe("CronTaskManager with file persistence CLASS TEST - add task", () => {
   test("Should not add task if reading file fails during aggrregation ", async () => {
     const addToCronStatus = "success";
     const deleteFromCronStatus = "success";
-    const writeFileStatus = [
+    const writeFileMockImplementationCalls = [
       "write",
       "write",
       "write",
@@ -411,42 +356,26 @@ describe("CronTaskManager with file persistence CLASS TEST - add task", () => {
       "write",
       "write",
     ] as DeviceTaskError[];
-    const readFileStatus = [
+    const readFileMockImplementationCalls = [
       "task",
       "task",
       "error",
       "task",
     ] as DeviceTaskError[];
 
-    const task = {
-      "678910": {
-        id: "678910",
-        deviceId: "12345",
-        onStatus: false,
-        scheduledTime: { hour: "10", minutes: "10" },
-      },
-    };
-    const device = {
-      "12345": {
-        id: "12345",
-        deviceType: "switch",
-        name: "switch1",
-        commandOn: "switch on",
-        commandOff: "switch off",
-      },
-    };
-
-    const itemToRead = [{}, task, device, task];
-    const appCron = appCronMockMethods(addToCronStatus, deleteFromCronStatus);
-
-    fsModuleMockForDevices(writeFileStatus, readFileStatus, itemToRead);
-    const helperMock = new FileRepositoryHelpers();
-
-    const cronTaskManager =
-      prepareCronTaskManagerForFilePersistenceWithMockParameters(
-        appCron,
-        helperMock
-      );
+    const readFileMockReturnValues = [
+      {},
+      taskMockValue,
+      deviceMockValue,
+      taskMockValue,
+    ];
+    const cronTaskManager = dependency(
+      addToCronStatus,
+      deleteFromCronStatus,
+      writeFileMockImplementationCalls,
+      readFileMockImplementationCalls,
+      readFileMockReturnValues
+    );
 
     await cronTaskManager.add(taskToAdd).catch((err) =>
       expect(err).toEqual({
@@ -469,44 +398,31 @@ describe("CronTaskManager with file persistence CLASS TEST - add task", () => {
   test("Should not add task if writing file fails during aggrregation", async () => {
     const addToCronStatus = "success";
     const deleteFromCronStatus = "success";
-    const writeFileStatus = [
+    const writeFileMockImplementationCalls = [
       "write",
       "write",
       "error",
       "write",
       "write",
     ] as DeviceTaskError[];
-    const readFileStatus = ["task", "task"] as DeviceTaskError[];
+    const readFileMockImplementationCalls = [
+      "task",
+      "task",
+    ] as DeviceTaskError[];
 
-    const task = {
-      "678910": {
-        id: "678910",
-        deviceId: "12345",
-        onStatus: false,
-        scheduledTime: { hour: "10", minutes: "10" },
-      },
-    };
-    const device = {
-      "12345": {
-        id: "12345",
-        deviceType: "switch",
-        name: "switch1",
-        commandOn: "switch on",
-        commandOff: "switch off",
-      },
-    };
-
-    const itemToRead = [{}, task, device, task];
-    const appCron = appCronMockMethods(addToCronStatus, deleteFromCronStatus);
-
-    fsModuleMockForDevices(writeFileStatus, readFileStatus, itemToRead);
-    const helperMock = new FileRepositoryHelpers();
-
-    const cronTaskManager =
-      prepareCronTaskManagerForFilePersistenceWithMockParameters(
-        appCron,
-        helperMock
-      );
+    const readFileMockReturnValues = [
+      {},
+      taskMockValue,
+      deviceMockValue,
+      taskMockValue,
+    ];
+    const cronTaskManager = dependency(
+      addToCronStatus,
+      deleteFromCronStatus,
+      writeFileMockImplementationCalls,
+      readFileMockImplementationCalls,
+      readFileMockReturnValues
+    );
 
     await cronTaskManager.add(taskToAdd).catch((err) =>
       expect(err).toEqual({

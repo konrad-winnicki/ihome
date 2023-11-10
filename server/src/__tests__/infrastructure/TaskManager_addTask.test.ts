@@ -2,13 +2,51 @@ import { describe } from "@jest/globals";
 import { SpiedFunction } from "jest-mock";
 import { expect, jest, test } from "@jest/globals";
 
-import { taskDocumentWithMockMetods } from "./mockForMongoTaskPersistence";
+import {
+  AggregateStatus,
+  DeleteFromDBOptions,
+  taskDocumentWithMockMetods,
+} from "./mockForMongoTaskPersistence";
 import {
   appCronMockMethods,
   prepareCronTaskManagerForDatabasePersistenceWithMockParameters,
 } from "./mockForCronManager";
+import { MemeoryStatusType } from "./mockForCacheDeviceRepository";
+import {
+  AddToDatabaseStatus,
+  DeleteFromDBStatus,
+  FindOneById,
+} from "./mockForMongoDevicePersistence";
 
 describe("CronTaskManager with database persistence CLASS TEST - add task", () => {
+  const dependency = (
+    addToCronStatus: MemeoryStatusType,
+    deleteFromCronStatus: MemeoryStatusType,
+    addToDBStatus: AddToDatabaseStatus,
+    deleteFromDBStatus: DeleteFromDBStatus,
+    deleteFromDBOptions: DeleteFromDBOptions,
+    aggregateStatus: AggregateStatus,
+    findOneByIdStatus: FindOneById
+  ) => {
+    const appCron = appCronMockMethods(addToCronStatus, deleteFromCronStatus);
+
+    const taskDokumentMock = taskDocumentWithMockMetods(
+      addToDBStatus,
+      deleteFromDBStatus,
+      deleteFromDBOptions,
+      aggregateStatus,
+      findOneByIdStatus
+    );
+
+    const cronTaskManager =
+      prepareCronTaskManagerForDatabasePersistenceWithMockParameters(
+        appCron,
+        taskDokumentMock
+      );
+
+    return cronTaskManager;
+  };
+
   let consoleSpy: SpiedFunction;
   const taskToAdd = {
     id: "678910",
@@ -31,20 +69,16 @@ describe("CronTaskManager with database persistence CLASS TEST - add task", () =
     const deleteFromDBStatus = "success";
     const deleteFromDBOptions = { acknowledged: true, deletedCount: 1 };
     const aggregateStatus = "success";
-    const appCron = appCronMockMethods(addToCronStatus, deleteFromCronStatus);
+   const findOneByIdStatus = undefined
 
-    const taskDokumentMock = taskDocumentWithMockMetods(
+    const cronTaskManager = dependency (
+      addToCronStatus,
+      deleteFromCronStatus,
       addToDBStatus,
       deleteFromDBStatus,
       deleteFromDBOptions,
-      aggregateStatus
-    );
-
-    const cronTaskManager =
-      prepareCronTaskManagerForDatabasePersistenceWithMockParameters(
-        appCron,
-        taskDokumentMock
-      );
+      aggregateStatus,
+      findOneByIdStatus)
 
     await cronTaskManager
       .add(taskToAdd)
@@ -59,25 +93,16 @@ describe("CronTaskManager with database persistence CLASS TEST - add task", () =
     const aggregateStatus = "success";
 
     const deleteFromDBOptions = { acknowledged: true, deletedCount: 1 };
-    const appCron = appCronMockMethods(addToCronStatus, deleteFromCronStatus);
+    const findOneByIdStatus = undefined
 
-    const taskDokumentMock = taskDocumentWithMockMetods(
+    const cronTaskManager = dependency (
+      addToCronStatus,
+      deleteFromCronStatus,
       addToDBStatus,
       deleteFromDBStatus,
       deleteFromDBOptions,
-      aggregateStatus
-    );
-
-    const cronTaskManager =
-      prepareCronTaskManagerForDatabasePersistenceWithMockParameters(
-        appCron,
-        taskDokumentMock
-      );
-/*
-    await cronTaskManager
-      .add(taskToAdd)
-      .catch((err) => console.log("E____________", err));
-*/
+      aggregateStatus,
+      findOneByIdStatus)
     await cronTaskManager.add(taskToAdd).catch((err) =>
       expect(err).toEqual({
         "Task not added": {
@@ -85,35 +110,34 @@ describe("CronTaskManager with database persistence CLASS TEST - add task", () =
         },
       })
     );
-    
   });
 
   test("Should not add Task if task id exists", async () => {
     const addToCronStatus = "success";
     const deleteFromCronStatus = "success";
-    const addToDBStatus = "duplicatedId";
+    const addToDBStatus = "DuplicatedId";
     const deleteFromDBStatus = "success";
     const aggregateStatus = "success";
 
     const deleteFromDBOptions = { acknowledged: true, deletedCount: 1 };
-    const appCron = appCronMockMethods(addToCronStatus, deleteFromCronStatus);
+    const findOneByIdStatus = undefined
 
-    const taskDokumentMock = taskDocumentWithMockMetods(
+    const cronTaskManager = dependency (
+      addToCronStatus,
+      deleteFromCronStatus,
       addToDBStatus,
       deleteFromDBStatus,
       deleteFromDBOptions,
-      aggregateStatus
-    );
+      aggregateStatus,
+      findOneByIdStatus)
 
-    const cronTaskManager =
-      prepareCronTaskManagerForDatabasePersistenceWithMockParameters(
-        appCron,
-        taskDokumentMock
+    await cronTaskManager
+      .add(taskToAdd)
+      .catch((err) =>
+        expect(err).toEqual({
+          "Task not added": { "Task not added": { error: "Duplicated id" } },
+        })
       );
-
-    await cronTaskManager.add(taskToAdd).catch((err) =>
-      expect(err).toEqual({ 'Task not added': { 'Task not added': { error: 'Duplicated id' } } })
-    );
   });
 
   test("Should not add task and compensate if adding to cron failed", async () => {
@@ -124,20 +148,16 @@ describe("CronTaskManager with database persistence CLASS TEST - add task", () =
     const deleteFromDBOptions = { acknowledged: true, deletedCount: 1 };
     const aggregateStatus = "success";
 
-    const appCron = appCronMockMethods(addToCronStatus, deleteFromCronStatus);
+    const findOneByIdStatus = undefined
 
-    const taskDokumentMock = taskDocumentWithMockMetods(
+    const cronTaskManager = dependency (
+      addToCronStatus,
+      deleteFromCronStatus,
       addToDBStatus,
       deleteFromDBStatus,
       deleteFromDBOptions,
-      aggregateStatus
-    );
-
-    const cronTaskManager =
-      prepareCronTaskManagerForDatabasePersistenceWithMockParameters(
-        appCron,
-        taskDokumentMock
-      );
+      aggregateStatus,
+      findOneByIdStatus)
 
     await cronTaskManager.add(taskToAdd).catch((err) =>
       expect(err).toEqual({
@@ -167,25 +187,16 @@ describe("CronTaskManager with database persistence CLASS TEST - add task", () =
     const deleteFromDBOptions = { acknowledged: true, deletedCount: 1 };
     const aggregateStatus = "success";
 
-    const appCron = appCronMockMethods(addToCronStatus, deleteFromCronStatus);
+    const findOneByIdStatus = undefined
 
-    const taskDokumentMock = taskDocumentWithMockMetods(
+    const cronTaskManager = dependency (
+      addToCronStatus,
+      deleteFromCronStatus,
       addToDBStatus,
       deleteFromDBStatus,
       deleteFromDBOptions,
-      aggregateStatus
-    );
-
-    const cronTaskManager =
-      prepareCronTaskManagerForDatabasePersistenceWithMockParameters(
-        appCron,
-        taskDokumentMock
-      );
-
-    await cronTaskManager
-      .add(taskToAdd)
-      .catch((err) => console.log("EEEEEEEEEE", JSON.stringify(err)));
-
+      aggregateStatus,
+      findOneByIdStatus)
     await cronTaskManager.add(taskToAdd).catch((err) =>
       expect(err).toEqual({
         "Task not added": {
@@ -216,20 +227,16 @@ describe("CronTaskManager with database persistence CLASS TEST - add task", () =
     const deleteFromDBOptions = { acknowledged: true, deletedCount: 1 };
     const aggregateStatus = "internalError";
 
-    const appCron = appCronMockMethods(addToCronStatus, deleteFromCronStatus);
+    const findOneByIdStatus = undefined
 
-    const taskDokumentMock = taskDocumentWithMockMetods(
+    const cronTaskManager = dependency (
+      addToCronStatus,
+      deleteFromCronStatus,
       addToDBStatus,
       deleteFromDBStatus,
       deleteFromDBOptions,
-      aggregateStatus
-    );
-
-    const cronTaskManager =
-      prepareCronTaskManagerForDatabasePersistenceWithMockParameters(
-        appCron,
-        taskDokumentMock
-      );
+      aggregateStatus,
+      findOneByIdStatus)
 
     await cronTaskManager.add(taskToAdd).catch((err) =>
       expect(err).toEqual({
@@ -258,23 +265,16 @@ describe("CronTaskManager with database persistence CLASS TEST - add task", () =
     const deleteFromDBStatus = "error";
     const deleteFromDBOptions = { acknowledged: true, deletedCount: 1 };
     const aggregateStatus = "internalError";
-    const findOneByIdStatus = "success";
+    const findOneByIdStatus = "success"
 
-    const appCron = appCronMockMethods(addToCronStatus, deleteFromCronStatus);
-
-    const taskDokumentMock = taskDocumentWithMockMetods(
+    const cronTaskManager = dependency (
+      addToCronStatus,
+      deleteFromCronStatus,
       addToDBStatus,
       deleteFromDBStatus,
       deleteFromDBOptions,
       aggregateStatus,
-      findOneByIdStatus
-    );
-
-    const cronTaskManager =
-      prepareCronTaskManagerForDatabasePersistenceWithMockParameters(
-        appCron,
-        taskDokumentMock
-      );
+      findOneByIdStatus)
 
     await cronTaskManager.add(taskToAdd).catch((err) =>
       expect(err).toEqual({
@@ -306,25 +306,16 @@ describe("CronTaskManager with database persistence CLASS TEST - add task", () =
     const deleteFromDBOptions = { acknowledged: true, deletedCount: 1 };
     const aggregateStatus = "emptyArray";
 
-    const appCron = appCronMockMethods(addToCronStatus, deleteFromCronStatus);
+    const findOneByIdStatus = undefined
 
-    const taskDokumentMock = taskDocumentWithMockMetods(
+    const cronTaskManager = dependency (
+      addToCronStatus,
+      deleteFromCronStatus,
       addToDBStatus,
       deleteFromDBStatus,
       deleteFromDBOptions,
-      aggregateStatus
-    );
-
-    const cronTaskManager =
-      prepareCronTaskManagerForDatabasePersistenceWithMockParameters(
-        appCron,
-        taskDokumentMock
-      );
-
-    await cronTaskManager
-      .add(taskToAdd)
-      .catch((res) => console.log("DDDDD", JSON.stringify(res)));
-
+      aggregateStatus,
+      findOneByIdStatus)
     await cronTaskManager.add(taskToAdd).catch((err) =>
       expect(err).toEqual({
         "Task not added": {

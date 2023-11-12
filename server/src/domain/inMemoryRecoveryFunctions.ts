@@ -16,12 +16,12 @@ export async function recoveryInMemoryDeviceStorage(
     devicesInMemory.add(meter);
   });
 
-  const switchOffResults = [];
+  //const switchOffResults = [];
   for (const switchDevice of switches) {
     devicesInMemory.add(switchDevice);
 
-    const result = await switchOffPerformer(deviceRunService, switchDevice);
-    switchOffResults.push(result);
+    //const result = await switchOffPerformer(deviceRunService, switchDevice);
+    //switchOffResults.push(result);
   }
 
   /*
@@ -41,7 +41,7 @@ export async function recoveryInMemoryDeviceStorage(
   return switchOffPromises;
 */
 
-  return { "Devices added to memory": switchOffResults };
+  //return { "Devices added to memory": switchOffResults };
 }
 
 async function getDevices(deviceService: DeviceService) {

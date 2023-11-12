@@ -11,7 +11,6 @@ export class RunDeviceControllers {
     this.deviceRunService = deviceRunService;
     this.activateMeter = this.activateMeter.bind(this);
     this.runSwitch = this.runSwitch.bind(this);
-    this.listActivatedSwitches = this.listActivatedSwitches.bind(this);
   }
 
   async activateMeter(ctx: Koa.Context) {
@@ -57,16 +56,4 @@ export class RunDeviceControllers {
     }
   }
 
-  async listActivatedSwitches(ctx: Koa.Context) {
-    return this.deviceRunService
-      .listActivatedSwitches()
-      .then((activatedSwitches) => {
-        ctx.status = 200;
-        ctx.body = activatedSwitches;
-      })
-      .catch((error) => {
-        ctx.status = 500;
-        ctx.body = error;
-      });
-  }
 }

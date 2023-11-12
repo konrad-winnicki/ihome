@@ -19,12 +19,6 @@ export function initAppRouter(
   appRouter.post("/login", loginController.loginHandler);
   appRouter.get("/renew", authenticate, loginController.refreshToken);
 
-  appRouter.get(
-    "/running",
-    authenticate,
-    deviceRunControllers.listActivatedSwitches
-  );
-
   appRouter.post(
     "/meters/run/:id",
     authenticate,

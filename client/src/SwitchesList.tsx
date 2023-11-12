@@ -47,7 +47,9 @@ const SwitchesList: React.FC = () => {
       getRunning();
     }
     if (showSwitches) {
-      getSwitchList();
+      getSwitchList().then(()=>console.log(switches))
+      
+
     }
     if (deviceShowsTaskModule) {
       setShowSwitches(false);
@@ -55,6 +57,8 @@ const SwitchesList: React.FC = () => {
 
     
     if (refreshList) {
+      console.log(switches)
+
       setRefreshList(false);
     }
   }, [showSwitches, deviceShowsTaskModule, refreshList]);

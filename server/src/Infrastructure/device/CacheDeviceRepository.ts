@@ -87,6 +87,12 @@ export class CacheDeviceRepository implements DeviceRepository {
   }
 
   async listByType(deviceType: string): Promise<Device[]> {
+    const devices = [...this.cachedDevices.devices.values()].filter((device) => {
+      return device.deviceType === deviceType
+    })
+    if (devices.length !== 0){
+      return devices
+    }
     return this.delegate.listByType(deviceType);
   }
 

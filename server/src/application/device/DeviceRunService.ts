@@ -4,7 +4,6 @@ import { exec } from "child_process";
 import { DeviceRunInterface } from "./DeviceRunInterface";
 import { Switch } from "../../domain/Switch";
 import util from "util";
-import { ActivatedSwitches } from "../../domain/ActivatedSwitches";
 import { Device } from "../../domain/Device";
 import { cachedDevice } from "../../domain/CachedDevices";
 
@@ -19,12 +18,13 @@ export class DeviceRunService implements DeviceRunInterface {
   }
 
   async switchOn(deviceId: string) {
+    console.log('switch on')
     return this.getById(deviceId)
       .then((device) => {
         if (device.deviceType === "switch") {
-          const runningSwitches = ActivatedSwitches.getInstance();
-          runningSwitches.add(deviceId);
-          console.log(runningSwitches.switchDevices);
+          this.cachedDevices.changeStatus(deviceId, true)
+          console.log(this.cachedDevices.devices)
+
         }
         return this.executeScriptAndCollectSdtout(device.commandOn);
       })
@@ -37,11 +37,8 @@ export class DeviceRunService implements DeviceRunInterface {
     return this.getById(deviceId)
       .then((device) => {
         if (device.deviceType === "switch") {
-          const runningSwitches = ActivatedSwitches.getInstance();
-          console.log("service", runningSwitches);
-          runningSwitches.delete(deviceId);
-
           const switchDevice = device as Switch;
+          this.cachedDevices.changeStatus(deviceId, false)
           return this.executeScriptAndCollectSdtout(switchDevice.commandOff);
         }
         return Promise.reject({ error: "wrong device passed" });
@@ -50,20 +47,22 @@ export class DeviceRunService implements DeviceRunInterface {
         Promise.reject({ ["Error occured during switching off"]: error })
       );
   }
-
+/*
   async listActivatedSwitches(): Promise<Array<string>> {
     return new Promise<Array<string>>((resolve) => {
       const activatedSwitches = ActivatedSwitches.getInstance();
       resolve(activatedSwitches.switchDevices);
     });
   }
-
+*/
   getById(deviceId: string): Promise<Device> {
     return new Promise((resolve, reject) => {
       const devices = this.cachedDevices.devices;
-      const deviceProperty = devices.get(deviceId);
-      return deviceProperty
-        ? resolve(deviceProperty.device)
+      const device = devices.get(deviceId);
+      console.log('cached dev', devices)
+      console.log('searched device', device)
+      return device
+        ? resolve(device)
         : reject({
             NonExistsError: `Device with id ${deviceId} does not exist.`,
           });

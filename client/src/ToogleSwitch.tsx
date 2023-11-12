@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
 import ReactSwitch from "react-switch";
 import {toggleSwitch } from "./services";
+import { SwitchInterface } from "./SwitchesList";
 
-const ToggleSwitch: React.FC<{ switchId: string, onStatus:boolean }> = (props) => {
-  const [checked, setChecked] = useState(props.onStatus);
+const ToggleSwitch: React.FC<{ switchDevice: SwitchInterface, onStatus:boolean }> = (props) => {
+  const [checked, setChecked] = useState(props.switchDevice.onStatus);
   const token = localStorage.getItem("token");
 
   const handleChange = (val: boolean) => {
@@ -11,7 +12,7 @@ const ToggleSwitch: React.FC<{ switchId: string, onStatus:boolean }> = (props) =
 
     setChecked(val);
     console.log('after', val, checked)
-    toggleSwitch(props.switchId, val, token)
+    toggleSwitch(props.switchDevice.id, val, token)
   };
 
   useEffect(() => {

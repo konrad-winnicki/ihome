@@ -36,6 +36,11 @@ export const DeviceSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+
+  onStatus: {
+    type: Boolean,
+    default:false
+  },
 });
 
 export const ScheduleTimeSchema = new mongoose.Schema({

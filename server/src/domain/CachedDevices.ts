@@ -2,9 +2,9 @@ import { Device } from "./Device";
 
 export class cachedDevice {
   private static instance: cachedDevice | null = null;
-  private _devices: Map<string, Device>;
+  private _devices: Map<string, {onState: boolean, device: Device}>;
   private constructor() {
-    this._devices = new Map<string, Device>();
+    this._devices = new Map<string, {onState: boolean, device: Device}>();
   }
 
   public static getInstance() {
@@ -15,14 +15,14 @@ export class cachedDevice {
   }
 
   public add(device: Device) {
-    this._devices.set(device.id, device);
+    this._devices.set(device.id, {onState: false, device: device});
   }
 
   public delete(deviceId: string) {
     this._devices.delete(deviceId);
   }
 
-  get devices(): Map<string, Device> {
+  get devices(): Map<string, {onState: boolean, device: Device}> {
     return this._devices;
   }
 }

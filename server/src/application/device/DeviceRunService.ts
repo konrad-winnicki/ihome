@@ -61,9 +61,9 @@ export class DeviceRunService implements DeviceRunInterface {
   getById(deviceId: string): Promise<Device> {
     return new Promise((resolve, reject) => {
       const devices = this.cachedDevices.devices;
-      const device = devices.get(deviceId);
-      return device
-        ? resolve(device)
+      const deviceProperty = devices.get(deviceId);
+      return deviceProperty
+        ? resolve(deviceProperty.device)
         : reject({
             NonExistsError: `Device with id ${deviceId} does not exist.`,
           });

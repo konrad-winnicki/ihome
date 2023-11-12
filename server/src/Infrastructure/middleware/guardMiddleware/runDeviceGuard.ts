@@ -5,7 +5,7 @@ export type RunSwitchRequestBody = {
   switchOn: boolean;
 };
 
-export async function runSwitchGuardMiddleware(ctx: Koa.Context, next: Next) {
+export async function runDeviceGuardMiddleware(ctx: Koa.Context, next: Next) {
   const body = (await ctx.request.body) as RunSwitchRequestBody;
 
   if (isRunSwitch(body)) {

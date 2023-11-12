@@ -1,9 +1,8 @@
 import { PORT } from "./config/config";
 
-
 function prepareURL() {
-  const ip = localStorage.getItem('ip')
-return `http://${ip}`
+  const ip = localStorage.getItem("ip");
+  return `http://${ip}`;
 }
 
 export interface FormData {
@@ -16,36 +15,33 @@ export interface RegistrationData {
   password: string;
 }
 
-
-
 export async function fetchLogin(data: FormData) {
+  const URL = prepareURL();
+  const response = await fetch(`${URL}:${PORT}/login`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(data),
+  });
+  return response;
+}
 
-  const URL = prepareURL()
-	const response = await fetch(`${URL}:${PORT}/login`, {
-		method: 'POST',
-		headers: {
-			'Content-Type': 'application/json'
-		},
-		body: JSON.stringify(data)
-	})
-	return response}
+export const renewSession = async (token: string | null): Promise<Response> => {
+  const URL = prepareURL();
 
-
-  export const renewSession = async (token: string | null):Promise<Response> => {
-    const URL = prepareURL()
-
-    const response = await fetch(`${URL}:${PORT}/renew`, {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-    });
-    return response;
-  };
+  const response = await fetch(`${URL}:${PORT}/renew`, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+  });
+  return response;
+};
 
 export async function getMeasurement(meterId: string, token: string | null) {
-  const URL = prepareURL()
+  const URL = prepareURL();
 
   const response = await fetch(`${URL}:${PORT}/meters/run/${meterId}`, {
     method: "POST",
@@ -58,7 +54,7 @@ export async function getMeasurement(meterId: string, token: string | null) {
 }
 
 export async function getMeters(token: string | null) {
-  const URL = prepareURL()
+  const URL = prepareURL();
 
   const response = await fetch(`${URL}:${PORT}/meters`, {
     method: "GET",
@@ -71,7 +67,7 @@ export async function getMeters(token: string | null) {
 }
 
 export async function getSwitches(token: string | null) {
-  const URL = prepareURL()
+  const URL = prepareURL();
 
   const response = await fetch(`${URL}:${PORT}/switches`, {
     method: "GET",
@@ -84,7 +80,7 @@ export async function getSwitches(token: string | null) {
 }
 
 export async function listRunningSwitches(token: string | null) {
-  const URL = prepareURL()
+  const URL = prepareURL();
 
   const response = await fetch(`${URL}:${PORT}/running`, {
     method: "GET",
@@ -96,8 +92,11 @@ export async function listRunningSwitches(token: string | null) {
   return response;
 }
 
-export async function getTasksWhereDeviceId(deviceId:string, token: string | null ) {
-  const URL = prepareURL()
+export async function getTasksWhereDeviceId(
+  deviceId: string,
+  token: string | null
+) {
+  const URL = prepareURL();
 
   const response = await fetch(`${URL}:${PORT}/tasks/device/${deviceId}`, {
     method: "GET",
@@ -109,9 +108,8 @@ export async function getTasksWhereDeviceId(deviceId:string, token: string | nul
   return response;
 }
 
-
-export async function deleteTask(taskId:string, token: string | null) {
-  const URL = prepareURL()
+export async function deleteTask(taskId: string, token: string | null) {
+  const URL = prepareURL();
 
   const response = await fetch(`${URL}:${PORT}/tasks/${taskId}`, {
     method: "DELETE",
@@ -120,22 +118,24 @@ export async function deleteTask(taskId:string, token: string | null) {
       "Content-Type": "application/json",
     },
   });
-  return response;}
+  return response;
+}
 
-  export async function deleteDevice(taskId:string, token: string | null) {
-    const URL = prepareURL()
+export async function deleteDevice(taskId: string, token: string | null) {
+  const URL = prepareURL();
 
-    const response = await fetch(`${URL}:${PORT}/devices/${taskId}`, {
-      method: "DELETE",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-    });
-    return response;}
+  const response = await fetch(`${URL}:${PORT}/devices/${taskId}`, {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+  });
+  return response;
+}
 
 export const createMeter = async (meter: object, token: string | null) => {
-  const URL = prepareURL()
+  const URL = prepareURL();
 
   const response = await fetch(`${URL}:${PORT}/devices`, {
     method: "POST",
@@ -148,8 +148,11 @@ export const createMeter = async (meter: object, token: string | null) => {
   return response;
 };
 
-export const createSwitch = async (switchDevice: object, token: string | null) => {
-  const URL = prepareURL()
+export const createSwitch = async (
+  switchDevice: object,
+  token: string | null
+) => {
+  const URL = prepareURL();
 
   const response = await fetch(`${URL}:${PORT}/devices`, {
     method: "POST",
@@ -163,7 +166,7 @@ export const createSwitch = async (switchDevice: object, token: string | null) =
 };
 
 export const createTask = async (task: object, token: string | null) => {
-  const URL = prepareURL()
+  const URL = prepareURL();
 
   const response = await fetch(`${URL}:${PORT}/tasks`, {
     method: "POST",
@@ -176,18 +179,21 @@ export const createTask = async (task: object, token: string | null) => {
   return response;
 };
 
-export const toggleSwitch = async (switchDeviceId: string, switchStatus: boolean, token: string | null) => {
-  const URL = prepareURL()
+export const runDevice = async (
+  DeviceId: string,
+  onStatus: boolean,
+  token: string | null
+) => {
+  const URL = prepareURL();
 
-  const response = await fetch(`${URL}:${PORT}/switches/run/${switchDeviceId}`, {
+  const response = await fetch(`${URL}:${PORT}/devices/run/${DeviceId}`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${token}`,
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({switchOn: switchStatus }),
+    body: JSON.stringify({ 
+      onStatus }),
   });
   return response;
 };
-
-

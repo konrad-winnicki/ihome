@@ -1,5 +1,4 @@
 import sanitizedConfig from "../../../config/config";
-
 import { exec } from "child_process";
 import { DeviceRunInterface } from "./DeviceRunInterface";
 import { Switch } from "../../domain/Switch";
@@ -10,57 +9,35 @@ import { cachedDevice } from "../../domain/CachedDevices";
 const execAsync = util.promisify(exec);
 
 export class DeviceRunService implements DeviceRunInterface {
-  // private persistenceRepository: DeviceRepository;
   private cachedDevices: cachedDevice;
 
   constructor(cachedDevices: cachedDevice) {
     this.cachedDevices = cachedDevices;
   }
 
-  async switchOn(deviceId: string) {
-    console.log('switch on')
-    return this.getById(deviceId)
-      .then((device) => {
-        if (device.deviceType === "switch") {
-          this.cachedDevices.changeStatus(deviceId, true)
-          console.log(this.cachedDevices.devices)
-
-        }
-        return this.executeScriptAndCollectSdtout(device.commandOn);
-      })
-      .catch((error) =>
-        Promise.reject({ ["Error occured during switching on"]: error })
-      );
+  async switchOn(device: Device) {
+    if (device.deviceType === "switch") {
+      this.cachedDevices.changeStatus(device.id, true);
+      console.log(this.cachedDevices.devices);
+    }
+    return this.executeScriptAndCollectSdtout(device.commandOn);
   }
 
-  async switchOff(deviceId: string) {
-    return this.getById(deviceId)
-      .then((device) => {
-        if (device.deviceType === "switch") {
-          const switchDevice = device as Switch;
-          this.cachedDevices.changeStatus(deviceId, false)
-          return this.executeScriptAndCollectSdtout(switchDevice.commandOff);
-        }
-        return Promise.reject({ error: "wrong device passed" });
-      })
-      .catch((error) =>
-        Promise.reject({ ["Error occured during switching off"]: error })
-      );
+  async switchOff(device: Device) {
+    if (device.deviceType === "switch") {
+      const switchDevice = device as Switch;
+      this.cachedDevices.changeStatus(device.id, false);
+      return this.executeScriptAndCollectSdtout(switchDevice.commandOff);
+    }
+    return Promise.reject("Meter can be only switched on");
   }
-/*
-  async listActivatedSwitches(): Promise<Array<string>> {
-    return new Promise<Array<string>>((resolve) => {
-      const activatedSwitches = ActivatedSwitches.getInstance();
-      resolve(activatedSwitches.switchDevices);
-    });
-  }
-*/
-  getById(deviceId: string): Promise<Device> {
+
+  async getById(deviceId: string): Promise<Device> {
     return new Promise((resolve, reject) => {
       const devices = this.cachedDevices.devices;
       const device = devices.get(deviceId);
-      console.log('cached dev', devices)
-      console.log('searched device', device)
+      console.log("cached dev", devices);
+      console.log("searched device", device);
       return device
         ? resolve(device)
         : reject({

@@ -56,7 +56,7 @@ async function switchOffPerformer(
   switchDevice: Switch
 ) {
   return deviceRunService
-    .switchOff(switchDevice.id)
+    .switchOff(switchDevice)
     .then(() => {
       return Promise.resolve({
         [switchDevice.id]: "Item switched off during server restart",

@@ -3,7 +3,7 @@ import Router from "koa-router";
 import authenticate from "./middleware/auth";
 import { addDeviceGuardMiddleware } from "./middleware/guardMiddleware/addDeviceGuard";
 import { addTaskGuardMiddleware } from "./middleware/guardMiddleware/addTaskGuard";
-import { runSwitchGuardMiddleware } from "./middleware/guardMiddleware/runSwitchGuard";
+import { runDeviceGuardMiddleware } from "./middleware/guardMiddleware/runDeviceGuard";
 import { DeviceController } from "../controllers/DeviceController";
 import { RunDeviceControllers } from "../controllers/runDeviceControllers";
 import { TaskControllers } from "../controllers/TaskControllers";
@@ -20,15 +20,10 @@ export function initAppRouter(
   appRouter.get("/renew", authenticate, loginController.refreshToken);
 
   appRouter.post(
-    "/meters/run/:id",
+    "/devices/run/:id",
     authenticate,
-    deviceRunControllers.activateMeter
-  );
-  appRouter.post(
-    "/switches/run/:id",
-    authenticate,
-    runSwitchGuardMiddleware,
-    deviceRunControllers.runSwitch
+    runDeviceGuardMiddleware,
+    deviceRunControllers.runDevice
   );
 
   appRouter.post(

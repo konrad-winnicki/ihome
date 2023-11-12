@@ -1,7 +1,7 @@
 import sanitizedConfig from "../config/config";
 import { DeviceRunService } from "./application/device/DeviceRunService";
 import { MongoDatabase } from "./Infrastructure/databse/MongoDataBase";
-import { AppCron } from "./domain/AppCron";
+import { TaskSchedule } from "./domain/TaskSchedule";
 import { EventEmitter } from "node:events";
 import {
   recoveryInMemoryDeviceStorage,
@@ -9,11 +9,11 @@ import {
 } from "./domain/inMemoryRecoveryFunctions";
 import { AppServer } from "./Infrastructure/AppServer";
 import { initAppRouter } from "./Infrastructure/routes";
-import { InMemoryDeviceStorage } from "./domain/InMemoryDeviceStorage";
-import { DeviceControllers } from "./controllers/DeviceControllers";
+import { cachedDevice } from "./domain/CachedDevices";
+import { DeviceController } from "./controllers/DeviceController";
 import { RunDeviceControllers } from "./controllers/runDeviceControllers";
 import { TaskControllers } from "./controllers/TaskControllers";
-import { LoginControllers } from "./controllers/LoginControllers";
+import { LoginController } from "./controllers/LoginController";
 import { tokenGenerator } from "./domain/tokenGenerator";
 import { TaskRecoveryManager } from "./Infrastructure/task/TaskRecoveryManager";
 import { ServerMessages } from "./ServerMessages";
@@ -97,7 +97,7 @@ export async function initializeDependencias() {
   const serverMessages = ServerMessages.getInstance();
   const eventEmitter = new EventEmitter();
 
-  const devicesInMemory = InMemoryDeviceStorage.getInstance();
+  const devicesInMemory = cachedDevice.getInstance();
 
   const persistenciaType = await choosePersistenciaType(ENVIRONMENT);
 
@@ -109,7 +109,7 @@ export async function initializeDependencias() {
 
   const deviceService = new DeviceService(cacheDeviceRepository, eventEmitter);
 
-  const appCorn = new AppCron();
+  const appCorn = new TaskSchedule();
   const cronTaskManager = new CronTaskManager(
     appCorn,
     persistenciaType.taskRepository,
@@ -125,9 +125,9 @@ export async function initializeDependencias() {
 
   const deviceRunControllerDep = new RunDeviceControllers(deviceRunService);
 
-  const deviceControllers = new DeviceControllers(deviceService);
+  const deviceControllers = new DeviceController(deviceService);
   const taskControlles = new TaskControllers(taskService);
-  const loginControllers = new LoginControllers(tokenGenerator);
+  const loginControllers = new LoginController(tokenGenerator);
 
   const appRouter = initAppRouter(
     deviceControllers,
@@ -183,13 +183,13 @@ export async function initializeDependencias() {
 export class Application {
   private static instance: Application | null = null;
   public appServer: AppServer;
-  public devicesInMemory: InMemoryDeviceStorage;
+  public devicesInMemory: cachedDevice;
   public serverMessages: ServerMessages;
   public databaseInstance?: MongoDatabase;
 
   constructor(
     appServer: AppServer,
-    devicesInMemory: InMemoryDeviceStorage,
+    devicesInMemory: cachedDevice,
     serverMessages: ServerMessages,
     databaseInstance?: MongoDatabase
   ) {
@@ -201,7 +201,7 @@ export class Application {
 
   public static getInstance(
     appServer: AppServer,
-    devicesInMemory: InMemoryDeviceStorage,
+    devicesInMemory: cachedDevice,
     serverMessages: ServerMessages,
     databaseInstance?: MongoDatabase
   ) {

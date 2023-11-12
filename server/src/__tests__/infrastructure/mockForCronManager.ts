@@ -2,13 +2,13 @@ import { Model } from "mongoose";
 import { CronTaskManager } from "../../Infrastructure/task/CronTaskManager";
 import { MongoTaskRepository } from "../../Infrastructure/task/MongoTaskRepository";
 import { ServerMessages } from "../../ServerMessages";
-import { AppCron } from "../../domain/AppCron";
+import { TaskSchedule } from "../../domain/TaskSchedule";
 import { Task } from "../../domain/Task";
 import { FileTaskRepository } from "../../Infrastructure/filePersistencia/FileTaskRepository";
 import { FileRepositoryHelpers } from "../../Infrastructure/filePersistencia/auxilaryFunctions";
 
 export function prepareCronTaskManagerForDatabasePersistenceWithMockParameters(
-  appCron: AppCron,
+  appCron: TaskSchedule,
   taskDocument: Model<Task>
 ) {
   const serverMessages = new ServerMessages();
@@ -26,8 +26,9 @@ export function prepareCronTaskManagerForDatabasePersistenceWithMockParameters(
 }
 
 export function prepareCronTaskManagerForFilePersistenceWithMockParameters(
-  appCron: AppCron,
-  helperMethods: FileRepositoryHelpers){
+  appCron: TaskSchedule,
+  helperMethods: FileRepositoryHelpers
+) {
   const serverMessages = new ServerMessages();
 
   const fileTaskRepository = new FileTaskRepository(
@@ -49,7 +50,7 @@ export function appCronMockMethods(
   addToCronStatus: string,
   deleteFromCronStatus: string
 ) {
-  const appCron = new AppCron();
+  const appCron = new TaskSchedule();
 
   const mockInstallTask = jest.fn().mockImplementation(() => {
     switch (addToCronStatus) {

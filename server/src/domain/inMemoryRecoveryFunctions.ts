@@ -1,13 +1,13 @@
 import { DeviceRunService } from "../application/device/DeviceRunService";
 import { DeviceService } from "../application/device/DeviceService";
 import { TaskRecovery } from "../application/task/TaskRecovery";
-import { InMemoryDeviceStorage } from "./InMemoryDeviceStorage";
+import { cachedDevice } from "./CachedDevices";
 import { Meter } from "./Meter";
 import { Switch } from "./Switch";
 
 export async function recoveryInMemoryDeviceStorage(
   deviceService: DeviceService,
-  devicesInMemory: InMemoryDeviceStorage,
+  devicesInMemory: cachedDevice,
   deviceRunService: DeviceRunService
 ) {
   const [meters, switches] = await getDevices(deviceService);
@@ -16,12 +16,12 @@ export async function recoveryInMemoryDeviceStorage(
     devicesInMemory.add(meter);
   });
 
-  const switchOffResultAccumulator = [];
+  const switchOffResults = [];
   for (const switchDevice of switches) {
     devicesInMemory.add(switchDevice);
 
-    const result = await switchOffDevice(deviceRunService, switchDevice);
-    switchOffResultAccumulator.push(result);
+    const result = await switchOffPerformer(deviceRunService, switchDevice);
+    switchOffResults.push(result);
   }
 
   /*
@@ -41,7 +41,7 @@ export async function recoveryInMemoryDeviceStorage(
   return switchOffPromises;
 */
 
-  return { "Devices added to memory": switchOffResultAccumulator };
+  return { "Devices added to memory": switchOffResults };
 }
 
 async function getDevices(deviceService: DeviceService) {
@@ -51,7 +51,7 @@ async function getDevices(deviceService: DeviceService) {
   return Promise.all([promiseWithMeters, promiseWithSwitches]);
 }
 
-async function switchOffDevice(
+async function switchOffPerformer(
   deviceRunService: DeviceRunService,
   switchDevice: Switch
 ) {

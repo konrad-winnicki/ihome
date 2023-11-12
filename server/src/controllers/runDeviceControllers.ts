@@ -1,6 +1,5 @@
 import Koa from "koa";
 import { DeviceRunInterface } from "../application/device/DeviceRunInterface";
-import { RunningSwitches } from "../domain/RunningSwitches";
 
 export type RunSwitchRequestBody = {
   switchOn: boolean;
@@ -10,12 +9,12 @@ export class RunDeviceControllers {
   private deviceRunService: DeviceRunInterface;
   constructor(deviceRunService: DeviceRunInterface) {
     this.deviceRunService = deviceRunService;
-    this.runMeter = this.runMeter.bind(this);
+    this.activateMeter = this.activateMeter.bind(this);
     this.runSwitch = this.runSwitch.bind(this);
-    this.listRunningSwitches = this.listRunningSwitches.bind(this);
+    this.listActivatedSwitches = this.listActivatedSwitches.bind(this);
   }
 
-  async runMeter(ctx: Koa.Context) {
+  async activateMeter(ctx: Koa.Context) {
     const meterId = await ctx.params.id;
     return this.deviceRunService
       .switchOn(meterId)
@@ -58,15 +57,12 @@ export class RunDeviceControllers {
     }
   }
 
-  async listRunningSwitches(ctx: Koa.Context) {
-    console.log("passed to controller");
-    const runningSwitches = RunningSwitches.getInstance();
-console.log(runningSwitches)
+  async listActivatedSwitches(ctx: Koa.Context) {
     return this.deviceRunService
-      .listRunningSwitches()
-      .then((collectedData) => {
+      .listActivatedSwitches()
+      .then((activatedSwitches) => {
         ctx.status = 200;
-        ctx.body = collectedData;
+        ctx.body = activatedSwitches;
       })
       .catch((error) => {
         ctx.status = 500;

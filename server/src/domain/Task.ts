@@ -24,15 +24,15 @@ export class ScheduleTime {
   readonly hour: string;
   readonly minutes: string;
   constructor(hour: string, minutes: string) {
-    const digitRegExp = /^[0-9]+$/
+    const digitRegExp = /^[0-9]+$/;
     const parsedHour = parseFloat(hour);
     const parsedMinutes = parseFloat(minutes);
     if (!digitRegExp.test(hour) || !digitRegExp.test(minutes)) {
       throw new Error("Strings must contain only digits");
     }
- 
+
     if (
-      parsedHour>= 0 &&
+      parsedHour >= 0 &&
       parsedHour <= 23 &&
       parsedMinutes >= 0 &&
       parsedMinutes <= 59

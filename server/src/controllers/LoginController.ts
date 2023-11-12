@@ -1,23 +1,21 @@
 import Koa from "koa";
 //import appConfiguration from "../../config/sanitizedProperties";
 
-
-
-interface LoginControllersType {
+interface LoginRequestBody {
   password: string;
 }
-export class LoginControllers {
+export class LoginController {
   private tokenGenerator: () => Promise<string>;
   constructor(tokenGenerator: () => Promise<string>) {
     this.tokenGenerator = tokenGenerator;
-    this.handleLogin = this.handleLogin.bind(this);
-    this.renewSession = this.renewSession.bind(this);
+    this.loginHandler = this.loginHandler.bind(this);
+    this.refreshToken = this.refreshToken.bind(this);
   }
 
-  async handleLogin(ctx: Koa.Context) {
+  async loginHandler(ctx: Koa.Context) {
     const requestBody = await ctx.request.body;
-    const serverPassword = appConfiguration.PASSWORD
-    const incomingPassword = (requestBody as LoginControllersType).password;
+    const serverPassword = appConfiguration.PASSWORD;
+    const incomingPassword = (requestBody as LoginRequestBody).password;
     if (serverPassword !== incomingPassword) {
       ctx.status = 401;
       return (ctx.body = { Error: "Wrong password" });
@@ -34,8 +32,7 @@ export class LoginControllers {
       });
   }
 
-  async renewSession(ctx: Koa.Context) {
-    console.log('RENEWING SESSION')
+  async refreshToken(ctx: Koa.Context) {
     return this.tokenGenerator()
       .then((token) => {
         ctx.status = 200;

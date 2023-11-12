@@ -1,17 +1,17 @@
 import { Device } from "./Device";
 
-export class InMemoryDeviceStorage {
-  private static instance: InMemoryDeviceStorage | null = null;
+export class cachedDevice {
+  private static instance: cachedDevice | null = null;
   private _devices: Map<string, Device>;
   private constructor() {
     this._devices = new Map<string, Device>();
   }
 
   public static getInstance() {
-    if (!InMemoryDeviceStorage.instance) {
-      InMemoryDeviceStorage.instance = new InMemoryDeviceStorage();
+    if (!cachedDevice.instance) {
+      cachedDevice.instance = new cachedDevice();
     }
-    return InMemoryDeviceStorage.instance;
+    return cachedDevice.instance;
   }
 
   public add(device: Device) {

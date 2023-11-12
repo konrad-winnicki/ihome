@@ -1,4 +1,4 @@
-import { AppCron } from "../../domain/AppCron";
+import { TaskSchedule } from "../../domain/TaskSchedule";
 import { TaskManager } from "../../application/task/TaskManager";
 import { ServerMessages } from "../../ServerMessages";
 
@@ -11,12 +11,12 @@ type ManagerResponse<T> = {
 };
 
 export class CronTaskManager implements TaskManager {
-  private appCron: AppCron;
+  private appCron: TaskSchedule;
   private delegate: TaskRepository;
   private serverMessages: ServerMessages;
 
   constructor(
-    appCron: AppCron,
+    appCron: TaskSchedule,
     delegate: TaskRepository,
     serverMessages: ServerMessages
   ) {
@@ -43,7 +43,6 @@ export class CronTaskManager implements TaskManager {
               aggregatedTask.commandOn,
               aggregatedTask.commandOff,
               task.deviceId
-                
             );
           })
           .catch((error) => {
@@ -68,7 +67,6 @@ export class CronTaskManager implements TaskManager {
           });
       })
       .catch((error) => {
-
         const message = this.serverMessages.addTask.FAILURE;
         const rejectMessage = { [message]: error };
         return Promise.reject(rejectMessage);

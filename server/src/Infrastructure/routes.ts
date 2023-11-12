@@ -4,31 +4,31 @@ import authenticate from "./middleware/auth";
 import { addDeviceGuardMiddleware } from "./middleware/guardMiddleware/addDeviceGuard";
 import { addTaskGuardMiddleware } from "./middleware/guardMiddleware/addTaskGuard";
 import { runSwitchGuardMiddleware } from "./middleware/guardMiddleware/runSwitchGuard";
-import { DeviceControllers } from "../controllers/DeviceControllers";
+import { DeviceController } from "../controllers/DeviceController";
 import { RunDeviceControllers } from "../controllers/runDeviceControllers";
 import { TaskControllers } from "../controllers/TaskControllers";
-import { LoginControllers } from "../controllers/LoginControllers";
+import { LoginController } from "../controllers/LoginController";
 
 export function initAppRouter(
-  deviceControllers: DeviceControllers,
+  deviceControllers: DeviceController,
   deviceRunControllers: RunDeviceControllers,
   taskControllers: TaskControllers,
-  loginController: LoginControllers
+  loginController: LoginController
 ) {
   const appRouter = new Router();
-  appRouter.post("/login", loginController.handleLogin);
-  appRouter.get("/renew", authenticate, loginController.renewSession);
+  appRouter.post("/login", loginController.loginHandler);
+  appRouter.get("/renew", authenticate, loginController.refreshToken);
 
   appRouter.get(
     "/running",
     authenticate,
-    deviceRunControllers.listRunningSwitches
+    deviceRunControllers.listActivatedSwitches
   );
 
   appRouter.post(
     "/meters/run/:id",
     authenticate,
-    deviceRunControllers.runMeter
+    deviceRunControllers.activateMeter
   );
   appRouter.post(
     "/switches/run/:id",

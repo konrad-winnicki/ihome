@@ -8,7 +8,7 @@ export type DeviceControllers = {
 };
 */
 
-export class DeviceControllers {
+export class DeviceController {
   private deviceService: DeviceService;
   constructor(deviceService: DeviceService) {
     this.deviceService = deviceService;

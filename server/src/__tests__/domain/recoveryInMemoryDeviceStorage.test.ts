@@ -1,6 +1,6 @@
 import { describe, test, expect } from "@jest/globals";
 import { Device } from "../../domain/Device";
-import { InMemoryDeviceStorage } from "../../domain/InMemoryDeviceStorage";
+import { cachedDevice } from "../../domain/CachedDevices";
 import { Meter } from "../../domain/Meter";
 import { Switch } from "../../domain/Switch";
 
@@ -40,8 +40,8 @@ describe("InMemoryDeviceStorage class test", () => {
   );
 
   test("Should return class instance ", () => {
-    const inMemoryDeviceStorage = InMemoryDeviceStorage.getInstance();
-    expect(inMemoryDeviceStorage).toBeInstanceOf(InMemoryDeviceStorage);
+    const inMemoryDeviceStorage = cachedDevice.getInstance();
+    expect(inMemoryDeviceStorage).toBeInstanceOf(cachedDevice);
   });
 
   test.each([
@@ -54,7 +54,7 @@ describe("InMemoryDeviceStorage class test", () => {
       value: device2,
     },
   ])("Should add device to storage", ({ key, value }) => {
-    const inMemoryDeviceStorage = InMemoryDeviceStorage.getInstance();
+    const inMemoryDeviceStorage = cachedDevice.getInstance();
     inMemoryDeviceStorage.add(value);
     const devices = inMemoryDeviceStorage.devices;
 
@@ -72,7 +72,7 @@ describe("InMemoryDeviceStorage class test", () => {
       value: meter2,
     },
   ])("Should add meter to storage", ({ key, value }) => {
-    const inMemoryDeviceStorage = InMemoryDeviceStorage.getInstance();
+    const inMemoryDeviceStorage = cachedDevice.getInstance();
     inMemoryDeviceStorage.add(value);
     const devices = inMemoryDeviceStorage.devices;
 
@@ -90,7 +90,7 @@ describe("InMemoryDeviceStorage class test", () => {
       value: switch2,
     },
   ])("Should add switch to storage", ({ key, value }) => {
-    const inMemoryDeviceStorage = InMemoryDeviceStorage.getInstance();
+    const inMemoryDeviceStorage = cachedDevice.getInstance();
     inMemoryDeviceStorage.add(value);
     const devices = inMemoryDeviceStorage.devices;
 
@@ -99,7 +99,7 @@ describe("InMemoryDeviceStorage class test", () => {
   });
 
   test("Should delete item from storage", () => {
-    const inMemoryDeviceStorage = InMemoryDeviceStorage.getInstance();
+    const inMemoryDeviceStorage = cachedDevice.getInstance();
     inMemoryDeviceStorage.add(meter1);
     inMemoryDeviceStorage.add(switch1);
     inMemoryDeviceStorage.delete("m1");

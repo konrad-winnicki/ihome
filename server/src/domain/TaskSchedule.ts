@@ -2,9 +2,9 @@ import cron from "node-cron";
 
 import { exec } from "child_process";
 import { ManagerResponse } from "../application/task/TaskManager";
-import { RunningSwitches } from "./RunningSwitches";
+import { ActivatedSwitches } from "./ActivatedSwitches";
 
-export class AppCron {
+export class TaskSchedule {
   async installTask(
     taskId: string,
     minutes: number,
@@ -20,14 +20,13 @@ export class AppCron {
       cronString,
       () => {
         try {
-          const runningSwitches = RunningSwitches.getInstance();
+          const runningSwitches = ActivatedSwitches.getInstance();
 
           if (onStatus) {
             runningSwitches.add(deviceId);
             console.log(commandOn);
             exec(commandOn);
-          }
-          if (!onStatus && commandOff) {
+          } else if (!onStatus && commandOff) {
             runningSwitches.delete(deviceId);
 
             console.log(commandOff);
@@ -46,7 +45,7 @@ export class AppCron {
   async deleteTask(taskId: string): Promise<ManagerResponse<object | string>> {
     const memoryTaskList = cron.getTasks();
     const task = memoryTaskList.get(taskId);
-//TODO: delete from runningSwitches
+    //TODO: delete from runningSwitches
     task?.stop();
     const isDeletedFromMemory = memoryTaskList.delete(taskId);
     return isDeletedFromMemory

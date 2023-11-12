@@ -4,26 +4,25 @@ import { exec } from "child_process";
 import { DeviceRunInterface } from "./DeviceRunInterface";
 import { Switch } from "../../domain/Switch";
 import util from "util";
-import { RunningSwitches } from "../../domain/RunningSwitches";
+import { ActivatedSwitches } from "../../domain/ActivatedSwitches";
 import { Device } from "../../domain/Device";
-import { InMemoryDeviceStorage } from "../../domain/InMemoryDeviceStorage";
+import { cachedDevice } from "../../domain/CachedDevices";
 
 const execAsync = util.promisify(exec);
 
 export class DeviceRunService implements DeviceRunInterface {
- // private persistenceRepository: DeviceRepository;
-  private cachedDevices: InMemoryDeviceStorage;
+  // private persistenceRepository: DeviceRepository;
+  private cachedDevices: cachedDevice;
 
-  constructor(cachedDevices: InMemoryDeviceStorage) {
-    this.cachedDevices = cachedDevices
+  constructor(cachedDevices: cachedDevice) {
+    this.cachedDevices = cachedDevices;
   }
 
   async switchOn(deviceId: string) {
-    return this
-      .getById(deviceId)
+    return this.getById(deviceId)
       .then((device) => {
         if (device.deviceType === "switch") {
-          const runningSwitches = RunningSwitches.getInstance();
+          const runningSwitches = ActivatedSwitches.getInstance();
           runningSwitches.add(deviceId);
           console.log(runningSwitches.switchDevices);
         }
@@ -35,12 +34,11 @@ export class DeviceRunService implements DeviceRunInterface {
   }
 
   async switchOff(deviceId: string) {
-    return this
-      .getById(deviceId)
+    return this.getById(deviceId)
       .then((device) => {
         if (device.deviceType === "switch") {
-          const runningSwitches = RunningSwitches.getInstance();
-          console.log('service', runningSwitches)
+          const runningSwitches = ActivatedSwitches.getInstance();
+          console.log("service", runningSwitches);
           runningSwitches.delete(deviceId);
 
           const switchDevice = device as Switch;
@@ -53,22 +51,24 @@ export class DeviceRunService implements DeviceRunInterface {
       );
   }
 
-  async listRunningSwitches(): Promise<Array<string>> {
-    console.log('finction callled')
+  async listActivatedSwitches(): Promise<Array<string>> {
     return new Promise<Array<string>>((resolve) => {
-      const runningSwitches = RunningSwitches.getInstance();
-      resolve(runningSwitches.switchDevices);
+      const activatedSwitches = ActivatedSwitches.getInstance();
+      resolve(activatedSwitches.switchDevices);
     });
   }
 
   getById(deviceId: string): Promise<Device> {
-  return new Promise((resolve, reject)=>{
-    const devices = this.cachedDevices.devices
-    const device = devices.get(deviceId)
-    return device? resolve(device): reject({
-      NonExistsError: `Device with id ${deviceId} does not exist.`,
-    })
-  })}
+    return new Promise((resolve, reject) => {
+      const devices = this.cachedDevices.devices;
+      const device = devices.get(deviceId);
+      return device
+        ? resolve(device)
+        : reject({
+            NonExistsError: `Device with id ${deviceId} does not exist.`,
+          });
+    });
+  }
 
   async executeScriptAndCollectSdtout(command: string): Promise<string> {
     const collectStdOut = async () => {

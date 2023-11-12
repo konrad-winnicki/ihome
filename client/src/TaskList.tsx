@@ -12,6 +12,8 @@ export interface Parameters {
 interface TaskListInterface {
   device: SwitchInterface;
   setDeviceShowTaskModule: (param: SwitchInterface | null) => void;
+  setShowSwitches: (param: boolean) => void;
+
 }
 
 const TaskList: React.FC<TaskListInterface> = (props) => {
@@ -49,6 +51,7 @@ const TaskList: React.FC<TaskListInterface> = (props) => {
       <button
         onClick={() => {
           props.setDeviceShowTaskModule(null);
+          props.setShowSwitches(true)
         }}
         className="bg-[#B804D8] px-1 py-1 text-white m-1 mr-4 rounded text-white text-lg font-semibold"
       >
@@ -77,7 +80,7 @@ const TaskList: React.FC<TaskListInterface> = (props) => {
         {tasks?.map((task: TaskInterface) => {
           return (
             <div key={task.id}>
-              <TaskModule task={task}></TaskModule>
+              <TaskModule task={task} setTasks={setTasks}></TaskModule>
             </div>
           );
         })}

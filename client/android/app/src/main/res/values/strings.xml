@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">PiManager</string>
-    <string name="title_activity_main">PiManager</string>
-    <string name="package_name">mafasoft.pimanager</string>
-    <string name="custom_url_scheme">mafasoft.pimanager</string>
+    <string name="app_name">piManager</string>
+    <string name="title_activity_main">piManager</string>
+    <string name="package_name">mafasoft.piManager</string>
+    <string name="custom_url_scheme">mafasoft.piManager</string>
 </resources>

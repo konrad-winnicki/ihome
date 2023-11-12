@@ -49,6 +49,6 @@ export type MemeoryStatusType = 'success'|'error'
   
     inMemoryStorageMock.add = mockAddDeviceToStorage;
     inMemoryStorageMock.delete = mockDeleteDeviceFromStorage;
-  
+    
     return inMemoryStorageMock;
   }

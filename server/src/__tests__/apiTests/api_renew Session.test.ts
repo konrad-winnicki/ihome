@@ -14,8 +14,8 @@ describe("API RENEW SESSION TEST", () => {
   let app: Application;
   let token: string;
   let requestUri: string
-  const tokenExpirationTimeInMS = 360000
-  const manipulationTimeInMS = 10000
+  const tokenExpirationTimeInMS = 7200000
+  const bufferMiliecondsBeforeEnd = 240000
   beforeAll(async () => {
 
     app = await initializeDependencias();
@@ -33,7 +33,7 @@ describe("API RENEW SESSION TEST", () => {
 
   
   it("Should return new token", async () => {
-    jest.advanceTimersByTime(tokenExpirationTimeInMS - manipulationTimeInMS);
+    jest.advanceTimersByTime(tokenExpirationTimeInMS - bufferMiliecondsBeforeEnd);
 
     const response = await request(requestUri)
       .get("/renew")
@@ -43,7 +43,7 @@ describe("API RENEW SESSION TEST", () => {
     expect(response.body).toHaveProperty('token');
   });
   it("Should not return token if provious token expired", async () => {
-    jest.advanceTimersByTime(tokenExpirationTimeInMS + manipulationTimeInMS);
+    jest.advanceTimersByTime(tokenExpirationTimeInMS + bufferMiliecondsBeforeEnd);
 
     const response = await request(requestUri)
       .get("/renew")

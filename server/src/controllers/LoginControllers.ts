@@ -35,6 +35,7 @@ export class LoginControllers {
   }
 
   async renewSession(ctx: Koa.Context) {
+    console.log('RENEWING SESSION')
     return this.tokenGenerator()
       .then((token) => {
         ctx.status = 200;

@@ -33,26 +33,27 @@ const SwitchesList: React.FC = () => {
     }
   }
 
-  async function getRunning(){
+  async function getRunning() {
     const response = await listRunningSwitches(token);
     if (response.ok) {
       const data = await response.json();
       setRunningSwitches(data);
-      console.log('running', data, runningSwitches)
-
+      console.log("running", data, runningSwitches);
     }
   }
 
   useEffect(() => {
-    if (!showSwitches){
-    getRunning()}
+    if (!showSwitches) {
+      getRunning();
+    }
     if (showSwitches) {
-      
       getSwitchList();
     }
     if (deviceShowsTaskModule) {
       setShowSwitches(false);
     }
+
+    
     if (refreshList) {
       setRefreshList(false);
     }
@@ -73,15 +74,17 @@ const SwitchesList: React.FC = () => {
       <div className=" overflow-y-auto ">
         {showSwitches
           ? switches.map((switchDevice: SwitchInterface) => {
-            const isRunning = runningSwitches.find((value)=> value === switchDevice.id )  
-            
-            return (
+              const isRunning = runningSwitches.find(
+                (value) => value === switchDevice.id
+              );
+
+              return (
                 <div key={switchDevice.id}>
                   <SwitchModule
                     switchDevice={switchDevice}
                     setShowTaskDetails={setDeviceShowTaskModule}
                     setRefreshList={setRefreshList}
-                    onStatus= {isRunning? true: false}
+                    onStatus={isRunning ? true : false}
                   ></SwitchModule>
                 </div>
               );
@@ -93,6 +96,7 @@ const SwitchesList: React.FC = () => {
         {deviceShowsTaskModule ? (
           <TaskList
             setDeviceShowTaskModule={setDeviceShowTaskModule}
+            setShowSwitches= {setShowSwitches}
             device={deviceShowsTaskModule}
           ></TaskList>
         ) : (

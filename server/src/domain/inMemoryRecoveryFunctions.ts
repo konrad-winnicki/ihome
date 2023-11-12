@@ -3,7 +3,6 @@ import { DeviceService } from "../application/device/DeviceService";
 import { TaskRecovery } from "../application/task/TaskRecovery";
 import { InMemoryDeviceStorage } from "./InMemoryDeviceStorage";
 import { Meter } from "./Meter";
-import { Switch } from "./Switch";
 
 export async function recoveryInMemoryDeviceStorage(
   deviceService: DeviceService,
@@ -19,26 +18,31 @@ export async function recoveryInMemoryDeviceStorage(
       devicesInMemory.add(meter);
     });
 
-    const switchOffPromises = switches.map((switchDevice: Switch) => {
-      devicesInMemory.add(switchDevice);
-
-      return deviceRunService
-        .switchOff(switchDevice.id)
-        .then(() => {
-          return Promise.resolve({
-            [switchDevice.id]: "Item switched off during server restart",
+    const switchOffPromises = switches.reduce(
+      async (accumulatorPromise, switchDevice) => {
+        devicesInMemory.add(switchDevice);
+        const accumulator = await accumulatorPromise;
+        const result = await deviceRunService
+          .switchOff(switchDevice.id)
+          .then(() => {
+            return Promise.resolve({
+              [switchDevice.id]: "Item switched off during server restart",
+            });
+          })
+          .catch(() => {
+            const message = {
+              [`Switch ${switchDevice.id}`]:
+                "Error occureed during switching off after server restart",
+            };
+            return Promise.reject(message);
           });
-        })
-        .catch(() => {
-          const message = {
-            [`Switch ${switchDevice.id}`]:
-              "Error occureed during switching off after server restart",
-          };
-          return Promise.reject(message);
-        });
-    });
 
-    return Promise.all(switchOffPromises);
+        accumulator.push(result);
+        return accumulator;
+      },
+      Promise.resolve<object[]>([])
+    );
+    return switchOffPromises;
   });
 }
 

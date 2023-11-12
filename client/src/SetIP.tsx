@@ -10,6 +10,7 @@ export const SetIP: React.FC<CreateSwitchProps> = (props) => {
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
     localStorage.setItem(name, value);
+    setIp(value)
     //setIp(value)
   };
 
@@ -17,7 +18,7 @@ export const SetIP: React.FC<CreateSwitchProps> = (props) => {
     const ipStorage = localStorage.getItem("ip");
     const validIp = ipStorage ? ipStorage : "";
     setIp(validIp);
-  }, []);
+  }, [ip]);
 
   return (
     <div className=" w-full p-6 bg-white rounded-lg">
@@ -35,7 +36,7 @@ export const SetIP: React.FC<CreateSwitchProps> = (props) => {
             type="text"
             id="ip"
             name="ip"
-            placeholder={ip}
+            value={ip}
             onChange={handleInputChange}
           />
         </div>

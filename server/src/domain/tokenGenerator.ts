@@ -6,7 +6,7 @@ import { v4 } from "uuid";
 export function tokenGenerator():Promise<string> {
   return new Promise<string>((resolve) => {
     const token = jwt.sign({ sessionId: v4() }, appConfiguration.JWT_SECRET, {
-      expiresIn: "360s",
+      expiresIn: "2h",
     });
     resolve(token);
   }).catch((error) => Promise.reject(error));

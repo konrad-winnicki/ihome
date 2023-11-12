@@ -31,33 +31,18 @@ export const Login: React.FC<LoginType> = (props) => {
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
 
-    function renewToken(decodedToken: DecodedToken) {
-      const currentTimestamp = Math.round(Date.now() / 1000);
-      const remainingSeconds = decodedToken.exp - currentTimestamp;
-      const timeout = (remainingSeconds - 300) * 1000;
-      setTimeout(() => {
-        const token = localStorage.getItem("token");
-        renewSession(token)
-          .then((response) => response.json())
-          .then((data) => {
-            localStorage.setItem("token", data.token);
-          });
-      }, timeout);
-    }
-
     try {
       console.log(formData);
       const response = await fetchLogin(formData);
       if (response.ok) {
         const data = await response.json();
         const token = data.token;
-        const decodedToken: DecodedToken = jwt_decode(token);
-        console.log("TOKEEEN", decodedToken.exp);
         localStorage.setItem("token", token);
-        renewToken(decodedToken);
-
         console.log("login successful");
         props.setIsLoggedIn(true);
+        renewTokenTiming(token).then((token: string) => {
+          logOutTiming(token, props);
+        });
       } else {
         alert("Password incorrect");
         console.error("login failed");
@@ -78,7 +63,7 @@ export const Login: React.FC<LoginType> = (props) => {
         </label>
         <div className="flex m-2 items-center justify-center">
           <label
-            className= "block p-2 text-gray-700 text-sm font-bold mb-2"
+            className="block p-2 text-gray-700 text-sm font-bold mb-2"
             htmlFor="password"
           >
             Password
@@ -104,5 +89,43 @@ export const Login: React.FC<LoginType> = (props) => {
     </div>
   );
 };
+
+function calculateTimeToFinishToken(token: DecodedToken) {
+  const milisecondsPerSecond = 1000;
+  const currentTimestampInSeconds = Math.round(
+    Date.now() / milisecondsPerSecond
+  );
+  const remainingSeconds = token.exp - currentTimestampInSeconds;
+  const bufferSecondsBeforeEnd = 240
+  const timeoutInMiliseconds =
+    (remainingSeconds - bufferSecondsBeforeEnd) * milisecondsPerSecond;
+
+  return timeoutInMiliseconds;
+}
+
+async function renewTokenTiming(currentToken: string): Promise<string> {
+  const decodedToken: DecodedToken = jwt_decode(currentToken);
+  const timeoutToRefreshToken = calculateTimeToFinishToken(decodedToken);
+  return new Promise<string>((resolve) => {
+    setTimeout(() => {
+      renewSession(currentToken)
+        .then((response) => response.json())
+        .then((data) => {
+          const token: string = data.token;
+          localStorage.setItem("token", token);
+          resolve(token)
+        });
+    }, timeoutToRefreshToken);
+  });
+
+}
+
+function logOutTiming(currentToken: string, props: LoginType) {
+  const decodedToken: DecodedToken = jwt_decode(currentToken);
+  const timeToLogout = calculateTimeToFinishToken(decodedToken);
+  setTimeout(() => {
+    props.setIsLoggedIn(false);
+  }, timeToLogout);
+}
 
 export default Login;

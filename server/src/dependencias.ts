@@ -121,7 +121,7 @@ export async function initializeDependencias() {
     deviceService,
     eventEmitter
   );
-  const deviceRunService = new DeviceRunService(cacheDeviceRepository);
+  const deviceRunService = new DeviceRunService(devicesInMemory);
 
   const deviceRunControllerDep = new RunDeviceControllers(deviceRunService);
 

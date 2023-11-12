@@ -4,20 +4,22 @@ import { exec } from "child_process";
 import { DeviceRunInterface } from "./DeviceRunInterface";
 import { Switch } from "../../domain/Switch";
 import util from "util";
-import { DeviceRepository } from "./DeviceRepository";
 import { RunningSwitches } from "../../domain/RunningSwitches";
+import { Device } from "../../domain/Device";
+import { InMemoryDeviceStorage } from "../../domain/InMemoryDeviceStorage";
 
 const execAsync = util.promisify(exec);
 
 export class DeviceRunService implements DeviceRunInterface {
-  private persistenceRepository: DeviceRepository;
+ // private persistenceRepository: DeviceRepository;
+  private cachedDevices: InMemoryDeviceStorage;
 
-  constructor(persistenceRepository: DeviceRepository) {
-    this.persistenceRepository = persistenceRepository;
+  constructor(cachedDevices: InMemoryDeviceStorage) {
+    this.cachedDevices = cachedDevices
   }
 
   async switchOn(deviceId: string) {
-    return this.persistenceRepository
+    return this
       .getById(deviceId)
       .then((device) => {
         if (device.deviceType === "switch") {
@@ -33,11 +35,12 @@ export class DeviceRunService implements DeviceRunInterface {
   }
 
   async switchOff(deviceId: string) {
-    return this.persistenceRepository
+    return this
       .getById(deviceId)
       .then((device) => {
         if (device.deviceType === "switch") {
           const runningSwitches = RunningSwitches.getInstance();
+          console.log('service', runningSwitches)
           runningSwitches.delete(deviceId);
 
           const switchDevice = device as Switch;
@@ -57,6 +60,15 @@ export class DeviceRunService implements DeviceRunInterface {
       resolve(runningSwitches.switchDevices);
     });
   }
+
+  getById(deviceId: string): Promise<Device> {
+  return new Promise((resolve, reject)=>{
+    const devices = this.cachedDevices.devices
+    const device = devices.get(deviceId)
+    return device? resolve(device): reject({
+      NonExistsError: `Device with id ${deviceId} does not exist.`,
+    })
+  })}
 
   async executeScriptAndCollectSdtout(command: string): Promise<string> {
     const collectStdOut = async () => {

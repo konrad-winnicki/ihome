@@ -1,10 +1,10 @@
 apply plugin: 'com.android.application'
 
 android {
-    namespace "mafasoft.pimanager"
+    namespace "mafasoft.piManager"
     compileSdkVersion rootProject.ext.compileSdkVersion
     defaultConfig {
-        applicationId "mafasoft.pimanager"
+        applicationId "mafasoft.piManager"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1

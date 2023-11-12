@@ -95,8 +95,13 @@ export class CacheDeviceRepository implements DeviceRepository {
   }
 
   getById(deviceId: string): Promise<Device> {
+     
     return this.delegate.getById(deviceId);
   }
+
+
+
+  
 
   private async compensateDeviceAddition(
     deviceId: string

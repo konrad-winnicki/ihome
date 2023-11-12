@@ -1,12 +1,12 @@
-import { CapacitorConfig } from "@capacitor/cli";
+import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: "mafasoft.pimanager",
-  appName: "PiManager",
-  webDir: "dist",
+  appId: 'mafasoft.piManager',
+  appName: 'piManager',
+  webDir: 'dist',
   server: {
-    androidScheme: "http"
-  },
+    androidScheme: 'http'
+  }
 };
 
 export default config;

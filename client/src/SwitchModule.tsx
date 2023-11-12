@@ -30,7 +30,7 @@ export const SwitchModule: React.FC<SwitchModuleInterface> = (
 
 
   async function deleteItem (){
-    const confirmation = confirm('Do you want to delete item?')
+    const confirmation = confirm('Do you want to delete device?')
     if (confirmation){
       await deleteDevice(props.switchDevice.id, token)
       props.setRefreshList(true)

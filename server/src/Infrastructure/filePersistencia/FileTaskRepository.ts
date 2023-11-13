@@ -2,10 +2,7 @@ import { ServerMessages } from "../../ServerMessages";
 import { ManagerResponse } from "../../application/task/TaskManager";
 import { FileRepositoryHelpers } from "./auxilaryFunctions";
 import { TaskRepository } from "../../application/task/TaskRepository";
-import { AggregatedTask } from "../../domain/AggregatedTask";
 import { Task } from "../../domain/Task";
-import { Meter } from "../../domain/Meter";
-import { Switch } from "../../domain/Switch";
 
 export class FileTaskRepository implements TaskRepository {
   private helperMethods: FileRepositoryHelpers;
@@ -84,25 +81,10 @@ export class FileTaskRepository implements TaskRepository {
       });
   }
 
-  async listAll(): Promise<AggregatedTask[]> {
+  async listAll(): Promise<Task[]> {
     return this.helperMethods.readDataFromFile("tasks.json").then((taskMap) => {
       const tasks = Object.values(taskMap) as Task[];
-      return this.helperMethods
-        .readDataFromFile("devices.json")
-        .then((deviceMap) => {
-          return tasks.map((task: Task) => {
-            const device = deviceMap[task.deviceId] as Meter & Switch;
-            return new AggregatedTask(
-              task.id,
-              task.onStatus,
-              Number(task.scheduledTime.hour),
-              Number(task.scheduledTime.minutes),
-              device.commandOn,
-              device.commandOff,
-              device.id
-            );
-          });
-        });
+      return tasks
     });
   }
 
@@ -127,25 +109,6 @@ export class FileTaskRepository implements TaskRepository {
       .catch((error) => Promise.reject({ [persistenceError]: error }));
   }
 
-  async findByIdAndAggregateWithDevice(
-    taskId: string
-  ): Promise<AggregatedTask> {
-    const notFoundMessage = this.serverMessages.notFound;
-    const persistenceError = this.serverMessages.persistenceError;
-
-    return this.listAll()
-      .then((aggregatedTasks: AggregatedTask[]) => {
-        const task = aggregatedTasks.find((aggregatedTaskl) => {
-          return aggregatedTaskl.id === taskId;
-        });
-        if (task) {
-          return task;
-        }
-        return Promise.reject({ [notFoundMessage]: `Task not exists` });
-      })
-      .catch((error) => Promise.reject({ [persistenceError]: error }));
-  }
-
   async findById(taskId: string): Promise<Task> {
     //const notFoundMessage = this.serverMessages.notFound;
 
@@ -163,4 +126,5 @@ export class FileTaskRepository implements TaskRepository {
         return Promise.reject({ error: error });
       });
   }
+  
 }

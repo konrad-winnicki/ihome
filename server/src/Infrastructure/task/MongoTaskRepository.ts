@@ -1,31 +1,9 @@
 import { TaskRepository } from "../../application/task/TaskRepository";
 import { Task } from "../../domain/Task";
 import { Model, mongo } from "mongoose";
-import { AggregatedTask } from "../../domain/AggregatedTask";
 import { RepositoryResponse } from "../../application/task/TaskRepository";
 import { ServerMessages } from "../../ServerMessages";
 
-const taskAndDeviceAggregationPipeline = (taskId?: string) => [
-  taskId ? { $match: { id: taskId } } : { $match: {} },
-  {
-    $lookup: {
-      from: "devices",
-      localField: "deviceId",
-      foreignField: "id",
-      as: "device",
-    },
-  },
-  { $unwind: "$device" },
-  { $unwind: "$scheduledTime" },
-  {
-    $project: {
-      id: 1,
-      onStatus: 1,
-      scheduledTime: 1,
-      device: { commandOn: 1, commandOff: 1, id: 1},
-    },
-  },
-];
 
 export class MongoTaskRepository implements TaskRepository {
   private taskDocument: Model<Task>;
@@ -96,33 +74,6 @@ export class MongoTaskRepository implements TaskRepository {
       });
   }
 
-  public async findByIdAndAggregateWithDevice(
-    taskId: string
-  ): Promise<AggregatedTask> {
-    const notFound = this.serverMessages.notFound;
-
-    return this.taskDocument
-      .aggregate(taskAndDeviceAggregationPipeline(taskId))
-      .then((aggregatedTasksList) => {
-        if (aggregatedTasksList.length === 1) {
-          const aggregatedTask = aggregatedTasksList[0];
-
-          return Promise.resolve(
-            new AggregatedTask(
-              aggregatedTask.id,
-              aggregatedTask.onStatus,
-              aggregatedTask.scheduledTime.hour,
-              aggregatedTask.scheduledTime.minutes,
-              aggregatedTask.device.commandOn,
-              aggregatedTask.device.commandOff,
-              aggregatedTask.device.id
-            )
-          );
-        }
-        return Promise.reject({ [notFound]: `Task not exists` });
-      }).catch((error)=> Promise.reject({error:error}) )
-  }
-
   public async findById(taskId: string): Promise<Task> {
         return this.taskDocument
       .findOne({ id: taskId })
@@ -140,32 +91,18 @@ export class MongoTaskRepository implements TaskRepository {
       });
   }
 
-  public async listAll(): Promise<AggregatedTask[]> {
-    const persistenceError = this.serverMessages.persistenceError;
-    return this.taskDocument
-      .aggregate(taskAndDeviceAggregationPipeline())
-      .then((aggregatedTasks) => {
-        const tasks = aggregatedTasks.map(
-          (task) =>
-            new AggregatedTask(
-              task.id,
-              task.onStatus,
-              task.scheduledTime.hour,
-              task.scheduledTime.minutes,
-              task.device.commandOn,
-              task.device.commandOff,
-              task.device.id
-
-            )
-        );
-        return Promise.resolve(tasks);
+  public async listAll(): Promise<Task[]> {
+    return this.taskDocument.find({})
+      .then((tasks) => {
+        return Promise.resolve(tasks as Task[]);
       })
-      .catch((error) => Promise.reject({ [persistenceError]: error }));
+      .catch((error) => {
+        const persistenceError = this.serverMessages.persistenceError;
+        return Promise.reject({ [persistenceError]: error })});
   }
 
   public async getByDevice(deviceId: string): Promise<Task[]> {
     const databaseError = this.serverMessages.persistenceError;
-
     return this.taskDocument
       .find({ deviceId: deviceId })
       .then((tasks) => tasks)

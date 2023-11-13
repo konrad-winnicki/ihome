@@ -5,14 +5,14 @@ import {
 
 
 export type RunSwitchRequestBody = {
-  switchOn: boolean;
+  onStatus: boolean;
 };
 export function isRunSwitch(reqBody: RunSwitchRequestBody): boolean {
-  const expectedParameters = ["switchOn"];
+  const expectedParameters = ["onStatus"];
 
   return (
     checkIfNotExceededParams(reqBody, expectedParameters) &&
     checkIfNotMissingParams(reqBody, expectedParameters) &&
-    typeof reqBody.switchOn === "boolean"
+    typeof reqBody.onStatus === "boolean"
   );
 }

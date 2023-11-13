@@ -2,17 +2,19 @@ import { CacheDeviceRepository } from "../../Infrastructure/device/CacheDeviceRe
 import { ServerMessages } from "../../ServerMessages";
 import { DeviceRepository } from "../../application/device/DeviceRepository";
 import { Device } from "../../domain/Device";
-import { cachedDevice } from "../../domain/CachedDevices";
+import { CachedDevice } from "../../domain/CachedDevices";
 
 export function prepareCacheDeviceRepositoryWithMockPerameters(
-  inMemoryStorage: cachedDevice,
+  inMemoryStorage: CachedDevice,
   deviceRepository: DeviceRepository
 ) {
+
+  
   const serverMessages = new ServerMessages();
   const cacheDeviceRepository = new CacheDeviceRepository(
     inMemoryStorage,
     deviceRepository,
-    serverMessages
+    serverMessages,
   );
 
   return cacheDeviceRepository;
@@ -24,7 +26,7 @@ export function inMemoryStoreWithMockMethods(
   addToMemoryStatus: MemeoryStatusType,
   deleteFromMemoryStatus: MemeoryStatusType
 ) {
-  const inMemoryStorageMock = cachedDevice.getInstance();
+  const inMemoryStorageMock = CachedDevice.getInstance();
 
   const mockAddDeviceToStorage = jest
     .fn()

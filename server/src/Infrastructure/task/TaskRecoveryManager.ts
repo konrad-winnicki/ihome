@@ -1,16 +1,14 @@
 import { TaskRepository } from "../../application/task/TaskRepository";
-import { AggregatedTask } from "../../domain/AggregatedTask";
 import { TaskRecovery } from "../../application/task/TaskRecovery";
-import { TaskSchedule } from "../../domain/TaskSchedule";
+import { TaskScheduler } from "../../domain/TaskScheduler";
 import { ManagerResponse } from "../../application/task/TaskManager";
-
-//const appCron = new AppCron();
+import { Task } from "../../domain/Task";
 
 export class TaskRecoveryManager implements TaskRecovery {
-  private appCron: TaskSchedule;
+  private appCron: TaskScheduler;
   private taskRepository: TaskRepository;
 
-  constructor(taskRepository: TaskRepository, appCron: TaskSchedule) {
+  constructor(taskRepository: TaskRepository, appCron: TaskScheduler) {
     this.taskRepository = taskRepository;
     this.appCron = appCron;
   }
@@ -19,14 +17,12 @@ export class TaskRecoveryManager implements TaskRecovery {
     return this.taskRepository
       .listAll()
       .then((tasks) => {
-        tasks.forEach((task: AggregatedTask) => {
-          this.appCron.installTask(
+        tasks.forEach((task: Task) => {
+          this.appCron.add(
             task.id,
-            task.minutes,
-            task.hour,
+            Number(task.scheduledTime.minutes),
+            Number(task.scheduledTime.hour),
             task.onStatus,
-            task.commandOn,
-            task.commandOff,
             task.deviceId
           );
         });

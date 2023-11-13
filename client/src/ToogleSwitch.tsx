@@ -5,7 +5,6 @@ import { SwitchInterface } from "./SwitchesList";
 
 const ToggleSwitch: React.FC<{
   switchDevice: SwitchInterface;
-  onStatus: boolean;
 }> = (props) => {
   const [checked, setChecked] = useState(props.switchDevice.onStatus);
   const token = localStorage.getItem("token");

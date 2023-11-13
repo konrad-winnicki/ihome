@@ -2,13 +2,15 @@ import { Model } from "mongoose";
 import { CronTaskManager } from "../../Infrastructure/task/CronTaskManager";
 import { MongoTaskRepository } from "../../Infrastructure/task/MongoTaskRepository";
 import { ServerMessages } from "../../ServerMessages";
-import { TaskSchedule } from "../../domain/TaskSchedule";
+import { TaskScheduler } from "../../domain/TaskScheduler";
 import { Task } from "../../domain/Task";
 import { FileTaskRepository } from "../../Infrastructure/filePersistencia/FileTaskRepository";
 import { FileRepositoryHelpers } from "../../Infrastructure/filePersistencia/auxilaryFunctions";
+import { DeviceRunService } from "../../application/device/DeviceRunService";
+import { CachedDevice } from "../../domain/CachedDevices";
 
 export function prepareCronTaskManagerForDatabasePersistenceWithMockParameters(
-  appCron: TaskSchedule,
+  appCron: TaskScheduler,
   taskDocument: Model<Task>
 ) {
   const serverMessages = new ServerMessages();
@@ -26,7 +28,7 @@ export function prepareCronTaskManagerForDatabasePersistenceWithMockParameters(
 }
 
 export function prepareCronTaskManagerForFilePersistenceWithMockParameters(
-  appCron: TaskSchedule,
+  appCron: TaskScheduler,
   helperMethods: FileRepositoryHelpers
 ) {
   const serverMessages = new ServerMessages();
@@ -50,7 +52,9 @@ export function appCronMockMethods(
   addToCronStatus: string,
   deleteFromCronStatus: string
 ) {
-  const appCron = new TaskSchedule();
+  const cachedDevices = CachedDevice.getInstance();
+  const deviceRunService = new DeviceRunService(cachedDevices);
+  const appCron = new TaskScheduler(deviceRunService);
 
   const mockInstallTask = jest.fn().mockImplementation(() => {
     switch (addToCronStatus) {
@@ -75,7 +79,7 @@ export function appCronMockMethods(
     }
   });
 
-  appCron.installTask = mockInstallTask;
-  appCron.deleteTask = mockDeleteTask;
+  appCron.add = mockInstallTask;
+  appCron.delete = mockDeleteTask;
   return appCron;
 }

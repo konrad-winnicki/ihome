@@ -1,17 +1,17 @@
-import { cachedDevice } from "../../domain/CachedDevices";
+import { CachedDevice } from "../../domain/CachedDevices";
 import { Device } from "../../domain/Device";
 import { ServerMessages } from "../../ServerMessages";
 import { ManagerResponse } from "../../application/task/TaskManager";
 import { DeviceRepository } from "../../application/device/DeviceRepository";
 
 export class CacheDeviceRepository implements DeviceRepository {
-  private cachedDevices: cachedDevice;
+  private cachedDevices: CachedDevice;
   private delegate: DeviceRepository;
   private serverMessages: ServerMessages;
   constructor(
-    cachedDevices: cachedDevice,
+    cachedDevices: CachedDevice,
     delegate: DeviceRepository,
-    serverMessages: ServerMessages
+    serverMessages: ServerMessages,
   ) {
     this.cachedDevices = cachedDevices;
     this.delegate = delegate;
@@ -87,13 +87,22 @@ export class CacheDeviceRepository implements DeviceRepository {
   }
 
   async listByType(deviceType: string): Promise<Device[]> {
-    const devices = [...this.cachedDevices.devices.values()].filter((device) => {
-      return device.deviceType === deviceType
-    })
-    if (devices.length !== 0){
-      return devices
+    const devices = [...this.cachedDevices.devices.values()].filter(
+      (device) => {
+        return device.deviceType === deviceType;
+      }
+    );
+    console.log(devices, devices.length)
+    if (devices.length !== 0) {
+      return devices;
     }
-    return this.delegate.listByType(deviceType);
+
+    return this.delegate.listByType(deviceType).then((devices) => {
+      devices.forEach((device) => {
+        this.cachedDevices.add(device);
+      });
+      return devices;
+    });
   }
 
   getById(deviceId: string): Promise<Device> {
@@ -131,6 +140,7 @@ export class CacheDeviceRepository implements DeviceRepository {
         const resolveMessage = {
           [messageSuccess]: response,
         };
+
         console.log(resolveMessage);
         return Promise.resolve(resolveMessage);
       })
@@ -142,4 +152,23 @@ export class CacheDeviceRepository implements DeviceRepository {
         return Promise.reject(rejectMessage);
       });
   }
+
+  
+  /*
+  async switchOffPerformer(switchDevice: Switch) {
+    return this.deviceRunSevice
+      .switchOff(switchDevice)
+      .then(() => {
+        return Promise.resolve({
+          [switchDevice.id]: "Item switched off during server restart",
+        });
+      })
+      .catch(() => {
+        const message = {
+          [`Switch ${switchDevice.id}`]:
+            "Error occureed during switching off after server restart",
+        };
+        return Promise.reject(message);
+      });
+  }*/
 }

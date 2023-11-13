@@ -40,22 +40,18 @@ export class FileDeviceRepository implements DeviceRepository {
           });
         }
         fileContent[device.id] = device;
-        console.log("BEFORE WRITE DATA TO FILE");
         return this.helperMethods
           .writeDataToFile("devices.json", fileContent)
           .then(() => {
-            console.log("______THEN");
             const messageSuccess = this.serverMessages.addDevice.SUCCESS;
             const resolveMessage = { [messageSuccess]: device.id };
             return Promise.resolve(resolveMessage);
           })
           .catch((c) => {
-            console.log("______CATCH");
             return Promise.reject(c);
           });
       })
       .catch((error) => {
-        console.log("________write error");
 
         const messageFailure = this.serverMessages.addDevice.FAILURE;
         if (error instanceof Error) {
@@ -70,12 +66,10 @@ export class FileDeviceRepository implements DeviceRepository {
       .readDataFromFile("devices.json")
       .then((fileContent) => {
         const isExisting = this.helperMethods.findByIdInFile(fileContent, id);
-        console.log('is existing', isExisting)
         if (!isExisting) {
           throw new Error(`Device ${id} does not exists.`);
         }
         delete fileContent[id];
-        console.log("inside delete");
         return this.helperMethods
           .writeDataToFile("devices.json", fileContent)
           .then(() => {
@@ -85,7 +79,6 @@ export class FileDeviceRepository implements DeviceRepository {
           });
       })
       .catch((error) => {
-        console.log("error in delete", error);
         const messageFailure = this.serverMessages.addDevice.FAILURE;
         if (error instanceof Error) {
           return Promise.reject({ [messageFailure]: error.message });
@@ -111,13 +104,15 @@ export class FileDeviceRepository implements DeviceRepository {
       .catch((error) => Promise.reject({ [persistencieError]: error }));
   }
 
+
+
+
   async getById(deviceId: string): Promise<Device> {
     const persistenceError = this.serverMessages.persistenceError;
 
     return this.helperMethods
       .readDataFromFile("devices.json")
       .then((fileContent) => {
-        console.log("get by id", fileContent);
         const device = this.helperMethods.findByIdInFile(fileContent, deviceId);
         return device
           ? Promise.resolve(device as Device)

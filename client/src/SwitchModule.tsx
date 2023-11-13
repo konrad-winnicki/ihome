@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { BiTask } from "react-icons/bi";
 import ToggleSwitch from "./ToogleSwitch";
 import { FaTrashRestoreAlt } from "react-icons/fa";
@@ -13,7 +13,6 @@ export interface SwitchModuleInterface {
   switchDevice: SwitchInterface
   setShowTaskDetails: (param:DeviceInterface|null)=> void
   setRefreshList: (param:boolean)=> void
-  onStatus: boolean
 }
 
 export interface DeviceInterface {
@@ -39,6 +38,12 @@ export const SwitchModule: React.FC<SwitchModuleInterface> = (
     }
   }
 
+  useEffect(()=>{
+    console.log('switch module render')
+    console.log(props.switchDevice)
+
+  },[])
+
   return (
     <div className="w-5/5 border-2 border-solid border-violet-700 p-0 rounded-xl m-2 justify-center items-center">
       <div className="flex">
@@ -46,7 +51,7 @@ export const SwitchModule: React.FC<SwitchModuleInterface> = (
           <div className=" flex basis-2/3 justify-center items-center bg-[#B804D8] p-2 text-white rounded-xl text-lg font-semibold m-2">{`${props.switchDevice.name}`}</div>
       
           <div className="flex basis-1/3 m-2 justify-center items-center">
-            <ToggleSwitch switchDevice={props.switchDevice} onStatus={props.onStatus}></ToggleSwitch>
+            <ToggleSwitch switchDevice={props.switchDevice} ></ToggleSwitch>
           </div>
        
         <div className="flex justify-center items-center">

@@ -7,10 +7,10 @@ import {
   DeleteFromDBOptions,
   taskDocumentWithMockMetods,
 } from "./mockForMongoTaskPersistence";
-import { AggregatedTask } from "../../domain/AggregatedTask";
 import { appCronMockMethods, prepareCronTaskManagerForDatabasePersistenceWithMockParameters } from "./mockForCronManager";
 import { MemeoryStatusType } from "./mockForCacheDeviceRepository";
 import { AddToDatabaseStatus, DeleteFromDBStatus, FindOneById } from "./mockForMongoDevicePersistence";
+import { Task } from "../../domain/Task";
 
 describe("cronTaskManager CLASS TEST - list all tasks", () => {
   const dependency = (
@@ -73,7 +73,7 @@ describe("cronTaskManager CLASS TEST - list all tasks", () => {
       .listAll()
       .then((result) =>
         expect(result).toStrictEqual([
-          new AggregatedTask("678910", true, 10, 56, "switch on", "switch off", '12345'),
+          new Task("678910", '12345', true, {hour:'10', minutes:'56'}),
         ])
       );
   });

@@ -1,8 +1,8 @@
 import { PORT } from "./config/config";
 
-function prepareURL() {
+export function prepareURL() {
   const ip = localStorage.getItem("ip");
-  return `http://${ip}`;
+  return `http://${ip}:${PORT}`;
 }
 
 export interface FormData {
@@ -17,7 +17,7 @@ export interface RegistrationData {
 
 export async function fetchLogin(data: FormData) {
   const URL = prepareURL();
-  const response = await fetch(`${URL}:${PORT}/login`, {
+  const response = await fetch(`${URL}/login`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -30,7 +30,7 @@ export async function fetchLogin(data: FormData) {
 export const renewSession = async (token: string | null): Promise<Response> => {
   const URL = prepareURL();
 
-  const response = await fetch(`${URL}:${PORT}/renew`, {
+  const response = await fetch(`${URL}/renew`, {
     method: "GET",
     headers: {
       Authorization: `Bearer ${token}`,
@@ -43,7 +43,7 @@ export const renewSession = async (token: string | null): Promise<Response> => {
 export async function getMeasurement(meterId: string, token: string | null) {
   const URL = prepareURL();
 
-  const response = await fetch(`${URL}:${PORT}/meters/run/${meterId}`, {
+  const response = await fetch(`${URL}/meters/run/${meterId}`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${token}`,
@@ -56,7 +56,7 @@ export async function getMeasurement(meterId: string, token: string | null) {
 export async function getMeters(token: string | null) {
   const URL = prepareURL();
 
-  const response = await fetch(`${URL}:${PORT}/meters`, {
+  const response = await fetch(`${URL}/meters`, {
     method: "GET",
     headers: {
       Authorization: `Bearer ${token}`,
@@ -69,7 +69,7 @@ export async function getMeters(token: string | null) {
 export async function getSwitches(token: string | null) {
   const URL = prepareURL();
 
-  const response = await fetch(`${URL}:${PORT}/switches`, {
+  const response = await fetch(`${URL}/switches`, {
     method: "GET",
     headers: {
       Authorization: `Bearer ${token}`,
@@ -79,18 +79,6 @@ export async function getSwitches(token: string | null) {
   return response;
 }
 
-export async function listRunningSwitches(token: string | null) {
-  const URL = prepareURL();
-
-  const response = await fetch(`${URL}:${PORT}/running`, {
-    method: "GET",
-    headers: {
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json",
-    },
-  });
-  return response;
-}
 
 export async function getTasksWhereDeviceId(
   deviceId: string,
@@ -98,7 +86,7 @@ export async function getTasksWhereDeviceId(
 ) {
   const URL = prepareURL();
 
-  const response = await fetch(`${URL}:${PORT}/tasks/device/${deviceId}`, {
+  const response = await fetch(`${URL}/tasks/device/${deviceId}`, {
     method: "GET",
     headers: {
       Authorization: `Bearer ${token}`,
@@ -111,7 +99,7 @@ export async function getTasksWhereDeviceId(
 export async function deleteTask(taskId: string, token: string | null) {
   const URL = prepareURL();
 
-  const response = await fetch(`${URL}:${PORT}/tasks/${taskId}`, {
+  const response = await fetch(`${URL}/tasks/${taskId}`, {
     method: "DELETE",
     headers: {
       Authorization: `Bearer ${token}`,
@@ -124,7 +112,7 @@ export async function deleteTask(taskId: string, token: string | null) {
 export async function deleteDevice(taskId: string, token: string | null) {
   const URL = prepareURL();
 
-  const response = await fetch(`${URL}:${PORT}/devices/${taskId}`, {
+  const response = await fetch(`${URL}/devices/${taskId}`, {
     method: "DELETE",
     headers: {
       Authorization: `Bearer ${token}`,
@@ -137,7 +125,7 @@ export async function deleteDevice(taskId: string, token: string | null) {
 export const createMeter = async (meter: object, token: string | null) => {
   const URL = prepareURL();
 
-  const response = await fetch(`${URL}:${PORT}/devices`, {
+  const response = await fetch(`${URL}/devices`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${token}`,
@@ -154,7 +142,7 @@ export const createSwitch = async (
 ) => {
   const URL = prepareURL();
 
-  const response = await fetch(`${URL}:${PORT}/devices`, {
+  const response = await fetch(`${URL}/devices`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${token}`,
@@ -168,7 +156,7 @@ export const createSwitch = async (
 export const createTask = async (task: object, token: string | null) => {
   const URL = prepareURL();
 
-  const response = await fetch(`${URL}:${PORT}/tasks`, {
+  const response = await fetch(`${URL}/tasks`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${token}`,
@@ -185,15 +173,15 @@ export const runDevice = async (
   token: string | null
 ) => {
   const URL = prepareURL();
-
-  const response = await fetch(`${URL}:${PORT}/devices/run/${DeviceId}`, {
+console.log(onStatus)
+  const response = await fetch(`${URL}/devices/run/${DeviceId}`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${token}`,
       "Content-Type": "application/json",
     },
     body: JSON.stringify({ 
-      onStatus }),
+      onStatus:onStatus }),
   });
   return response;
 };

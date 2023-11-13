@@ -3,11 +3,11 @@ import { SpiedFunction } from "jest-mock";
 import { expect, jest, test } from "@jest/globals";
 
 
-import { AggregatedTask } from "../../domain/AggregatedTask";
 import { appCronMockMethods, prepareCronTaskManagerForFilePersistenceWithMockParameters } from "./mockForCronManager";
 import { FileRepositoryHelpers } from "../../Infrastructure/filePersistencia/auxilaryFunctions";
 import { DeviceTaskError, EmptyObject, ReadFileMockReturnValues, fsModuleMockForDevices } from "./mockForFileRepositoryHeplers";
 import { MemeoryStatusType } from "./mockForCacheDeviceRepository";
+import { Task } from "../../domain/Task";
 
 describe("cronTaskManager CLASS TEST - list all tasks", () => {
   const dependency = (
@@ -86,7 +86,7 @@ describe("cronTaskManager CLASS TEST - list all tasks", () => {
       .listAll()
       .then((result) =>
         expect(result).toStrictEqual([
-          new AggregatedTask("678910", false, 10, 10, "switch on", "switch off", '12345'),
+          new Task("678910", '12345', true, {hour:'10', minutes:'56'}),
         ])
       );
   });

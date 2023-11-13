@@ -8,7 +8,9 @@ interface Option {
 
 interface OnOffOptionProps {
   setOnStatus: (param: boolean) => void;
+  onStatus: boolean|null
 }
+
 
 export const OnOffOption: React.FC<OnOffOptionProps> = (props) => {
   const [isOn, setIsOn] = useState<string>("");
@@ -17,6 +19,7 @@ export const OnOffOption: React.FC<OnOffOptionProps> = (props) => {
     { value: "OFF", label: "OFF" },
   ];
   const handleOptionChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    console.log(event.target.value)
     setIsOn(event.target.value);
   };
 
@@ -27,6 +30,11 @@ export const OnOffOption: React.FC<OnOffOptionProps> = (props) => {
     if (isOn === "OFF") {
       props.setOnStatus(false);
     }
+
+    if(props.onStatus === null){
+        setIsOn("")
+    }
+
   }, [isOn, props]);
 
   return (

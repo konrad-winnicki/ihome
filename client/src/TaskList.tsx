@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { getTasksWhereDeviceId } from "./services";
-import TaskModule, { TaskInterface } from "./TaskModule";
+import TaskModule, { Task } from "./TaskModule";
 import { SwitchInterface } from "./SwitchesList";
 import { RiDeleteBack2Line } from "react-icons/ri";
 import { TaskSetter } from "./TaskSetter";
@@ -13,14 +13,16 @@ interface TaskListInterface {
   device: SwitchInterface;
   setDeviceShowTaskModule: (param: SwitchInterface | null) => void;
   setShowSwitches: (param: boolean) => void;
-
+  //setTask: (param: TaskInterface | null) => void
 }
 
 const TaskList: React.FC<TaskListInterface> = (props) => {
-  const [tasks, setTasks] = useState<TaskInterface[] | null>(null);
+  const [tasks, setTasks] = useState<Task[] | null>(null);
+  const [isNewAdded, setNewAdded] = useState<boolean>(false);
+  const [isDeleted, setDeleted] = useState<boolean>(false);
 
-  const sortFunction = (data: TaskInterface[]) => {
-    data.sort((a: TaskInterface, b: TaskInterface) => {
+  const sortFunction = (data: Task[]) => {
+    data.sort((a: Task, b: Task) => {
       const timeA =
         parseInt(a.scheduledTime.hour) * 60 + parseInt(a.scheduledTime.minutes);
       const timeB =
@@ -36,22 +38,31 @@ const TaskList: React.FC<TaskListInterface> = (props) => {
   const getTasks = useCallback(async () => {
     const response = await getTasksWhereDeviceId(deviceId, token);
     if (response.ok) {
-      const data = (await response.json()) as TaskInterface[];
-      setTasks(sortFunction(data));
+      const data = (await response.json()) as Task[];
+      return sortFunction(data);
     }
-  }, [deviceId]);
+    return Promise.reject();
+  }, [deviceId, token]);
 
   useEffect(() => {
-    getTasks();
-  }, [getTasks]);
+    getTasks().then((tasks) => setTasks(tasks));
+  }, [getTasks,isNewAdded, isDeleted]);
+
+  useEffect(() => {
+    if (isNewAdded) {
+      setNewAdded(false);
+    }
+    if (isDeleted) {
+      setDeleted(false);
+    }
+  }, [isNewAdded, isDeleted]);
 
   return (
     <div className="chatList flex justify-center border-5 border-sky-500 m-4 p- flex flex-col rounded-lg">
-      
       <button
         onClick={() => {
           props.setDeviceShowTaskModule(null);
-          props.setShowSwitches(true)
+          props.setShowSwitches(true);
         }}
         className="bg-[#B804D8] px-1 py-1 text-white m-1 mr-4 rounded text-white text-lg font-semibold"
       >
@@ -62,25 +73,24 @@ const TaskList: React.FC<TaskListInterface> = (props) => {
       </button>
 
       <h1 className="border-b border-black m-2 text-black  text-1l font-semibold">
-              Add new task
-            </h1>
-            <div className="dd">
-              <TaskSetter
-                setShowTaskDetails={props.setDeviceShowTaskModule}
-                switchId={props.device.id}
-              ></TaskSetter>
-            </div>
-
+        Add new task
+      </h1>
+      <div className="dd">
+        <TaskSetter
+          setNewAdded={setNewAdded}
+          switchId={props.device.id}
+        ></TaskSetter>
+      </div>
 
       <h1 className="w-full border-b border-black py-2 text-black text-lg font-semibold">
         Current tasks
       </h1>
-      
+
       <div>
-        {tasks?.map((task: TaskInterface) => {
+        {tasks?.map((task: Task) => {
           return (
             <div key={task.id}>
-              <TaskModule task={task} setTasks={setTasks}></TaskModule>
+              <TaskModule task={task} setDeleted={setDeleted}></TaskModule>
             </div>
           );
         })}

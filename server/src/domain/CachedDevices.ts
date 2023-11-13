@@ -1,18 +1,18 @@
 import { Device } from "./Device";
 import { Switch } from "./Switch";
 
-export class cachedDevice {
-  private static instance: cachedDevice | null = null;
+export class CachedDevice {
+  private static instance: CachedDevice | null = null;
   private _devices: Map<string, Device>;
   private constructor() {
     this._devices = new Map<string, Device>();
   }
 
   public static getInstance() {
-    if (!cachedDevice.instance) {
-      cachedDevice.instance = new cachedDevice();
+    if (!CachedDevice.instance) {
+      CachedDevice.instance = new CachedDevice();
     }
-    return cachedDevice.instance;
+    return CachedDevice.instance;
   }
 
   public add(device: Device) {
@@ -23,10 +23,10 @@ export class cachedDevice {
     this._devices.delete(deviceId);
   }
 
-  public changeStatus(deviceId: string, status:boolean) {
-    const device = this._devices.get(deviceId)
-    if (device && device.deviceType === "switch"){
-      (device as Switch).onStatus = status
+  public changeStatus(deviceId: string, status: boolean) {
+    const device = this._devices.get(deviceId);
+    if (device && device.deviceType === "switch") {
+      (device as Switch).onStatus = status;
     }
   }
 

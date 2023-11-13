@@ -1,22 +1,21 @@
-import { TaskSchedule } from "../../domain/TaskSchedule";
+import { TaskScheduler } from "../../domain/TaskScheduler";
 import { TaskManager } from "../../application/task/TaskManager";
 import { ServerMessages } from "../../ServerMessages";
 
 import { TaskRepository } from "../../application/task/TaskRepository";
 import { Task } from "../../domain/Task";
-import { AggregatedTask } from "../../domain/AggregatedTask";
 
 type ManagerResponse<T> = {
   [key: string]: T;
 };
 
 export class CronTaskManager implements TaskManager {
-  private appCron: TaskSchedule;
+  private appCron: TaskScheduler;
   private delegate: TaskRepository;
   private serverMessages: ServerMessages;
 
   constructor(
-    appCron: TaskSchedule,
+    appCron: TaskScheduler,
     delegate: TaskRepository,
     serverMessages: ServerMessages
   ) {
@@ -28,23 +27,15 @@ export class CronTaskManager implements TaskManager {
   public async add(task: Task): Promise<ManagerResponse<object | string>> {
     return this.delegate
       .add(task)
-      .then((delegateResponse) => {
-        const justAddedTaskId = (
-          delegateResponse as { [taskId: string]: string }
-        ).taskId;
-        return this.delegate
-          .findByIdAndAggregateWithDevice(justAddedTaskId)
-          .then((aggregatedTask) => {
-            return this.appCron.installTask(
-              aggregatedTask.id,
-              aggregatedTask.minutes,
-              aggregatedTask.hour,
-              aggregatedTask.onStatus,
-              aggregatedTask.commandOn,
-              aggregatedTask.commandOff,
-              task.deviceId
-            );
-          })
+      .then(() => {
+        return this.appCron
+          .add(
+            task.id,
+            Number(task.scheduledTime.minutes),
+            Number(task.scheduledTime.hour),
+            task.onStatus,
+            task.deviceId
+          )
           .catch((error) => {
             const errorToPass = error instanceof Error ? error.message : error;
             return this.compensateTaskAddition(task.id)
@@ -86,7 +77,7 @@ export class CronTaskManager implements TaskManager {
       });
   }
 
-  public async listAll(): Promise<AggregatedTask[]> {
+  public async listAll(): Promise<Task[]> {
     return this.delegate.listAll();
   }
 
@@ -96,7 +87,7 @@ export class CronTaskManager implements TaskManager {
 
   private async deleteTask(task: Task) {
     return this.delegate.delete(task.id).then(() => {
-      return this.appCron.deleteTask(task.id).catch((cronError) =>
+      return this.appCron.delete(task.id).catch((cronError) =>
         this.compensateTaskDeletion(task)
           .then((compensationResult) => {
             const rejectMessage = {

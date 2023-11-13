@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { RxDropdownMenu } from "react-icons/rx";
-import { getSwitches, listRunningSwitches } from "./services";
+import { getSwitches, prepareURL} from "./services";
 import SwitchModule from "./SwitchModule";
 import TaskList from "./TaskList";
+import {  useNavigate } from "react-router-dom";
 
 export interface Parameters {
   [key: string]: string;
@@ -15,8 +16,10 @@ export interface SwitchInterface {
 }
 
 const SwitchesList: React.FC = () => {
-  const [switches, setSwitches] = useState<SwitchInterface[]>([]);
-  const [runningSwitches, setRunningSwitches] = useState<[]>([]);
+
+  const navigate = useNavigate();
+
+  const [switches, setSwitches] = useState<{switches: SwitchInterface[]}>({switches: []});
 
   const [showSwitches, setShowSwitches] = useState<boolean>(false);
   const [deviceShowsTaskModule, setDeviceShowTaskModule] =
@@ -29,39 +32,34 @@ const SwitchesList: React.FC = () => {
     const response = await getSwitches(token);
     if (response.ok) {
       const data = await response.json();
-      setSwitches(data);
+      return data
+    }
+    if(response.status === 401){
+      const url = prepareURL()
+      navigate(`${url}`)
     }
   }
 
-  async function getRunning() {
-    const response = await listRunningSwitches(token);
-    if (response.ok) {
-      const data = await response.json();
-      setRunningSwitches(data);
-      console.log("running", data, runningSwitches);
-    }
-  }
+  
 
   useEffect(() => {
     if (!showSwitches) {
-      getRunning();
+      getSwitchList().then((data)=>{
+      setSwitches({switches:data});
+
     }
-    if (showSwitches) {
-      getSwitchList().then(()=>console.log(switches))
-      
+      )
 
     }
     if (deviceShowsTaskModule) {
       setShowSwitches(false);
     }
 
-    
     if (refreshList) {
-      console.log(switches)
-
       setRefreshList(false);
     }
-  }, [showSwitches, deviceShowsTaskModule, refreshList]);
+    
+  }, [JSON.stringify(switches), showSwitches, deviceShowsTaskModule]);
 
   return (
     <div className="flex-col h-full items-center justify-center border-5 border-sky-500">
@@ -77,18 +75,13 @@ const SwitchesList: React.FC = () => {
 
       <div className=" overflow-y-auto ">
         {showSwitches
-          ? switches.map((switchDevice: SwitchInterface) => {
-              const isRunning = runningSwitches.find(
-                (value) => value === switchDevice.id
-              );
-
-              return (
+          ? switches.switches.map((switchDevice: SwitchInterface) => {
+            return (
                 <div key={switchDevice.id}>
                   <SwitchModule
                     switchDevice={switchDevice}
                     setShowTaskDetails={setDeviceShowTaskModule}
                     setRefreshList={setRefreshList}
-                    onStatus={isRunning ? true : false}
                   ></SwitchModule>
                 </div>
               );

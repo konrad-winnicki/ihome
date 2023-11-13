@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { FaTrashRestoreAlt } from "react-icons/fa";
 import { deleteTask } from "./services";
 
@@ -6,13 +6,16 @@ export interface Parameters {
   [key: string]: string;
 }
 
-export interface TaskInterface {
+export interface Task {
   id: string;
   scheduledTime: { hour: string; minutes: string };
   onStatus: boolean;
 }
 
-export const TaskModule: React.FC<{ task: TaskInterface, setTasks:(param: TaskInterface[] | null)=>void }> = (props) => {
+export const TaskModule: React.FC<{
+  task: Task;
+  setDeleted: (param: boolean) => void;
+}> = (props) => {
   const token = localStorage.getItem("token");
 
   async function deleteItem() {
@@ -22,24 +25,25 @@ export const TaskModule: React.FC<{ task: TaskInterface, setTasks:(param: TaskIn
         const response = await deleteTask(props.task.id, token);
         const data = await response.json();
         if (response.ok) {
-          console.log(data);
-          props.setTasks(null)
+          props.setDeleted(true);
         } else {
           console.log("Task not deleted", data);
         }
       } catch (error) {
-        console.error("an error occurred:", error);
+        console.error("An error occurred:", error);
       }
     }
   }
 
- 
 
+  useEffect(()=>{
+    'task module render'
+  },[])
   return (
     <div className="flex flex-row justify-center items-center">
       <h1 className=" border border-black p-2 text-black rounded-xl text-lg font-semibold m-2">
-        {`Switch time => ${props.task.scheduledTime.hour}: ${props.task.scheduledTime.minutes} `}
         {props.task.onStatus ? "ON" : "OFF"}
+        {` => ${props.task.scheduledTime.hour}: ${props.task.scheduledTime.minutes} `}
       </h1>
       <button
         onClick={() => deleteItem()}

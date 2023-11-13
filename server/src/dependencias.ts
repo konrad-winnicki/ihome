@@ -1,15 +1,12 @@
 import sanitizedConfig from "../config/config";
 import { DeviceRunService } from "./application/device/DeviceRunService";
 import { MongoDatabase } from "./Infrastructure/databse/MongoDataBase";
-import { TaskSchedule } from "./domain/TaskSchedule";
+import { TaskScheduler } from "./domain/TaskScheduler";
 import { EventEmitter } from "node:events";
-import {
-  recoveryInMemoryDeviceStorage,
-  fillCronInMemoryWithData,
-} from "./domain/inMemoryRecoveryFunctions";
+import { recoverTasks } from "./domain/recoveryFunctions";
 import { AppServer } from "./Infrastructure/AppServer";
 import { initAppRouter } from "./Infrastructure/routes";
-import { cachedDevice } from "./domain/CachedDevices";
+import { CachedDevice } from "./domain/CachedDevices";
 import { DeviceController } from "./controllers/DeviceController";
 import { RunDeviceControllers } from "./controllers/runDeviceControllers";
 import { TaskControllers } from "./controllers/TaskControllers";
@@ -27,6 +24,7 @@ import { CronTaskManager } from "./Infrastructure/task/CronTaskManager";
 import { FileTaskRepository } from "./Infrastructure/filePersistencia/FileTaskRepository";
 import { MongoTaskRepository } from "./Infrastructure/task/MongoTaskRepository";
 import { TaskService } from "./application/task/TaskService";
+import { PressButtonPerformer } from "./domain/PressButtonPerformer";
 
 const ENVIRONMENT = sanitizedConfig.NODE_ENV;
 
@@ -97,9 +95,10 @@ export async function initializeDependencias() {
   const serverMessages = ServerMessages.getInstance();
   const eventEmitter = new EventEmitter();
 
-  const devicesInMemory = cachedDevice.getInstance();
+  const devicesInMemory = CachedDevice.getInstance();
 
   const persistenciaType = await choosePersistenciaType(ENVIRONMENT);
+  const deviceRunService = new DeviceRunService(devicesInMemory);
 
   const cacheDeviceRepository = new CacheDeviceRepository(
     devicesInMemory,
@@ -109,7 +108,7 @@ export async function initializeDependencias() {
 
   const deviceService = new DeviceService(cacheDeviceRepository, eventEmitter);
 
-  const appCorn = new TaskSchedule();
+  const appCorn = new TaskScheduler(deviceRunService);
   const cronTaskManager = new CronTaskManager(
     appCorn,
     persistenciaType.taskRepository,
@@ -121,7 +120,6 @@ export async function initializeDependencias() {
     deviceService,
     eventEmitter
   );
-  const deviceRunService = new DeviceRunService(devicesInMemory);
 
   const deviceRunControllerDep = new RunDeviceControllers(deviceRunService);
 
@@ -137,29 +135,17 @@ export async function initializeDependencias() {
   );
 
   const appServer = new AppServer(appRouter);
-  try {
-    const result = await recoveryInMemoryDeviceStorage(
-      deviceService,
-      devicesInMemory,
-      deviceRunService
-    );
-    console.log(result);
-  } catch (err) {
-    console.log(err);
-  }
-  /*
-  const cronTaskRepository = new TaskRecoveryManager(
-    persistenciaType.taskRepository,
-    cronTaskManager
-  );
-  */
 
   const cronTaskRepository = new TaskRecoveryManager(
     persistenciaType.taskRepository,
     appCorn
   );
 
-  await fillCronInMemoryWithData(cronTaskRepository);
+  await switchOffAllDevicesAfterServerStart(deviceService)
+    .then((result) => console.log(result))
+    .catch((error) => console.log(error));
+
+  await recoverTasks(cronTaskRepository);
 
   const port = Number(appConfiguration.PORT);
 
@@ -183,13 +169,13 @@ export async function initializeDependencias() {
 export class Application {
   private static instance: Application | null = null;
   public appServer: AppServer;
-  public devicesInMemory: cachedDevice;
+  public devicesInMemory: CachedDevice;
   public serverMessages: ServerMessages;
   public databaseInstance?: MongoDatabase;
 
   constructor(
     appServer: AppServer,
-    devicesInMemory: cachedDevice,
+    devicesInMemory: CachedDevice,
     serverMessages: ServerMessages,
     databaseInstance?: MongoDatabase
   ) {
@@ -201,7 +187,7 @@ export class Application {
 
   public static getInstance(
     appServer: AppServer,
-    devicesInMemory: cachedDevice,
+    devicesInMemory: CachedDevice,
     serverMessages: ServerMessages,
     databaseInstance?: MongoDatabase
   ) {
@@ -215,4 +201,32 @@ export class Application {
     }
     return Application.instance;
   }
+}
+
+async function switchOffAllDevicesAfterServerStart(
+  deviceService: DeviceService
+) {
+  const devices = await deviceService.getSwitchList();
+  const switchPerformer = PressButtonPerformer.getInstance();
+  const switchingResults = [];
+  for (const device of devices) {
+    const result = await switchPerformer
+      .pressButton(device, false)
+      .then(() => {
+        return Promise.resolve({
+          [device.id]: "Item switched off during server restart",
+        });
+      })
+      .catch(() => {
+        const message = {
+          [`Switch ${device.id}`]:
+            "Error occureed during switching off after server restart",
+        };
+        return Promise.resolve(message);
+      });
+
+    switchingResults.push(result);
+  }
+
+  return switchingResults;
 }

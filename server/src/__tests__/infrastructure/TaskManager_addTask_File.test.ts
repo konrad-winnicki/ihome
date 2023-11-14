@@ -80,22 +80,10 @@ describe("CronTaskManager with file persistence CLASS TEST - add task", () => {
     const writeFileMockImplementationCalls = [
       "write",
       "write",
-      "write",
-      "write",
     ] as DeviceTaskError[];
-    const readFileMockImplementationCalls = [
-      "task",
-      "task",
-      "device",
-      "task",
-    ] as DeviceTaskError[];
+    const readFileMockImplementationCalls = ["task"] as DeviceTaskError[];
 
-    const readFileMockReturnValues = [
-      {},
-      taskMockValue,
-      deviceMockValue,
-      taskMockValue,
-    ];
+    const readFileMockReturnValues = [{}, taskMockValue];
 
     const cronTaskManager = dependency(
       addToCronStatus,
@@ -196,24 +184,14 @@ describe("CronTaskManager with file persistence CLASS TEST - add task", () => {
     const writeFileMockImplementationCalls = [
       "write",
       "write",
-      "write",
-      "write",
-      "write",
-      "write",
+      "write","write"
+
     ] as DeviceTaskError[];
     const readFileMockImplementationCalls = [
-      "task",
-      "task",
-      "device",
-      "task",
+      "task", "task"
     ] as DeviceTaskError[];
 
-    const readFileMockReturnValues = [
-      {},
-      taskMockValue,
-      deviceMockValue,
-      taskMockValue,
-    ];
+    const readFileMockReturnValues = [{}, taskMockValue];
     const cronTaskManager = dependency(
       addToCronStatus,
       deleteFromCronStatus,
@@ -238,29 +216,24 @@ describe("CronTaskManager with file persistence CLASS TEST - add task", () => {
     });
   });
 
-  test("Compensation fails reading file fails if during task deletion", async () => {
+  test("Compensation fails if reading file fails during task deletion", async () => {
     const addToCronStatus = "error";
     const deleteFromCronStatus = "success";
     const writeFileMockImplementationCalls = [
       "write",
       "write",
       "write",
-      "write",
-      "write",
-      "write",
+      
     ] as DeviceTaskError[];
     const readFileMockImplementationCalls = [
       "task",
-      "task",
-      "device",
       "error",
     ] as DeviceTaskError[];
 
     const readFileMockReturnValues = [
       {},
       taskMockValue,
-      deviceMockValue,
-      taskMockValue,
+      
     ];
     const cronTaskManager = dependency(
       addToCronStatus,
@@ -290,12 +263,10 @@ describe("CronTaskManager with file persistence CLASS TEST - add task", () => {
     });
   });
 
-  test("Compensation fails if reading file fails during task deletion", async () => {
+  test("Compensation fails if writing file fails during task deletion", async () => {
     const addToCronStatus = "error";
     const deleteFromCronStatus = "success";
     const writeFileMockImplementationCalls = [
-      "write",
-      "write",
       "write",
       "write",
       "write",
@@ -304,14 +275,11 @@ describe("CronTaskManager with file persistence CLASS TEST - add task", () => {
     const readFileMockImplementationCalls = [
       "task",
       "task",
-      "device",
-      "task",
+      
     ] as DeviceTaskError[];
 
     const readFileMockReturnValues = [
       {},
-      taskMockValue,
-      deviceMockValue,
       taskMockValue,
     ];
 
@@ -345,100 +313,5 @@ describe("CronTaskManager with file persistence CLASS TEST - add task", () => {
     });
   });
 
-  test("Should not add task if reading file fails during aggrregation ", async () => {
-    const addToCronStatus = "success";
-    const deleteFromCronStatus = "success";
-    const writeFileMockImplementationCalls = [
-      "write",
-      "write",
-      "write",
-      "write",
-      "write",
-      "write",
-    ] as DeviceTaskError[];
-    const readFileMockImplementationCalls = [
-      "task",
-      "task",
-      "error",
-      "task",
-    ] as DeviceTaskError[];
-
-    const readFileMockReturnValues = [
-      {},
-      taskMockValue,
-      deviceMockValue,
-      taskMockValue,
-    ];
-    const cronTaskManager = dependency(
-      addToCronStatus,
-      deleteFromCronStatus,
-      writeFileMockImplementationCalls,
-      readFileMockImplementationCalls,
-      readFileMockReturnValues
-    );
-
-    await cronTaskManager.add(taskToAdd).catch((err) =>
-      expect(err).toEqual({
-        "Task not added": {
-          Error: {
-            "Persistence error": { "Read file error": "Internal read error" },
-          },
-          compensation: {
-            "Compensation succeded": { "Task deleted": "No errors" },
-          },
-        },
-      })
-    );
-
-    expect(consoleSpy).toHaveBeenCalledWith({
-      "Compensation succeded": { "Task deleted": "No errors" },
-    });
-  });
-
-  test("Should not add task if writing file fails during aggrregation", async () => {
-    const addToCronStatus = "success";
-    const deleteFromCronStatus = "success";
-    const writeFileMockImplementationCalls = [
-      "write",
-      "write",
-      "error",
-      "write",
-      "write",
-    ] as DeviceTaskError[];
-    const readFileMockImplementationCalls = [
-      "task",
-      "task",
-    ] as DeviceTaskError[];
-
-    const readFileMockReturnValues = [
-      {},
-      taskMockValue,
-      deviceMockValue,
-      taskMockValue,
-    ];
-    const cronTaskManager = dependency(
-      addToCronStatus,
-      deleteFromCronStatus,
-      writeFileMockImplementationCalls,
-      readFileMockImplementationCalls,
-      readFileMockReturnValues
-    );
-
-    await cronTaskManager.add(taskToAdd).catch((err) =>
-      expect(err).toEqual({
-        "Task not added": {
-          Error: {
-            "Persistence error": { "Write file error": "Internal write error" },
-          },
-          compensation: {
-            "Compensation succeded": { "Task deleted": "No errors" },
-          },
-        },
-      })
-    );
-
-    expect(consoleSpy).toHaveBeenCalledWith({
-      "Compensation succeded": { "Task deleted": "No errors" },
-    });
-  });
+ 
 });

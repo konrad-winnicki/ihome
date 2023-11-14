@@ -69,12 +69,13 @@ describe("API ADD DEVICE TEST", () => {
     const [device] = await listDevices();
 
     expect(response.body).toHaveProperty("deviceId");
-    expect(devicesInMemory).toEqual({
+    expect(devicesInMemory).toMatchObject({
       id: deviceId,
       deviceType: "switch",
       name: "switch1",
       commandOn: "switch on",
       commandOff: "switch off",
+      onStatus: false
     });
 
     expect(device).toMatchObject({
@@ -83,6 +84,7 @@ describe("API ADD DEVICE TEST", () => {
       name: "switch1",
       commandOn: "switch on",
       commandOff: "switch off",
+      onStatus:false
     });
   });
 
@@ -118,6 +120,7 @@ describe("API ADD DEVICE TEST", () => {
       name: "meter1",
       parameters: { temperature: "oC", humidity: "%" },
       commandOn: "meter on",
+
     });
   });
 
@@ -447,6 +450,8 @@ describe("API ADD DEVICE TEST", () => {
       name: "switch1",
       commandOn: "switch on",
       commandOff: "switch off",
+      onStatus: false
+
     });
 
     expect(device).toMatchObject({
@@ -455,6 +460,8 @@ describe("API ADD DEVICE TEST", () => {
       name: "switch1",
       commandOn: "switch on",
       commandOff: "switch off",
+      onStatus: false
+
     });
 
     

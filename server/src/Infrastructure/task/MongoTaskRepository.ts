@@ -24,7 +24,6 @@ export class MongoTaskRepository implements TaskRepository {
 
     return this.taskDocument
       .create(newTask)
-
       .then((task) => {
         const message = this.serverMessages.addTask.SUCCESS;
         return Promise.resolve({ [message]: task.id });

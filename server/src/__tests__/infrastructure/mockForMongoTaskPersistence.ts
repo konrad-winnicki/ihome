@@ -16,8 +16,6 @@ export type DeleteFromDBOptions = {
 export function taskDocumentWithMockMetods(
   addToDBStatus: AddToDatabaseStatus,
   deleteFromDBStatus: DeleteFromDBStatus,
-  deleteFromDBOptions: DeleteFromDBOptions,
-  aggregateStatus: AggregateStatus,
   findOneByIdStatus: FindOneById
 ) {
   const databaseCreateMock = jest.fn().mockImplementation((device: Device) => {
@@ -36,7 +34,7 @@ export function taskDocumentWithMockMetods(
   const databaseDeleteOneMock = jest.fn().mockImplementation(() => {
     switch (deleteFromDBStatus) {
       case "success":
-        return Promise.resolve(deleteFromDBOptions);
+        return Promise.resolve({ acknowledged: true, deletedCount: 1 });
       case "error":
         return Promise.reject(
           "NOT deleted from database. Internal database error."
@@ -44,23 +42,7 @@ export function taskDocumentWithMockMetods(
     }
   });
 
-  const aggregateMock = jest.fn().mockImplementation(() => {
-    switch (aggregateStatus) {
-      case "success":
-        return Promise.resolve([
-          {
-            id: "678910",
-            onStatus: true,
-            scheduledTime: { hour: 10, minutes: 56 },
-            device: { commandOn: "switch on", commandOff: "switch off", id: '12345' },
-          },
-        ]);
-      case "internalError":
-        return Promise.reject("Error during aggregation");
-      case "emptyArray":
-        return Promise.resolve([]);
-    }
-  });
+ 
 
   const databaseFindOneMock = jest.fn().mockImplementation(() => {
     switch (findOneByIdStatus) {
@@ -69,7 +51,7 @@ export function taskDocumentWithMockMetods(
           id: "678910",
           onStatus: true,
           scheduledTime: { hour: "10", minutes: "56" },
-          device: { commandOn: "switch on", commandOff: "switch off" },
+          device: "12345",
         });
       case "error":
         return Promise.reject("Internal database error");
@@ -78,11 +60,22 @@ export function taskDocumentWithMockMetods(
         return Promise.reject(`Task not exists`);
     }
   });
+
+  const databaseFindMock = jest.fn().mockImplementation(() => {
+    
+        return Promise.resolve([{
+          id: "678910",
+          onStatus: true,
+          scheduledTime: { hour: "10", minutes: "10" },
+          deviceId: "12345",
+        }]);
+     
+  });
   const taskDokumentMock = {
     create: databaseCreateMock,
     deleteOne: databaseDeleteOneMock,
-    aggregate: aggregateMock,
     findOne: databaseFindOneMock,
+    find: databaseFindMock
   } as unknown as Model<Task>;
 
   return taskDokumentMock;

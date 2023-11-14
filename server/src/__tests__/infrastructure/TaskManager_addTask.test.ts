@@ -3,8 +3,6 @@ import { SpiedFunction } from "jest-mock";
 import { expect, jest, test } from "@jest/globals";
 
 import {
-  AggregateStatus,
-  DeleteFromDBOptions,
   taskDocumentWithMockMetods,
 } from "./mockForMongoTaskPersistence";
 import {
@@ -24,8 +22,6 @@ describe("CronTaskManager with database persistence CLASS TEST - add task", () =
     deleteFromCronStatus: MemeoryStatusType,
     addToDBStatus: AddToDatabaseStatus,
     deleteFromDBStatus: DeleteFromDBStatus,
-    deleteFromDBOptions: DeleteFromDBOptions,
-    aggregateStatus: AggregateStatus,
     findOneByIdStatus: FindOneById
   ) => {
     const appCron = appCronMockMethods(addToCronStatus, deleteFromCronStatus);
@@ -33,8 +29,6 @@ describe("CronTaskManager with database persistence CLASS TEST - add task", () =
     const taskDokumentMock = taskDocumentWithMockMetods(
       addToDBStatus,
       deleteFromDBStatus,
-      deleteFromDBOptions,
-      aggregateStatus,
       findOneByIdStatus
     );
 
@@ -67,8 +61,6 @@ describe("CronTaskManager with database persistence CLASS TEST - add task", () =
     const deleteFromCronStatus = "success";
     const addToDBStatus = "success";
     const deleteFromDBStatus = "success";
-    const deleteFromDBOptions = { acknowledged: true, deletedCount: 1 };
-    const aggregateStatus = "success";
    const findOneByIdStatus = undefined
 
     const cronTaskManager = dependency (
@@ -76,8 +68,6 @@ describe("CronTaskManager with database persistence CLASS TEST - add task", () =
       deleteFromCronStatus,
       addToDBStatus,
       deleteFromDBStatus,
-      deleteFromDBOptions,
-      aggregateStatus,
       findOneByIdStatus)
 
     await cronTaskManager
@@ -90,9 +80,6 @@ describe("CronTaskManager with database persistence CLASS TEST - add task", () =
     const deleteFromCronStatus = "success";
     const addToDBStatus = "error";
     const deleteFromDBStatus = "success";
-    const aggregateStatus = "success";
-
-    const deleteFromDBOptions = { acknowledged: true, deletedCount: 1 };
     const findOneByIdStatus = undefined
 
     const cronTaskManager = dependency (
@@ -100,8 +87,6 @@ describe("CronTaskManager with database persistence CLASS TEST - add task", () =
       deleteFromCronStatus,
       addToDBStatus,
       deleteFromDBStatus,
-      deleteFromDBOptions,
-      aggregateStatus,
       findOneByIdStatus)
     await cronTaskManager.add(taskToAdd).catch((err) =>
       expect(err).toEqual({
@@ -117,9 +102,7 @@ describe("CronTaskManager with database persistence CLASS TEST - add task", () =
     const deleteFromCronStatus = "success";
     const addToDBStatus = "DuplicatedId";
     const deleteFromDBStatus = "success";
-    const aggregateStatus = "success";
 
-    const deleteFromDBOptions = { acknowledged: true, deletedCount: 1 };
     const findOneByIdStatus = undefined
 
     const cronTaskManager = dependency (
@@ -127,8 +110,6 @@ describe("CronTaskManager with database persistence CLASS TEST - add task", () =
       deleteFromCronStatus,
       addToDBStatus,
       deleteFromDBStatus,
-      deleteFromDBOptions,
-      aggregateStatus,
       findOneByIdStatus)
 
     await cronTaskManager
@@ -145,8 +126,6 @@ describe("CronTaskManager with database persistence CLASS TEST - add task", () =
     const deleteFromCronStatus = "success";
     const addToDBStatus = "success";
     const deleteFromDBStatus = "success";
-    const deleteFromDBOptions = { acknowledged: true, deletedCount: 1 };
-    const aggregateStatus = "success";
 
     const findOneByIdStatus = undefined
 
@@ -155,8 +134,6 @@ describe("CronTaskManager with database persistence CLASS TEST - add task", () =
       deleteFromCronStatus,
       addToDBStatus,
       deleteFromDBStatus,
-      deleteFromDBOptions,
-      aggregateStatus,
       findOneByIdStatus)
 
     await cronTaskManager.add(taskToAdd).catch((err) =>
@@ -184,9 +161,6 @@ describe("CronTaskManager with database persistence CLASS TEST - add task", () =
     const deleteFromCronStatus = "success";
     const addToDBStatus = "success";
     const deleteFromDBStatus = "error";
-    const deleteFromDBOptions = { acknowledged: true, deletedCount: 1 };
-    const aggregateStatus = "success";
-
     const findOneByIdStatus = undefined
 
     const cronTaskManager = dependency (
@@ -194,8 +168,6 @@ describe("CronTaskManager with database persistence CLASS TEST - add task", () =
       deleteFromCronStatus,
       addToDBStatus,
       deleteFromDBStatus,
-      deleteFromDBOptions,
-      aggregateStatus,
       findOneByIdStatus)
     await cronTaskManager.add(taskToAdd).catch((err) =>
       expect(err).toEqual({
@@ -219,121 +191,5 @@ describe("CronTaskManager with database persistence CLASS TEST - add task", () =
     });
   });
 
-  test("Should not add tack and compensate if aggregation failed", async () => {
-    const addToCronStatus = "success";
-    const deleteFromCronStatus = "success";
-    const addToDBStatus = "success";
-    const deleteFromDBStatus = "success";
-    const deleteFromDBOptions = { acknowledged: true, deletedCount: 1 };
-    const aggregateStatus = "internalError";
-
-    const findOneByIdStatus = undefined
-
-    const cronTaskManager = dependency (
-      addToCronStatus,
-      deleteFromCronStatus,
-      addToDBStatus,
-      deleteFromDBStatus,
-      deleteFromDBOptions,
-      aggregateStatus,
-      findOneByIdStatus)
-
-    await cronTaskManager.add(taskToAdd).catch((err) =>
-      expect(err).toEqual({
-        "Task not added": {
-          Error: { error: "Error during aggregation" },
-          compensation: {
-            "Compensation succeded": {
-              "Task deleted": { acknowledged: true, deletedCount: 1 },
-            },
-          },
-        },
-      })
-    );
-
-    expect(consoleSpy).toHaveBeenCalledWith({
-      "Compensation succeded": {
-        "Task deleted": { acknowledged: true, deletedCount: 1 },
-      },
-    });
-  });
-
-  test("Aggregation fails, compensation fails", async () => {
-    const addToCronStatus = "success";
-    const deleteFromCronStatus = "success";
-    const addToDBStatus = "success";
-    const deleteFromDBStatus = "error";
-    const deleteFromDBOptions = { acknowledged: true, deletedCount: 1 };
-    const aggregateStatus = "internalError";
-    const findOneByIdStatus = "success"
-
-    const cronTaskManager = dependency (
-      addToCronStatus,
-      deleteFromCronStatus,
-      addToDBStatus,
-      deleteFromDBStatus,
-      deleteFromDBOptions,
-      aggregateStatus,
-      findOneByIdStatus)
-
-    await cronTaskManager.add(taskToAdd).catch((err) =>
-      expect(err).toEqual({
-        "Task not added": {
-          Error: { error: "Error during aggregation" },
-          compensation: {
-            "Compensation failed": {
-              "Task not deleted":
-                "NOT deleted from database. Internal database error.",
-            },
-          },
-        },
-      })
-    );
-
-    expect(consoleSpy).toHaveBeenCalledWith({
-      "Compensation failed": {
-        "Task not deleted":
-          "NOT deleted from database. Internal database error.",
-      },
-    });
-  });
-
-  test("Should not add task and compensate if aggregation returns empty array", async () => {
-    const addToCronStatus = "success";
-    const deleteFromCronStatus = "success";
-    const addToDBStatus = "success";
-    const deleteFromDBStatus = "success";
-    const deleteFromDBOptions = { acknowledged: true, deletedCount: 1 };
-    const aggregateStatus = "emptyArray";
-
-    const findOneByIdStatus = undefined
-
-    const cronTaskManager = dependency (
-      addToCronStatus,
-      deleteFromCronStatus,
-      addToDBStatus,
-      deleteFromDBStatus,
-      deleteFromDBOptions,
-      aggregateStatus,
-      findOneByIdStatus)
-    await cronTaskManager.add(taskToAdd).catch((err) =>
-      expect(err).toEqual({
-        "Task not added": {
-          Error: { error: { "Item not found": "Task not exists" } },
-
-          compensation: {
-            "Compensation succeded": {
-              "Task deleted": { acknowledged: true, deletedCount: 1 },
-            },
-          },
-        },
-      })
-    );
-
-    expect(consoleSpy).toHaveBeenCalledWith({
-      "Compensation succeded": {
-        "Task deleted": { acknowledged: true, deletedCount: 1 },
-      },
-    });
-  });
+  
 });

@@ -56,16 +56,17 @@ export function appCronMockMethods(
   const deviceRunService = new DeviceRunService(cachedDevices);
   const appCron = new TaskScheduler(deviceRunService);
 
-  const mockInstallTask = jest.fn().mockImplementation(() => {
+  const mockAdd = jest.fn().mockImplementation(async () => {
     switch (addToCronStatus) {
       case "success":
         return Promise.resolve({ taskId: "678910" });
       case "error":
-        throw new Error("Internal cron error");
+        //throw new Error("Internal cron error");
+        return Promise.reject("Internal cron error")
     }
   });
 
-  const mockDeleteTask = jest.fn().mockImplementation(() => {
+  const mockDelete = jest.fn().mockImplementation(() => {
     console.log("delete from cron", deleteFromCronStatus);
     switch (deleteFromCronStatus) {
       case "success":
@@ -79,7 +80,7 @@ export function appCronMockMethods(
     }
   });
 
-  appCron.add = mockInstallTask;
-  appCron.delete = mockDeleteTask;
+  appCron.add = mockAdd;
+  appCron.delete = mockDelete;
   return appCron;
 }

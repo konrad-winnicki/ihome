@@ -73,9 +73,9 @@ describe("API RUN SWITCH TEST", () => {
 
   test("Should run command on script:", async () => {
     const responseFromSwitch = await request(requestUri)
-      .post(`/switches/run/${switchId}`)
+      .post(`/devices/run/${switchId}`)
       .set("Authorization", token)
-      .send({ switchOn: true })
+      .send({ onStatus: true })
       .expect(200)
       .expect("Content-Type", /text\/plain/);
 
@@ -84,9 +84,9 @@ describe("API RUN SWITCH TEST", () => {
 
   test("Should run command off script:", async () => {
     const responseFromSwitch = await request(requestUri)
-      .post(`/switches/run/${switchId}`)
+      .post(`/devices/run/${switchId}`)
       .set("Authorization", token)
-      .send({ switchOn: false })
+      .send({ onStatus: false })
       .expect(200)
       .expect("Content-Type", /text\/plain/);
 
@@ -95,36 +95,35 @@ describe("API RUN SWITCH TEST", () => {
 
   test("Switch on should return error if file not exists:", async () => {
     const responseFromSwitch = await request(requestUri)
-      .post(`/switches/run/${switchWithNonExistingScriptId}`)
+      .post(`/devices/run/${switchWithNonExistingScriptId}`)
       .set("Authorization", token)
-      .send({ switchOn: true })
+      .send({ onStatus: true })
       .expect(500)
-      .expect("Content-Type", /application\/json/);
+      .expect("Content-Type", /text\/plain/);
 
-    expect(Object.keys(responseFromSwitch.body)[0]).toMatch(
-      "Error occured during switching on"
+    expect(responseFromSwitch.text).toMatch(
+      "Acomplished with error:"
     );
   });
 
   test("Switch off should return error if file not exists:", async () => {
     const responseFromMeter = await request(requestUri)
-      .post(`/switches/run/${switchWithNonExistingScriptId}`)
+      .post(`/devices/run/${switchWithNonExistingScriptId}`)
       .set("Authorization", token)
-      .send({ switchOn: false })
+      .send({ onStatus: false })
       .expect(500)
-      .expect("Content-Type", /application\/json/);
-
+      .expect("Content-Type", /text\/plain/);
     console.log(responseFromMeter.text);
     expect(responseFromMeter.text).toMatch(
-      "Error occured during switching off"
+      "Acomplished with error:"
     );
   });
 
   test("Should resolve promise even if process not ended:", async () => {
     const responseFromMeter = await request(requestUri)
-      .post(`/switches/run/${listeningSwitch}`)
+      .post(`/devices/run/${listeningSwitch}`)
       .set("Authorization", token)
-      .send({ switchOn: true })
+      .send({ onStatus: true })
       .expect(200)
       .expect("Content-Type", /text\/plain/);
 
@@ -135,9 +134,9 @@ describe("API RUN SWITCH TEST", () => {
 
   test("Should resolve promise even if process not printed message:", async () => {
     const responseFromMeter = await request(requestUri)
-      .post(`/switches/run/${switchWithNoPrint}`)
+      .post(`/devices/run/${switchWithNoPrint}`)
       .set("Authorization", token)
-      .send({ switchOn: true })
+      .send({ onStatus: true })
       .expect(200)
       .expect("Content-Type", /text\/plain/);
 

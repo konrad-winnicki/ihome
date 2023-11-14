@@ -3,8 +3,6 @@ import { SpiedFunction } from "jest-mock";
 import { expect, jest, test } from "@jest/globals";
 
 import {
-  AggregateStatus,
-  DeleteFromDBOptions,
   taskDocumentWithMockMetods,
 } from "./mockForMongoTaskPersistence";
 import { appCronMockMethods, prepareCronTaskManagerForDatabasePersistenceWithMockParameters} from "./mockForCronManager";
@@ -17,8 +15,6 @@ describe("cronTaskManager with database persistence CLASS TEST - delete task", (
     deleteFromCronStatus: MemeoryStatusType,
     addToDBStatus: AddToDatabaseStatus,
     deleteFromDBStatus: DeleteFromDBStatus,
-    deleteFromDBOptions: DeleteFromDBOptions,
-    aggregateStatus: AggregateStatus,
     findOneByIdStatus: FindOneById
   ) => {
     const appCron = appCronMockMethods(addToCronStatus, deleteFromCronStatus);
@@ -26,8 +22,6 @@ describe("cronTaskManager with database persistence CLASS TEST - delete task", (
     const taskDokumentMock = taskDocumentWithMockMetods(
       addToDBStatus,
       deleteFromDBStatus,
-      deleteFromDBOptions,
-      aggregateStatus,
       findOneByIdStatus
     );
 
@@ -57,9 +51,7 @@ describe("cronTaskManager with database persistence CLASS TEST - delete task", (
     const deleteFromCronStatus = "success";
     const addToDBStatus = "success";
     const deleteFromDBStatus = "success";
-    const deleteFromDBOptions = { acknowledged: true, deletedCount: 1 };
     const findOneByIdStatus = "success";
-    const aggregateStatus = undefined;
 
 
     const cronTaskManager = dependency (
@@ -67,8 +59,6 @@ describe("cronTaskManager with database persistence CLASS TEST - delete task", (
       deleteFromCronStatus,
       addToDBStatus,
       deleteFromDBStatus,
-      deleteFromDBOptions,
-      aggregateStatus,
       findOneByIdStatus)
 
     await cronTaskManager
@@ -83,8 +73,6 @@ describe("cronTaskManager with database persistence CLASS TEST - delete task", (
     const deleteFromCronStatus = "success";
     const addToDBStatus = "success";
     const deleteFromDBStatus = "error";
-    const deleteFromDBOptions = { acknowledged: true, deletedCount: 1 };
-    const aggregateStatus = undefined;
     const findOneByIdStatus = "success";
 
     const cronTaskManager = dependency (
@@ -92,8 +80,6 @@ describe("cronTaskManager with database persistence CLASS TEST - delete task", (
       deleteFromCronStatus,
       addToDBStatus,
       deleteFromDBStatus,
-      deleteFromDBOptions,
-      aggregateStatus,
       findOneByIdStatus)
 
     await cronTaskManager.delete(taskToDelete).catch((result) =>
@@ -111,8 +97,6 @@ describe("cronTaskManager with database persistence CLASS TEST - delete task", (
     const deleteFromCronStatus = "error";
     const addToDBStatus = "success";
     const deleteFromDBStatus = "success";
-    const deleteFromDBOptions = { acknowledged: true, deletedCount: 1 };
-    const aggregateStatus = undefined;
     const findOneByIdStatus = "success";
 
     const cronTaskManager = dependency (
@@ -120,8 +104,6 @@ describe("cronTaskManager with database persistence CLASS TEST - delete task", (
       deleteFromCronStatus,
       addToDBStatus,
       deleteFromDBStatus,
-      deleteFromDBOptions,
-      aggregateStatus,
       findOneByIdStatus)
 
     await cronTaskManager.delete(taskToDelete).catch((result) =>
@@ -146,8 +128,6 @@ describe("cronTaskManager with database persistence CLASS TEST - delete task", (
     const deleteFromCronStatus = "error";
     const addToDBStatus = "error";
     const deleteFromDBStatus = "success";
-    const deleteFromDBOptions = { acknowledged: true, deletedCount: 1 };
-    const aggregateStatus = undefined;
     const findOneByIdStatus = "success";
 
     const cronTaskManager = dependency (
@@ -155,8 +135,6 @@ describe("cronTaskManager with database persistence CLASS TEST - delete task", (
       deleteFromCronStatus,
       addToDBStatus,
       deleteFromDBStatus,
-      deleteFromDBOptions,
-      aggregateStatus,
       findOneByIdStatus)
 
     await cronTaskManager.delete(taskToDelete).catch((result) =>
@@ -184,8 +162,6 @@ describe("cronTaskManager with database persistence CLASS TEST - delete task", (
     const deleteFromCronStatus = "success";
     const addToDBStatus = "success";
     const deleteFromDBStatus = "success";
-    const deleteFromDBOptions = { acknowledged: true, deletedCount: 1 };
-    const aggregateStatus = undefined;
     const findOneByIdStatus = null;
 
     const cronTaskManager = dependency (
@@ -193,8 +169,6 @@ describe("cronTaskManager with database persistence CLASS TEST - delete task", (
       deleteFromCronStatus,
       addToDBStatus,
       deleteFromDBStatus,
-      deleteFromDBOptions,
-      aggregateStatus,
       findOneByIdStatus)
 
     await cronTaskManager.delete(taskToDelete).catch((result) =>
@@ -209,8 +183,6 @@ describe("cronTaskManager with database persistence CLASS TEST - delete task", (
     const deleteFromCronStatus = "success";
     const addToDBStatus = "success";
     const deleteFromDBStatus = "success";
-    const deleteFromDBOptions = { acknowledged: true, deletedCount: 1 };
-    const aggregateStatus = undefined;
     const findOneByIdStatus = "error";
 
     const cronTaskManager = dependency (
@@ -218,8 +190,6 @@ describe("cronTaskManager with database persistence CLASS TEST - delete task", (
       deleteFromCronStatus,
       addToDBStatus,
       deleteFromDBStatus,
-      deleteFromDBOptions,
-      aggregateStatus,
       findOneByIdStatus)
 
     await cronTaskManager.delete(taskToDelete).catch((result) =>

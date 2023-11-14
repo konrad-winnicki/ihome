@@ -59,8 +59,11 @@ let requestUri: string
 
   test("Should run command on script:", async () => {
     const responseFromMeter = await request(requestUri)
-      .post(`/meters/run/${meterId}`)
+      .post(`/devices/run/${meterId}`)
       .set("Authorization", token)
+      .send({
+        onStatus: true,
+      })
       .expect(200)
       .expect("Content-Type", /text\/plain/);
 
@@ -71,13 +74,16 @@ let requestUri: string
 
   test("Should return error if file not exists:", async () => {
     const responseFromMeter = await request(requestUri)
-      .post(`/meters/run/${meterWithNonExistingScriptId}`)
+      .post(`/devices/run/${meterWithNonExistingScriptId}`)
       .set("Authorization", token)
+      .send({
+        onStatus: true,
+      })
       .expect(500)
-      .expect("Content-Type", /application\/json/);
+      .expect("Content-Type", /text\/plain/);
 
-    expect(Object.keys(responseFromMeter.body)[0]).toMatch(
-      "Error occured during switching on"
+    expect(responseFromMeter.text).toMatch(
+      "Acomplished with error:"
     );
   });
 

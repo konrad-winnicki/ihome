@@ -16,12 +16,12 @@ export class TaskScheduler {
     onStatus: boolean,
     deviceId: string
   ) {
-    const cronString = `${minutes} ${hours} * * * `;
+    const timeString = `${minutes} ${hours} * * * `;
     const task = await this.setUpTaskSchedule(
       taskId,
       deviceId,
       onStatus,
-      cronString
+      timeString
     );
     task.start();
     return Promise.resolve({ taskId: taskId });
@@ -31,10 +31,10 @@ export class TaskScheduler {
     taskId: string,
     deviceId: string,
     onStatus: boolean,
-    cronTiming: string
+    time: string
   ) {
     return cron.schedule(
-      cronTiming,
+      time,
       () => {
         this.deviceRunService
           .getById(deviceId)

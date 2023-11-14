@@ -62,8 +62,8 @@ jobs:
         run: |
           npm run test_domain
         working-directory: ./server
-      #- name: Run infrastructure_test
-       # run: |
-        #  npm run test_infrastructure
-       # working-directory: ./server
+      - name: Run infrastructure_test
+        run: |
+          npm run test_infrastructure
+        working-directory: ./server
 

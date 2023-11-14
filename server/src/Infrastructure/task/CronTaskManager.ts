@@ -37,11 +37,11 @@ export class CronTaskManager implements TaskManager {
             task.deviceId
           )
           .catch((error) => {
-            const errorToPass = error instanceof Error ? error.message : error;
+            //const errorToPass = error instanceof Error ? error.message : error;
             return this.compensateTaskAddition(task.id)
               .catch((compensationError) => {
                 const rejectMessage = {
-                  Error: errorToPass,
+                  Error: error,
                   compensation: compensationError,
                 };
                 console.log(rejectMessage);
@@ -49,7 +49,7 @@ export class CronTaskManager implements TaskManager {
               })
               .then((compensationResult) => {
                 const rejectMessage = {
-                  Error: errorToPass,
+                  Error: error,
                   compensation: compensationResult,
                 };
                 console.log(rejectMessage);

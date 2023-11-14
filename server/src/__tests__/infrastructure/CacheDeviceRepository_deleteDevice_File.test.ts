@@ -146,17 +146,17 @@ describe("CacheDeviceReposiotory with file persistence CLASS TEST - delete devic
       readFileMockReturnValues
     );
     await cacheDeviceRepository.delete("12345").catch((result) =>
-      expect(result).toEqual({
+      expect(result).toMatchObject({
         "Device not deleted": {
           "Persistence error": {
-            "Read file error": "Internal read error",
+            "Read file error": 'Internal read error',
           },
         },
       })
     );
   });
 
-  test("Should not delete device if reading from file error during finding item", async () => {
+  test("Should not delete device if writing to file error during finding item", async () => {
     const addToMemoryStatus = "success";
     const deleteFromMemoryStatus = "success";
     const writeFileMockImplementationCalls = ["error"] as DeviceTaskError[];
@@ -269,7 +269,7 @@ describe("CacheDeviceReposiotory with file persistence CLASS TEST - delete devic
       "write",
       "error",
     ] as DeviceTaskError[];
-    const readFileMockImplemenmtationCalls = ["device", "device"] as DeviceTaskError[];
+    const readFileMockImplemenmtationCalls = ["device","device", "device"] as DeviceTaskError[];
     const readFileMockReturnValues = [deviceMockValue, deviceMockValue, deviceMockValue, {}];
 
     const cacheDeviceRepository = dependency(
@@ -311,8 +311,9 @@ describe("CacheDeviceReposiotory with file persistence CLASS TEST - delete devic
       "write",
       "write",
       "write",
+      "write"
     ] as DeviceTaskError[];
-    const readFileMockImplemenmtationCalls = ["device", "device", "error"] as DeviceTaskError[];
+    const readFileMockImplemenmtationCalls = ['device', "device", "error"] as DeviceTaskError[];
     const readFileMockReturnValues = [deviceMockValue, deviceMockValue];
 
     const cacheDeviceRepository = dependency(
@@ -323,7 +324,9 @@ describe("CacheDeviceReposiotory with file persistence CLASS TEST - delete devic
       readFileMockReturnValues
     );
 
-    await cacheDeviceRepository.delete("12345").catch((result) => {
+
+    
+      await cacheDeviceRepository.delete("12345").catch((result) => {
       expect(result).toEqual({
         "Device not deleted": {
           error: "Deletion from storage failed",

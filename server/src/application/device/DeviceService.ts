@@ -5,39 +5,35 @@ import { EventEmitter } from "node:events";
 import { ManagerResponse } from "../task/TaskManager";
 import { DeviceRepository } from "./DeviceRepository";
 
-//interface devicePersistence: adddevuce, deleteDevice, getMenager, Getswitch
-//mongo lub file impelement devicePersistence intrtface
-
 export class DeviceService {
-  private persistenceDeviceRepository: DeviceRepository;
+  private deviceRepository: DeviceRepository;
   private eventEmitter: EventEmitter;
 
   constructor(
-    persistenceDeviceRepository: DeviceRepository,
+    deviceRepository: DeviceRepository,
     eventEmitter: EventEmitter
   ) {
-    this.persistenceDeviceRepository = persistenceDeviceRepository;
+    this.deviceRepository = deviceRepository;
     this.eventEmitter = eventEmitter;
   }
 
   async addDevice(device: Device): Promise<ManagerResponse<object | string>> {
-    return this.persistenceDeviceRepository.add(device);
+    return this.deviceRepository.add(device);
   }
 
   async deleteDevice(
     deviceId: string
   ): Promise<ManagerResponse<object | string>> {
-    return this.persistenceDeviceRepository
+    return this.deviceRepository
       .delete(deviceId)
       .then((response) => {
-        console.log('DELETE device',response);
         this.eventEmitter.emit("deviceDeleted", deviceId);
         return Promise.resolve(response);
       });
   }
 
   async getMeterList(): Promise<Meter[]> {
-    return this.persistenceDeviceRepository
+    return this.deviceRepository
       .listByType("meter")
       .then((devices) => {
         const meters = devices as unknown as Meter[];
@@ -49,7 +45,7 @@ export class DeviceService {
   }
 
   async getSwitchList(): Promise<Switch[]> {
-    return this.persistenceDeviceRepository
+    return this.deviceRepository
       .listByType("switch")
       .then((devices) => {
         const switches = devices as unknown as Switch[];
@@ -61,7 +57,7 @@ export class DeviceService {
   }
 
   async getById(deviceId: string): Promise<Device> {
-    return this.persistenceDeviceRepository.getById(deviceId);
+    return this.deviceRepository.getById(deviceId);
     /*
       .then((device) =>
         device

@@ -1,11 +1,12 @@
 import Koa from "koa";
 import { DeviceRunInterface } from "../application/device/DeviceRunInterface";
+import { Switch } from "../domain/Switch";
 
-export type RunSwitchRequestBody = {
+export type RunDeviceRequestBody = {
   onStatus: boolean;
 };
 
-export class RunDeviceControllers {
+export class RunDeviceController {
   private deviceRunService: DeviceRunInterface;
   constructor(deviceRunService: DeviceRunInterface) {
     this.deviceRunService = deviceRunService;
@@ -14,7 +15,7 @@ export class RunDeviceControllers {
 
   async runDevice(ctx: Koa.Context) {
     const deviceId = await ctx.params.id;
-    const status = (await ctx.request.body) as RunSwitchRequestBody;
+    const status = (await ctx.request.body) as RunDeviceRequestBody;
     return this.deviceRunService
       .getById(deviceId)
       .then((device) => {
@@ -24,10 +25,12 @@ export class RunDeviceControllers {
             ctx.body = response;
           });
         } else {
-          return this.deviceRunService.switchOff(device).then((response) => {
-            ctx.status = 200;
-            ctx.body = response;
-          });
+          return this.deviceRunService
+            .switchOff(device as Switch)
+            .then((response) => {
+              ctx.status = 200;
+              ctx.body = response;
+            });
         }
       })
       .catch((error) => {

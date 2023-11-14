@@ -8,8 +8,8 @@ import { AppServer } from "./Infrastructure/AppServer";
 import { initAppRouter } from "./Infrastructure/routes";
 import { CachedDevice } from "./domain/CachedDevices";
 import { DeviceController } from "./controllers/DeviceController";
-import { RunDeviceControllers } from "./controllers/runDeviceControllers";
-import { TaskControllers } from "./controllers/TaskControllers";
+import { RunDeviceController } from "./controllers/DeviceRunController";
+import { TaskController } from "./controllers/TaskController";
 import { LoginController } from "./controllers/LoginController";
 import { tokenGenerator } from "./domain/tokenGenerator";
 import { TaskRecoveryManager } from "./Infrastructure/task/TaskRecoveryManager";
@@ -24,7 +24,7 @@ import { CronTaskManager } from "./Infrastructure/task/CronTaskManager";
 import { FileTaskRepository } from "./Infrastructure/filePersistencia/FileTaskRepository";
 import { MongoTaskRepository } from "./Infrastructure/task/MongoTaskRepository";
 import { TaskService } from "./application/task/TaskService";
-import { PressButtonPerformer } from "./domain/PressButtonPerformer";
+import { DevicePerformer } from "./domain/DevicePerformer";
 
 const ENVIRONMENT = sanitizedConfig.NODE_ENV;
 
@@ -121,10 +121,10 @@ export async function initializeDependencias() {
     eventEmitter
   );
 
-  const deviceRunControllerDep = new RunDeviceControllers(deviceRunService);
+  const deviceRunControllerDep = new RunDeviceController(deviceRunService);
 
   const deviceControllers = new DeviceController(deviceService);
-  const taskControlles = new TaskControllers(taskService);
+  const taskControlles = new TaskController(taskService);
   const loginControllers = new LoginController(tokenGenerator);
 
   const appRouter = initAppRouter(
@@ -207,11 +207,11 @@ async function switchOffAllDevicesAfterServerStart(
   deviceService: DeviceService
 ) {
   const devices = await deviceService.getSwitchList();
-  const switchPerformer = PressButtonPerformer.getInstance();
+  const switchPerformer = DevicePerformer.getInstance();
   const switchingResults = [];
   for (const device of devices) {
     const result = await switchPerformer
-      .pressButton(device, false)
+      .switchOn(device)
       .then(() => {
         return Promise.resolve({
           [device.id]: "Item switched off during server restart",

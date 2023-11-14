@@ -75,7 +75,6 @@ export class MongoDeviceRepository implements DeviceRepository {
       .catch((error) => Promise.reject({ [persistencieError]: error }));
   }
 
-  // jak zwrocic database error?
   async getById(deviceId: string): Promise<Device> {
     const persistenceError = this.serverMessages.persistenceError;
     return this.deviceDocument

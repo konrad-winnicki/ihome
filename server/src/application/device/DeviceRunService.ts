@@ -2,35 +2,37 @@ import { DeviceRunInterface } from "./DeviceRunInterface";
 import { Switch } from "../../domain/Switch";
 import { Device } from "../../domain/Device";
 import { CachedDevice } from "../../domain/CachedDevices";
-import { PressButtonPerformer } from "../../domain/PressButtonPerformer";
+import { DevicePerformer } from "../../domain/DevicePerformer";
 
+//PYTANIA: czy devicePerformer powinien byc przekazywany kalo zaleznosc
+// czy inicjalizowany w konstruktorze
 export class DeviceRunService implements DeviceRunInterface {
   private cachedDevices: CachedDevice;
-  private switchPerformer: PressButtonPerformer;
+  private devicePerformer: DevicePerformer;
   constructor(cachedDevices: CachedDevice) {
     this.cachedDevices = cachedDevices;
-    this.switchPerformer = PressButtonPerformer.getInstance();
+    this.devicePerformer = DevicePerformer.getInstance();
   }
 
   public async switchOn(device: Device) {
-    if (device.deviceType === "switch") {
-      if (this.isOn(device.id)) {
-        return Promise.resolve("Device is currently on");
+    return this.devicePerformer.switchOn(device).then((result) => {
+      if (device.deviceType === "switch") {
+        if (this.isOn(device.id)) {
+          return Promise.reject("Device is currently on");
+        }
+        this.cachedDevices.changeStatus(device.id, true);
       }
-      this.cachedDevices.changeStatus(device.id, true);
-    }
-    return this.switchPerformer.pressButton(device, true);
+      return result;
+    });
   }
 
-  public async switchOff(device: Device) {
-    if (device.deviceType === "switch") {
-      if (!this.isOn(device.id)) {
-        return Promise.resolve("Device is currently off");
-      }
-      this.cachedDevices.changeStatus(device.id, false);
-      return this.switchPerformer.pressButton(device, false);
+  public async switchOff(device: Switch) {
+    if (!this.isOn(device.id)) {
+      return Promise.reject("Device is currently off");
     }
-    return Promise.reject("Meter can not be switched off");
+    this.cachedDevices.changeStatus(device.id, false);
+
+    return this.devicePerformer.switchOff(device);
   }
 
   //ASK: czy getById nie powinno byc wolane przez switchOff i switchOn

@@ -1,12 +1,5 @@
 import Koa from "koa";
-//import { DeviceService } from "../application/device/DeviceService";
 import { DeviceService } from "../application/device/DeviceService";
-
-/*
-export type DeviceControllers = {
-  addDevice: (ctx: Koa.Context) => Promise<void>;
-};
-*/
 
 export class DeviceController {
   private deviceService: DeviceService;

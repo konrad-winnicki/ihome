@@ -1,7 +1,7 @@
 import Koa from "koa";
 import { TaskService } from "../application/task/TaskService";
 
-export class TaskControllers {
+export class TaskController {
   private taskService: TaskService;
   constructor(taskService: TaskService) {
     this.taskService = taskService;
@@ -30,7 +30,6 @@ export class TaskControllers {
     return this.taskService
       .delete(taskId)
       .then((response) => {
-
         ctx.status = 200;
         ctx.body = response;
       })

@@ -19,14 +19,14 @@ export class CachedDevice {
     this._devices.set(device.id, device);
   }
 
-  public delete(deviceId: string) {
-    this._devices.delete(deviceId);
+  public delete(id: string) {
+    this._devices.delete(id);
   }
 
-  public changeStatus(deviceId: string, status: boolean) {
-    const device = this._devices.get(deviceId);
+  public changeStatus(id: string, onStatus: boolean) {
+    const device = this._devices.get(id);
     if (device && device.deviceType === "switch") {
-      (device as Switch).onStatus = status;
+      (device as Switch).onStatus = onStatus;
     }
   }
 

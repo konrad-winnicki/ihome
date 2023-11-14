@@ -6,23 +6,23 @@ import util from "util";
 
 const execAsync = util.promisify(exec);
 
-export class PressButtonPerformer {
-  private static instance: PressButtonPerformer | null = null;
+export class DevicePerformer {
+  private static instance: DevicePerformer | null = null;
 
   public static getInstance() {
-    if (!PressButtonPerformer.instance) {
-      PressButtonPerformer.instance = new PressButtonPerformer();
+    if (!DevicePerformer.instance) {
+      DevicePerformer.instance = new DevicePerformer();
     }
-    return PressButtonPerformer.instance;
+    return DevicePerformer.instance;
   }
 
-  public async pressButton(device: Device, onStatus: boolean) {
-    if (onStatus) {
+  public async switchOn(device: Device) {
       return this.executeAndCollectSdtout(device.commandOn);
-    } else if (device.deviceType === "switch")
-      return this.executeAndCollectSdtout((device as Switch).commandOff);
+  }
 
-    return Promise.reject("Meter can only be switched on");
+  
+  public async switchOff(device: Switch) {
+      return this.executeAndCollectSdtout(device.commandOff);
   }
 
   async executeAndCollectSdtout(command: string): Promise<string> {

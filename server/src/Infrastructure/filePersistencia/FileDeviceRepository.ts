@@ -4,8 +4,6 @@ import { ServerMessages } from "../../ServerMessages";
 import { ManagerResponse } from "../../application/task/TaskManager";
 import { FileRepositoryHelpers } from "./auxilaryFunctions";
 
-//interface devicePersistence: adddevuce, deleteDevice, getMenager, Getswitch
-//mongo lub file impelement devicePersistence intrtface
 
 export class FileDeviceRepository implements DeviceRepository {
   private helperMethods: FileRepositoryHelpers;

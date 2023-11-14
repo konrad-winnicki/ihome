@@ -5,14 +5,14 @@ import { addDeviceGuardMiddleware } from "./middleware/guardMiddleware/addDevice
 import { addTaskGuardMiddleware } from "./middleware/guardMiddleware/addTaskGuard";
 import { runDeviceGuardMiddleware } from "./middleware/guardMiddleware/runDeviceGuard";
 import { DeviceController } from "../controllers/DeviceController";
-import { RunDeviceControllers } from "../controllers/runDeviceControllers";
-import { TaskControllers } from "../controllers/TaskControllers";
+import { RunDeviceController } from "../controllers/DeviceRunController";
+import { TaskController } from "../controllers/TaskController";
 import { LoginController } from "../controllers/LoginController";
 
 export function initAppRouter(
   deviceControllers: DeviceController,
-  deviceRunControllers: RunDeviceControllers,
-  taskControllers: TaskControllers,
+  deviceRunControllers: RunDeviceController,
+  taskControllers: TaskController,
   loginController: LoginController
 ) {
   const appRouter = new Router();

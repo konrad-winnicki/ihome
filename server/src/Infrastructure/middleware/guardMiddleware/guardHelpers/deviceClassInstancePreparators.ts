@@ -1,6 +1,6 @@
 import { v4 } from "uuid";
 import { Switch } from "../../../../domain/Switch";
-import { Meter } from "../../../../domain/Meter";
+import { Sensor } from "../../../../domain/Sensor";
 
 export function prepareSwitchClassInstance(switchDevice: Switch) {
   return new Switch(
@@ -12,8 +12,8 @@ export function prepareSwitchClassInstance(switchDevice: Switch) {
   );
 }
 
-export function prepareMeterClassInstance(meter: Meter) {
-  return new Meter(
+export function prepareMeterClassInstance(meter: Sensor) {
+  return new Sensor(
     v4(),
     meter.deviceType,
     meter.name,

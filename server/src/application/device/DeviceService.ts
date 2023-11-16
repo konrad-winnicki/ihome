@@ -1,4 +1,4 @@
-import { Meter } from "../../domain/Meter";
+import { Sensor } from "../../domain/Sensor";
 import { Device } from "../../domain/Device";
 import { Switch } from "../../domain/Switch";
 import { EventEmitter } from "node:events";
@@ -9,10 +9,7 @@ export class DeviceService {
   private deviceRepository: DeviceRepository;
   private eventEmitter: EventEmitter;
 
-  constructor(
-    deviceRepository: DeviceRepository,
-    eventEmitter: EventEmitter
-  ) {
+  constructor(deviceRepository: DeviceRepository, eventEmitter: EventEmitter) {
     this.deviceRepository = deviceRepository;
     this.eventEmitter = eventEmitter;
   }
@@ -24,19 +21,17 @@ export class DeviceService {
   async deleteDevice(
     deviceId: string
   ): Promise<ManagerResponse<object | string>> {
-    return this.deviceRepository
-      .delete(deviceId)
-      .then((response) => {
-        this.eventEmitter.emit("deviceDeleted", deviceId);
-        return Promise.resolve(response);
-      });
+    return this.deviceRepository.delete(deviceId).then((response) => {
+      this.eventEmitter.emit("deviceDeleted", deviceId);
+      return Promise.resolve(response);
+    });
   }
 
-  async getMeterList(): Promise<Meter[]> {
+  async getMeterList(): Promise<Sensor[]> {
     return this.deviceRepository
       .listByType("meter")
       .then((devices) => {
-        const meters = devices as unknown as Meter[];
+        const meters = devices as unknown as Sensor[];
         return Promise.resolve(meters);
       })
       .catch((err) =>

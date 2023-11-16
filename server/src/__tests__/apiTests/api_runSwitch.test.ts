@@ -110,7 +110,7 @@ describe("API RUN SWITCH TEST", () => {
     const responseFromMeter = await request(requestUri)
       .post(`/devices/run/${switchWithNonExistingScriptId}`)
       .set("Authorization", token)
-      .send({ onStatus: true })
+      .send({ onStatus: false })
       .expect(500)
       .expect("Content-Type", /text\/plain/);
     console.log(responseFromMeter.text);
@@ -173,7 +173,7 @@ describe("API RUN SWITCH TEST", () => {
       .expect("Content-Type", /text\/plain/);
 
     expect(responseFromMeter.text).toMatch(
-      "Acomplished succesfuly but not data collected"
+      "Acomplished successfuly but not data collected"
     );
   });
 

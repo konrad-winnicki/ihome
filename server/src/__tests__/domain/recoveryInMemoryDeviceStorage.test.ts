@@ -1,21 +1,21 @@
 import { describe, test, expect } from "@jest/globals";
 import { Device } from "../../domain/Device";
 import { CachedDevice } from "../../domain/CachedDevices";
-import { Meter } from "../../domain/Meter";
+import { Sensor } from "../../domain/Sensor";
 import { Switch } from "../../domain/Switch";
 
 describe("InMemoryDeviceStorage class test", () => {
   const device1 = new Device("d1", "device", "device1", "start_device_1");
 
   const device2 = new Device("d2", "device", "device2", "start_device_2");
-  const meter1 = new Meter(
+  const meter1 = new Sensor(
     "m1",
     "meter",
     "meter1",
     { temperature: "oC", humidity: "%" },
     "start_meter_1"
   );
-  const meter2 = new Meter(
+  const meter2 = new Sensor(
     "m2",
     "meter",
     "meter2",

@@ -2,7 +2,6 @@ import cron from "node-cron";
 
 import { ManagerResponse } from "../application/task/TaskManager";
 import { DeviceRunInterface } from "../application/device/DeviceRunInterface";
-import { Switch } from "./Switch";
 
 export class TaskScheduler {
   private deviceRunService: DeviceRunInterface;
@@ -41,9 +40,9 @@ export class TaskScheduler {
           .getById(deviceId)
           .then((device) => {
             if (onStatus) {
-              return this.deviceRunService.switchOn(device);
+              return this.deviceRunService.switchOn(device.id);
             }
-            return this.deviceRunService.switchOff(device as Switch);
+            return this.deviceRunService.switchOff(device.id);
           })
           .catch((error) => console.log(error));
       },

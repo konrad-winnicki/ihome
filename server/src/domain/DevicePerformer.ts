@@ -25,12 +25,12 @@ export class DevicePerformer {
       return this.executeAndCollectSdtout(device.commandOff);
   }
 
-  async executeAndCollectSdtout(command: string): Promise<string> {
+  private async executeAndCollectSdtout(command: string): Promise<string> {
     const collectStdOut = async () => {
       console.log("Running command:", command);
       const { stdout } = await execAsync(command);
       return Promise.resolve(
-        stdout ? stdout : "Acomplished succesfuly but not data collected"
+        stdout ? stdout : "Acomplished successfuly but not data collected"
       );
     };
 
@@ -44,7 +44,7 @@ export class DevicePerformer {
     }
   }
 
-  async longLastingProcResolver() {
+  private async longLastingProcResolver() {
     return new Promise<string>((resolve) => {
       setTimeout(
         () => {

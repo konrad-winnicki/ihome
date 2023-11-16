@@ -211,7 +211,7 @@ async function switchOffAllDevicesAfterServerStart(
   const switchingResults = [];
   for (const device of devices) {
     const result = await switchPerformer
-      .switchOn(device)
+      .switchOff(device)
       .then(() => {
         return Promise.resolve({
           [device.id]: "Item switched off during server restart",

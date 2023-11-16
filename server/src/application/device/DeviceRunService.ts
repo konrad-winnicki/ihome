@@ -14,25 +14,30 @@ export class DeviceRunService implements DeviceRunInterface {
     this.devicePerformer = DevicePerformer.getInstance();
   }
 
-  public async switchOn(device: Device) {
-    return this.devicePerformer.switchOn(device).then((result) => {
+  public async switchOn(deviceId: string) {
+    return this.getById(deviceId).then((device) => {
       if (device.deviceType === "switch") {
         if (this.isOn(device.id)) {
           return Promise.reject("Device is currently on");
         }
         this.cachedDevices.changeStatus(device.id, true);
       }
-      return result;
+      return this.devicePerformer.switchOn(device);
     });
   }
 
-  public async switchOff(device: Switch) {
-    if (!this.isOn(device.id)) {
-      return Promise.reject("Device is currently off");
-    }
-    this.cachedDevices.changeStatus(device.id, false);
+  public async switchOff(deviceId: string) {
+    return this.getById(deviceId).then((device) => {
+      if (device.deviceType === "switch") {
+        if (!this.isOn(deviceId)) {
+          return Promise.reject("Device is currently off");
+        }
+        this.cachedDevices.changeStatus(device.id, false);
 
-    return this.devicePerformer.switchOff(device);
+        return this.devicePerformer.switchOff(device as Switch);
+      }
+      return Promise.reject('Sensor has only "on" option');
+    });
   }
 
   //ASK: czy getById nie powinno byc wolane przez switchOff i switchOn

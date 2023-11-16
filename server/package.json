@@ -1,5 +1,5 @@
 {
-  "name": "chat_server",
+  "name": "pi_manager_server",
   "version": "1.0.0",
   "description": "",
   "main": "app.ts",

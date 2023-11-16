@@ -3,7 +3,7 @@ import {
   prepareMeterClassInstance,
 } from "./guardHelpers/deviceClassInstancePreparators";
 import { isMeter, isSwitch } from "./guardHelpers/addDeviceGuardHelpers";
-import { Meter } from "../../../domain/Meter";
+import { Sensor } from "../../../domain/Sensor";
 import { Switch } from "../../../domain/Switch";
 import Koa, { Next } from "koa";
 
@@ -23,7 +23,7 @@ export async function addDeviceGuardMiddleware(ctx: Koa.Context, next: Next) {
       return;
     }
   } else if (deviceType == "meter") {
-    const maybeMeter = body as Meter;
+    const maybeMeter = body as Sensor;
     if (isMeter(maybeMeter)) {
       ctx.device = prepareMeterClassInstance(maybeMeter);
       await next();
@@ -32,8 +32,10 @@ export async function addDeviceGuardMiddleware(ctx: Koa.Context, next: Next) {
   }
 
   ctx.status = 400;
-  return (ctx.body = {"BadRequest":`For meters request must contain following parameters:\n 
+  return (ctx.body = {
+    BadRequest: `For meters request must contain following parameters:\n 
   {deviceType: string, name:string, parameters:{[key:string]: sting}, commandOn:string}\n
   For switches request must contain following parameters:\n 
-  {deviceType: string, name:string, commandOn:string, commandOff: string}`});
+  {deviceType: string, name:string, commandOn:string, commandOff: string}`,
+  });
 }

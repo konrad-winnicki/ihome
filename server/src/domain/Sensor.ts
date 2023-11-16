@@ -4,7 +4,7 @@ export interface ParametersWithUnits {
   [key: string]: string;
 }
 
-export class Meter extends Device {
+export class Sensor extends Device {
   readonly parameters: ParametersWithUnits;
   constructor(
     id: string,

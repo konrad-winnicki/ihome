@@ -1,11 +1,11 @@
-import { Meter } from "../../../../domain/Meter";
+import { Sensor } from "../../../../domain/Sensor";
 import { Switch } from "../../../../domain/Switch";
 import {
   checkIfNotExceededParams,
   checkIfNotMissingParams,
 } from "./guardFunctionHelpers";
 
-export function isMeter(maybeMeter: Meter) {
+export function isMeter(maybeMeter: Sensor) {
   const expectedParameters = ["deviceType", "name", "parameters", "commandOn"];
 
   function chackIfParametersObjectValid() {
@@ -29,8 +29,6 @@ export function isMeter(maybeMeter: Meter) {
     typeof maybeMeter.parameters === "object"
   );
 }
-
-
 
 export function isSwitch(maybeSwitch: Switch) {
   const expectedParameters = ["deviceType", "name", "commandOn", "commandOff"];

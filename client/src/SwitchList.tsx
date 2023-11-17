@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { RxDropdownMenu } from "react-icons/rx";
-import { getSwitches, prepareURL} from "./services";
+import { getSwitches} from "./services";
 import SwitchModule from "./SwitchModule";
 import TaskList from "./TaskList";
 import {  useNavigate } from "react-router-dom";

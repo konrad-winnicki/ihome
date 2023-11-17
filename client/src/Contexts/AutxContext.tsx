@@ -21,8 +21,7 @@ const AuthContext = React.createContext<IAuthContext>(initValue)
 const AuthProvider = ({children}:Props)=>{
 const [isLoggedIn, setIsLoggedIn] = useState(initValue.isLoggedIn)
 
-const navigate = useNavigate()
-return(<AuthContext.Provider value={{isLoggedIn, setIsLoggedIn}}>{children}</AuthContext.Provider>)
+return(<AuthContext.Provider value={{isLoggedIn, setIsLoggedIn}} >{children }</AuthContext.Provider>)
 }
 
 

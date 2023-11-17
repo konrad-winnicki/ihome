@@ -34,11 +34,9 @@ export const Login: React.FC<LoginType> = (props) => {
         const token = data.token;
         localStorage.setItem("token", token);
         props.setIsLoggedIn(true);
-        /*
         renewTokenTiming(token).then((token: string) => {
           logOutTiming(token, props);
         });
-        */
       } else {
         alert("Password incorrect");
         console.error("login failed");

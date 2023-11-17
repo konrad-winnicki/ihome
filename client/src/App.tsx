@@ -1,7 +1,7 @@
 import { useState } from "react";
 import Login from "./Login";
 import Dashboard from "./Dashboard";
-import { InstallButton } from "./InstallButton";
+import { SettingsButton } from "./SettingsButton";
 import SetIP from "./SetIP";
 
 function App() {
@@ -17,12 +17,12 @@ function App() {
           <div>
             {!install ? <Login setIsLoggedIn={setIsLoggedIn} /> : ""}
             <div className="text-left">
-              <InstallButton
+              <SettingsButton
                 name={"IP"}
                 componentToRender={SetIP}
-                setInstall={setInstall}
-                install={install}
-              ></InstallButton>
+                setAddSettings={setInstall}
+                settings={install}
+              ></SettingsButton>
             </div>
           </div>
         )}

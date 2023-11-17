@@ -5,9 +5,7 @@ import SwitchModule from "./SwitchModule";
 import TaskList from "./TaskList";
 import {  useNavigate } from "react-router-dom";
 
-export interface Parameters {
-  [key: string]: string;
-}
+
 
 export interface SwitchInterface {
   id: string;
@@ -34,10 +32,11 @@ const SwitchesList: React.FC = () => {
       const data = await response.json();
       return data
     }
-    if(response.status === 401){
-      const url = prepareURL()
-      navigate(`${url}`)
-    }
+    if (response.status === 401) {
+      navigate('/', {replace:true})
+
+        return
+      }
   }
 
   

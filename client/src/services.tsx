@@ -15,7 +15,7 @@ export interface RegistrationData {
   password: string;
 }
 
-export async function fetchLogin(data: FormData) {
+export async function login(data: FormData) {
   const URL = prepareURL();
   const response = await fetch(`${URL}/login`, {
     method: "POST",
@@ -53,7 +53,7 @@ export async function getMeasurement(meterId: string, token: string | null) {
   return response;
 }
 
-export async function getMeters(token: string | null) {
+export async function getSensors(token: string | null) {
   const URL = prepareURL();
 
   const response = await fetch(`${URL}/meters`, {
@@ -78,7 +78,6 @@ export async function getSwitches(token: string | null) {
   });
   return response;
 }
-
 
 export async function getTasksWhereDeviceId(
   deviceId: string,
@@ -122,7 +121,7 @@ export async function deleteDevice(taskId: string, token: string | null) {
   return response;
 }
 
-export const createMeter = async (meter: object, token: string | null) => {
+export const createSensor = async (sensor: object, token: string | null) => {
   const URL = prepareURL();
 
   const response = await fetch(`${URL}/devices`, {
@@ -131,7 +130,7 @@ export const createMeter = async (meter: object, token: string | null) => {
       Authorization: `Bearer ${token}`,
       "Content-Type": "application/json",
     },
-    body: JSON.stringify(meter),
+    body: JSON.stringify(sensor),
   });
   return response;
 };
@@ -173,15 +172,16 @@ export const runDevice = async (
   token: string | null
 ) => {
   const URL = prepareURL();
-console.log(onStatus)
+  console.log(onStatus);
   const response = await fetch(`${URL}/devices/run/${DeviceId}`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${token}`,
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ 
-      onStatus:onStatus }),
+    body: JSON.stringify({
+      onStatus: onStatus,
+    }),
   });
   return response;
 };

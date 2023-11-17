@@ -3,7 +3,7 @@ import { createSwitch } from "./services";
 import { useNavigate } from "react-router-dom";
 
 export type CreateSwitchProps = {
-  setInstall: (param: string | null) => void;
+  setAddSettings: (param: string | null) => void;
 };
 
 export const CreateSwitch: React.FC<CreateSwitchProps> = (props) => {
@@ -53,7 +53,7 @@ export const CreateSwitch: React.FC<CreateSwitchProps> = (props) => {
     } catch (error) {
       console.error("an error occurred:", error);
     }
-    props.setInstall(null);
+    props.setAddSettings(null);
   };
 
   return (
@@ -65,9 +65,9 @@ export const CreateSwitch: React.FC<CreateSwitchProps> = (props) => {
         >
           Introduce switch details
         </label>
-        <div className="flex m-2">
+        <div className="flex mb-2 mt-2">
           <label
-            className="w-1/4 block text-gray-700 text-sm font-bold mb-2"
+            className="w-1/4 block text-gray-700 text-sm font-bold mr-5"
             htmlFor="name"
           >
             Name
@@ -82,9 +82,9 @@ export const CreateSwitch: React.FC<CreateSwitchProps> = (props) => {
           />
         </div>
 
-        <div className="flex m-2">
+        <div className="flex mb-2 mt-2">
           <label
-            className="w-1/4 block text-gray-700 text-sm font-bold mb-2"
+            className="w-1/4 block text-gray-700 text-sm font-bold mr-2"
             htmlFor="commandOn"
           >
             Command On
@@ -98,9 +98,9 @@ export const CreateSwitch: React.FC<CreateSwitchProps> = (props) => {
           />
         </div>
 
-        <div className="flex m-2">
+        <div className="flex mb-2 mt-2">
           <label
-            className="w-1/4 block text-gray-700 text-sm font-bold mb-2"
+            className="w-1/4 block text-gray-700 text-sm font-bold mr-2"
             htmlFor="commandOff"
           >
             Command Off
@@ -126,7 +126,7 @@ export const CreateSwitch: React.FC<CreateSwitchProps> = (props) => {
           <button
             className="w-1/2 bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring focus:ring-blue-300"
             type="submit"
-            onClick={() => props.setInstall(null)}
+            onClick={() => props.setAddSettings(null)}
           >
             Cancel
           </button>

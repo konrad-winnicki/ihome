@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from "react";
-import { createMeter } from "./services";
+import { createSensor as createSensor } from "./services";
 import { useNavigate } from "react-router-dom";
-import { Parameters } from "./MetersList";
 
+export interface Parameters {
+  [key: string]: string;
+}
 export type CreateMeterProps = {
-  setInstall: (param: string | null) => void;
+  setAddSettings: (param: string | null) => void;
 };
-export const CreateMeter: React.FC<CreateMeterProps> = (props) => {
+export const CreateSensor: React.FC<CreateMeterProps> = (props) => {
   const [formData, setFormData] = useState({
     name: "",
     parameterString: "",
@@ -39,8 +41,8 @@ export const CreateMeter: React.FC<CreateMeterProps> = (props) => {
       },
       {}
     );
-    const meter = {
-      deviceType: "meter",
+    const sensor = {
+      deviceType: "sensor",
       name: formData.name,
       parameters,
       commandOn: formData.commandOn,
@@ -48,9 +50,9 @@ export const CreateMeter: React.FC<CreateMeterProps> = (props) => {
     const token = localStorage.getItem("token");
 
     try {
-      const response = await createMeter(meter, token);
+      const response = await createSensor(sensor, token);
       if (response.ok) {
-        alert("Meter created");
+        alert("Sensor created");
         console.log(await response.json());
       }
       if (response.status == 409) {
@@ -62,7 +64,7 @@ export const CreateMeter: React.FC<CreateMeterProps> = (props) => {
     } catch (error) {
       console.error("an error occurred:", error);
     }
-    props.setInstall(null);
+    props.setAddSettings(null);
   };
 
   return (
@@ -70,11 +72,11 @@ export const CreateMeter: React.FC<CreateMeterProps> = (props) => {
       <form className="form" onSubmit={handleSubmit}>
         <label
           className="block text-gray-700 text-sm font-bold mb-2"
-          htmlFor="meter"
+          htmlFor="sensor"
         >
-          Introduce meter details
+          Introduce sensor details
         </label>
-        <div className="flex">
+        <div className="flex mb-2 mt-2">
           <label
             className="w-1/3 block text-gray-700 text-sm font-bold mr-2"
             htmlFor="name"
@@ -90,7 +92,7 @@ export const CreateMeter: React.FC<CreateMeterProps> = (props) => {
             onChange={handleInputChange}
           />
         </div>
-        <div className="flex m-2">
+        <div className="flex mb-2 mt-2">
           <label
             className=" w-1/3  text-gray-700 text-sm font-bold mr-2"
             htmlFor="parameterString"
@@ -98,7 +100,7 @@ export const CreateMeter: React.FC<CreateMeterProps> = (props) => {
             Parameters name
           </label>
           <input
-            className="w-full p-2 border rounded-md focus:outline-none focus:border-blue-500"
+            className="w-full p-1 mr-2 border rounded-md focus:outline-none focus:border-blue-500"
             type="text"
             id="parameterString"
             name="parameterString"
@@ -108,17 +110,17 @@ export const CreateMeter: React.FC<CreateMeterProps> = (props) => {
             className="w-1/5 block text-gray-700 text-sm font-bold mr-2"
             htmlFor="unitString"
           >
-            Unit
+            Units
           </label>
           <input
-            className="w-1/3 border rounded-md focus:outline-none focus:border-blue-500"
+            className="w-2/3 border rounded-md focus:outline-none focus:border-blue-500"
             type="text"
             id="unitString"
             name="unitString"
             onChange={handleInputChange}
           />
         </div>
-        <div className="flex">
+        <div className="flex mb-2 mt-2">
           <label
             className="w-1/3 block text-gray-700 text-sm font-bold mr-2"
             htmlFor="commandOn"
@@ -145,7 +147,7 @@ export const CreateMeter: React.FC<CreateMeterProps> = (props) => {
           <button
             className="w-1/2 bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring focus:ring-blue-300"
             type="submit"
-            onClick={() => props.setInstall(null)}
+            onClick={() => props.setAddSettings(null)}
           >
             Cancel
           </button>
@@ -155,4 +157,4 @@ export const CreateMeter: React.FC<CreateMeterProps> = (props) => {
   );
 };
 
-export default CreateMeter;
+export default CreateSensor;

@@ -110,10 +110,9 @@ describe("API RUN SWITCH TEST", () => {
     const responseFromMeter = await request(requestUri)
       .post(`/devices/run/${switchWithNonExistingScriptId}`)
       .set("Authorization", token)
-      .send({ onStatus: false })
+      .send({ onStatus: true })
       .expect(500)
       .expect("Content-Type", /text\/plain/);
-    console.log(responseFromMeter.text);
     expect(responseFromMeter.text).toMatch(
       "Acomplished with error:"
     );
@@ -126,7 +125,6 @@ describe("API RUN SWITCH TEST", () => {
       .send({ onStatus: false })
       .expect(500)
       .expect("Content-Type", /text\/plain/);
-    console.log(responseFromMeter.text);
     expect(responseFromMeter.text).toMatch(
       "Device is currently off"
     );
@@ -176,6 +174,7 @@ describe("API RUN SWITCH TEST", () => {
       "Acomplished successfuly but not data collected"
     );
   });
+
 
   afterAll(async () => {
     if (environment=== "test_api_database"){

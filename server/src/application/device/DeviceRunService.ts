@@ -12,35 +12,48 @@ export class DeviceRunService implements DeviceRunInterface {
   constructor(cachedDevices: CachedDevice) {
     this.cachedDevices = cachedDevices;
     this.devicePerformer = DevicePerformer.getInstance();
+    this.switchOn = this.switchOn.bind(this);
+    this.switchOff = this.switchOff.bind(this);
   }
 
   public async switchOn(deviceId: string) {
     return this.getById(deviceId).then((device) => {
-      if (device.deviceType === "switch") {
-        if (this.isOn(device.id)) {
-          return Promise.reject("Device is currently on");
-        }
-        this.cachedDevices.changeStatus(device.id, true);
+      if (this.isOn(device.id)) {
+        return Promise.reject("Device is currently on");
       }
-      return this.devicePerformer.switchOn(device);
+
+      return this.devicePerformer.switchOn(device).then((response) => {
+        if (device.deviceType === "switch") {
+          this.cachedDevices.changeStatus(device.id, true);
+        }
+
+        return response;
+      });
     });
   }
 
   public async switchOff(deviceId: string) {
     return this.getById(deviceId).then((device) => {
-      if (device.deviceType === "switch") {
-        if (!this.isOn(deviceId)) {
-          return Promise.reject("Device is currently off");
-        }
-        this.cachedDevices.changeStatus(device.id, false);
-
-        return this.devicePerformer.switchOff(device as Switch);
+      if (device.deviceType === "sensor") {
+        return Promise.reject(
+          'Sensor has only "on" option and cannot be switched off'
+        );
       }
-      return Promise.reject('Sensor has only "on" option');
+      if (!this.isOn(deviceId)) {
+        return Promise.reject("Device is currently off");
+      }
+
+      return this.devicePerformer
+        .switchOff(device as Switch)
+        .then((response) => {
+            this.cachedDevices.changeStatus(device.id, false);
+          
+          return response;
+        });
+
     });
   }
 
-  //ASK: czy getById nie powinno byc wolane przez switchOff i switchOn
   public async getById(deviceId: string): Promise<Device> {
     return new Promise((resolve, reject) => {
       const devices = this.cachedDevices.devices;

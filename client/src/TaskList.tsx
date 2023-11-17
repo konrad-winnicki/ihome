@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { getTasksWhereDeviceId } from "./services";
 import TaskModule, { Task } from "./TaskModule";
-import { SwitchInterface } from "./SwitchesList";
+import { SwitchInterface } from "./SwitchList";
 import { RiDeleteBack2Line } from "react-icons/ri";
 import { TaskSetter } from "./TaskSetter";
 
@@ -46,7 +46,7 @@ const TaskList: React.FC<TaskListInterface> = (props) => {
 
   useEffect(() => {
     getTasks().then((tasks) => setTasks(tasks));
-  }, [getTasks,isNewAdded, isDeleted]);
+  }, [getTasks, isNewAdded, isDeleted]);
 
   useEffect(() => {
     if (isNewAdded) {

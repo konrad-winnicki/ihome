@@ -1,7 +1,7 @@
 import React from "react";
 import { v4 } from "uuid";
 
-const MeterDisplay: React.FC<{ displayData: string[] }> = (props) => {
+const SensorDisplay: React.FC<{ displayData: string[] }> = (props) => {
   return (
     <div className="grid grid-rows-2 m-2 items-center justify-center ">
       {props.displayData
@@ -21,4 +21,4 @@ const MeterDisplay: React.FC<{ displayData: string[] }> = (props) => {
   );
 };
 
-export default MeterDisplay;
+export default SensorDisplay;

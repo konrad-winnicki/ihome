@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { fetchLogin, renewSession } from "./services";
+import React, { useState } from "react";
+import { login, renewSession } from "./services";
 import jwt_decode from "jwt-decode";
 
 interface DecodedToken {
@@ -16,10 +16,6 @@ export const Login: React.FC<LoginType> = (props) => {
     password: "",
   });
 
-  useEffect(() => {
-    console.log("form data", formData);
-  });
-
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
     setFormData((prevData) => ({
@@ -32,17 +28,17 @@ export const Login: React.FC<LoginType> = (props) => {
     event.preventDefault();
 
     try {
-      console.log(formData);
-      const response = await fetchLogin(formData);
+      const response = await login(formData);
       if (response.ok) {
         const data = await response.json();
         const token = data.token;
         localStorage.setItem("token", token);
-        console.log("login successful");
         props.setIsLoggedIn(true);
+        /*
         renewTokenTiming(token).then((token: string) => {
           logOutTiming(token, props);
         });
+        */
       } else {
         alert("Password incorrect");
         console.error("login failed");
@@ -96,7 +92,7 @@ function calculateTimeToFinishToken(token: DecodedToken) {
     Date.now() / milisecondsPerSecond
   );
   const remainingSeconds = token.exp - currentTimestampInSeconds;
-  const bufferSecondsBeforeEnd = 240
+  const bufferSecondsBeforeEnd = 240;
   const timeoutInMiliseconds =
     (remainingSeconds - bufferSecondsBeforeEnd) * milisecondsPerSecond;
 
@@ -113,11 +109,10 @@ async function renewTokenTiming(currentToken: string): Promise<string> {
         .then((data) => {
           const token: string = data.token;
           localStorage.setItem("token", token);
-          resolve(token)
+          resolve(token);
         });
     }, timeoutToRefreshToken);
   });
-
 }
 
 function logOutTiming(currentToken: string, props: LoginType) {

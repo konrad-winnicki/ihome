@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import ReactSwitch from "react-switch";
 import { runDevice } from "./services";
-import { SwitchInterface } from "./SwitchesList";
+import { SwitchInterface } from "./SwitchList";
 
 const ToggleSwitch: React.FC<{
   switchDevice: SwitchInterface;

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 
 export type CreateSwitchProps = {
-  setInstall: (param: string | null) => void;
+  setAddSettings: (param: string | null) => void;
 };
 
 export const SetIP: React.FC<CreateSwitchProps> = (props) => {
@@ -11,7 +11,6 @@ export const SetIP: React.FC<CreateSwitchProps> = (props) => {
     const { name, value } = event.target;
     localStorage.setItem(name, value);
     setIp(value)
-    //setIp(value)
   };
 
   useEffect(() => {
@@ -44,7 +43,7 @@ export const SetIP: React.FC<CreateSwitchProps> = (props) => {
           <button
             className="w-1/4 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring focus:ring-blue-300"
             type="submit"
-            onClick={() => props.setInstall(null)}
+            onClick={() => props.setAddSettings(null)}
           >
             Set
           </button>

@@ -1,71 +1,85 @@
 <!-- omit in toc -->
-# CHAT WITH SOCKET.IO
+# iHome
 
-This module was established to learn basic principles of user authentication with OAuth 2.0 standard and real-time, bidirectional communication between web clients and servers. The project contains client app written with `React` and server app written with `Node.js` version `v18.17.1` and `TypeScript`. In the root directory it may be found GitHub CI/CD workflow configuration file, docker-compose filr, unit tests and integration tests.
+NOTE:
+This application is under construction. Documentation may not be complete, hovewer main components can be used and tested by users.
 
 <br>
 
 <!-- omit in toc -->
 ## Table of Contents
-- [Description](#description)
-- [Instalations](#instalations)
-- [Usage](#usage)
-  - [Run servers:](#run-servers)
-  - [Frontend interface](#frontend-interface)
-- [Run all with Docker](#run-all-with-docker)
-- [Backend folder structure](#backend-folder-structure)
+- [Client side application](#client-side-application)
+- [Server side applications to install on RaspberryPi](#server-side-applications-to-install-on-raspberrypi)
+  - [Predefined main scripts](#predefined-main-scripts)
+    - [Run servers:](#run-servers)
+    - [Frontend interface](#frontend-interface)
+  - [Run all with Docker](#run-all-with-docker)
 ## Description
-The `CHAT` app may be used to exchange massages between registered and logged users. User can logge in with an email and a password or choose user authentication with Google. Each user can create own chat room or enter to existing ones. Data persistence is achieved by using MongoDB. 
-
+This project contains a client-server application which manages devices connected to the Raskperry Pi.
+The app allwos to manage sensors and switches controlling various house devices, such as water heater, heating, air purifiers and more.
+The main concept of this app was to let user supply scripts runing devices in any preferable lenguage.
+Applications allows data persistence in MongoDB or files.
 <br>
 
 ## Instalations 
 To use the library you can clone the repository and install all dependencies.
 
 ```bash
-git clone https://github.com/konrad-winnicki/chat
+git clone https://github.com/konrad-winnicki/iHome
 ```
 
 ```bash
 npm install
 ```
-Before run application:
- - in `./server` directory you have to prepare .env file containing the following key-value pairs:
-```javascript
-MONGO_URI="mongodb://localhost:27017"
-NODE_ENV="development"
-TEST_DATABASE='test'                                            //example
-DATABASE="chat"                                                 //example
-PORT="8011"                                                     //example
+# Client side application
+Client side app can be run:
+1. as browser application. 
+- install all dependencies:
+```bash
+npm install
+```
+- run app:
+  
+```bash
+npm run dev
+```
+Now you can use `iHouse` interface by going to:
+http://localhost:5173/api/login
 
-JWT_SECRET='passwordForJWTSecret'                               //example
+2. as Android App:
+- download APK file and install on SmartPhone
 
-SOCKET_ORIGIN="http://localhost:5173"                           //default Vite port
-CLIENT_ID='your google API Client ID'
-CLIENT_SECRET='your goole API client secret'
-CALLBACK_URL='http://localhost:8011/api/auth/google/callback'   //example, can be set in the google API
-EXCHANGE_TOKEN_URI="https://oauth2.googleapis.com/token"
-REDIRECT_URL_WITH_TOKEN = 'http://localhost:5173/api/chatroom'
+# Server side applications to install on RaspberryPi
+- install all dependencies:
+```bash
+npm install
+```
+- run app:
+  
+```bash
+npm run prod
 ```
 
-- in `./client` directory in `config.ts` you have to set up the following variables:
-
-```javascript
-const PORT = "8011";
-const REDIRECT_URI = "http://localhost:8011/api/auth/google/callback" //example, can be set in the google API
-const CLIENT_ID = 'your google API Client ID'
-
-```
+During instalation proces user will be ask to choose
+- port
+- place of data persistence
+- password to pair client and server
 
 
-## Usage
+## Predefined main scripts
 
 `Package.json` in the server directory `./server` contains several predefined scripts which can be initialized with `npm run` and:</br>
 ```build``` : to transpile `TypeScript` to `JavaScript` </br>
 ```prod``` : to start the backend server in the production </br>
-```dev``` : to start server in development mode </br>
+```nodemon_database``` : to start nodemon and server in development mode using Mongo persistence</br>
+```nodemon_file``` : to start nodemon and server in development mode using file persistence </br>
+```dev_database``` : to start server in development mode using Mongo persistence</br>
+```dev_file``` : to start server in development mode using file persistence </br>
 ```test_domain``` : to start domain tests</br>
-```test_api``` : to start integration api tests</br>
+```test_infrastructure``` : to start infrastructure tests</br>
+```test_api_database``` or ```test_api_file``` : to start integration api tests</br>
+```test_all_file``` or ```test_all_database``` : to start integration api tests</br>
+
 
 ### Run servers: 
 To run backend server you can type in `./server` directory:
@@ -87,9 +101,9 @@ docker compose up mongodb -d
 
 ### Frontend interface
 
-Now you can use `CHAT` interface by going to:
+Now you can use `iHouse` interface by going to:
 
-http://localhost:5173/login
+http://localhost:5173/api/login
 
 ## Run all with Docker
 The `Dockerfiles` contain set of instructions and configurations to build a Docker container images for frontend and backend.
@@ -106,55 +120,7 @@ docker compose down
 ```
 
 
-## Backend folder structure
 
-```
-src/
-├── application
-│   ├── ChatRoomInterface.ts
-│   ├── ChatRoomService.ts
-│   ├── servicesBuilder.ts
-│   ├── UserInterface.ts
-│   └── UserService.ts
-│
-├── domain
-│   ├── ChatRoomList.ts
-│   ├── ChatRoom.ts
-│   ├── RoomOccupancyManager.ts
-│   └── User.ts
-│
-├── infractructure
-│   │
-│   ├── controllers
-│   │   ├── auxilaryFunctions.ts
-│   │   └── controllers.ts
-│   │
-│   ├── database
-│   │   ├── databaseManagers
-│   │   │   ├── chatRoomDbManager.ts
-│   │   │   └── userDbManager.ts
-│   │   │
-│   │   ├── mongoDbConnection.ts
-│   │   └── mongoDbModel.ts
-│   │
-│   ├── errorHandler.ts
-│   │
-│   ├── middleware
-│   │   ├── auth.ts
-│   │   └── socketAuth.ts
-│   │
-│   ├── routes.ts
-│   └── socket
-│       ├── personHandler.ts
-│       ├── roomHandler.ts
-│       └── socketSetup.ts
-│
-├── appSetup.ts
-├── app.ts
-├── server.ts
-└── types.d.ts
-
-```
 
 
 

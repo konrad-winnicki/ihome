@@ -1,20 +1,19 @@
-name: PI_MANAGER
+name: IHOME_SERVER
 
 on:
   push:
     branches:
       - "main"
       - "working_area"
-    
+
   pull_request:
     branches:
       - "main"
-     
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    environment: PI_MANAGER
+    environment: IHOME
 
     steps:
       - uses: actions/checkout@v3
@@ -22,11 +21,11 @@ jobs:
           fetch-depth: 0
 
       - name: Create .env file
-       
+
         run: |
           cd server
           echo "NODE_ENV"="test_mode" >> .env
-         
+
       - name: Print .env file
         run: |
           echo "Printing .env:"
@@ -43,27 +42,27 @@ jobs:
           mongodb-version: 6.0
           mongodb-port: 27017
 
-      - name: Build NODE APP
+      - name: Build server
         run: |
           npm ci
           npm run eslint
           npm run build
         working-directory: ./server
 
-      - name: Run api file tests
-        run: |
-          npm run test_api_file
-        working-directory: ./server
-      - name: Run api database tests
-        run: |
-          npm run test_api_database
-        working-directory: ./server
-      - name: Run domain_test
+      - name: Run domain tests
         run: |
           npm run test_domain
         working-directory: ./server
-      - name: Run infrastructure_test
+      - name: Run infrastructure tests
         run: |
           npm run test_infrastructure
         working-directory: ./server
 
+      - name: Run api tests using file persistence
+        run: |
+          npm run test_api_file
+        working-directory: ./server
+      - name: Run api tests using database persistence
+        run: |
+          npm run test_api_database
+        working-directory: ./server

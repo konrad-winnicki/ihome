@@ -1,7 +1,7 @@
 import PropertiesReader, { Value } from "properties-reader";
 import { choosePropertyFile } from "../src/propertyWriter";
-import sanitizedConfig from "./config";
 import { prepareAppProperties as prepareProductionPropertyFile } from "../src/prepareAppProperties";
+import sanitizedConfig from "./config";
 
 interface DATABASE_PROPERTIES {
   PASSWORD: Value | null;
@@ -36,14 +36,26 @@ export interface FILE_CONFIGURATION {
 }
 const ENVIRONMENT = sanitizedConfig.NODE_ENV;
 
+class EnvAwarePropertiesReader {
+  private properties: PropertiesReader.Reader;
+  constructor(properties: PropertiesReader.Reader) {
+    this.properties = properties;
+  }
+  get(propertyName: string): Value | null {
+    const env = process.env[propertyName];
+    return env ? env : this.properties.get(propertyName);
+  }
+}
+
 async function prepareApplicationProperties() {
   const propertiesPath = choosePropertyFile(ENVIRONMENT);
-  const properties = PropertiesReader(propertiesPath, undefined, {
+  const propertiesReader = PropertiesReader(propertiesPath, undefined, {
     writer: { saveSections: true },
   });
+  const properties = new EnvAwarePropertiesReader(propertiesReader);
 
   if (ENVIRONMENT === "production") {
-    await prepareProductionPropertyFile(properties, propertiesPath);
+    await prepareProductionPropertyFile(propertiesReader, propertiesPath);
   }
 
   const getConfiguration = (): DATABASE_PROPERTIES | FILE_PROPERTIES => {
@@ -54,7 +66,9 @@ async function prepareApplicationProperties() {
         PERSISTENCIA: properties.get("PERSISTENCIA"),
         PORT: properties.get("PORT"),
         JWT_SECRET: properties.get("JWT_SECRET"),
-        DATABASE_URL: properties.get("DATABASE_URL"),
+        DATABASE_URL: process.env.DATABASE_URL
+          ? process.env.DATABASE_URL
+          : properties.get("DATABASE_URL"),
         DATABASE: properties.get("DATABASE"),
       };
     } else {
@@ -65,6 +79,7 @@ async function prepareApplicationProperties() {
         JWT_SECRET: properties.get("JWT_SECRET"),
       };
     }
+    console.log("PROPERTIES:", readedProperties);
     return readedProperties;
   };
 

@@ -8,7 +8,7 @@ export class FileRepositoryHelpers {
     return fs
       .writeFile(path, contentToWrite)
       .catch((err) => {
-        console.log('console lof from writefile error:', err)
+        console.log('console log from writefile error:', err)
         return Promise.reject({ ["Write file error"]: err })});
   }
 

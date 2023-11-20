@@ -3,7 +3,6 @@ import dotenv from "dotenv";
 
 
 dotenv.config({ path: path.resolve(process.cwd(), '.env') });
-console.log(dotenv.config({ path: path.resolve(process.cwd(), '.env') }))
 
 interface ENV {
   NODE_ENV: string | undefined;

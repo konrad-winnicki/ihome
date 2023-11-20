@@ -111,12 +111,16 @@ The `docker-compose.yaml` file specifies the services for backend, frontend and 
 To run databases, backend and frontend with docker, just type in the project root directory:
 
 ```bash
-docker compose up -d
+docker-compose --env-file=.env.database up -d
+```
+or
+```bash
+docker-compose --env-file=.env.file up -d
 ```
 
 To stop all docker containers type:
 ```bash
-docker compose down 
+docker-compose down 
 ```
 
 

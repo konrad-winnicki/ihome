@@ -1,0 +1,10 @@
+**/node_modules/
+**/dist/
+**/.DS_Store
+**/config.env
+.env
+production.env
+**/coverage/
+server/src/properties/app.properties
+**/androidw/
+**/android/

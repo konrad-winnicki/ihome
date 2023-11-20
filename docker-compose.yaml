@@ -1,4 +1,3 @@
-
 version: '3.8'
 
 services:
@@ -6,11 +5,11 @@ services:
     build:
       dockerfile: Dockerfile_backend
     container_name: backend
-    command: npm run prod
     ports:
-      - "8011:8011"
+      - "4000:4000"
     environment:
-      - MONGO_URI=mongodb://mongodb:27017
+      - NODE_ENV
+      - DATABASE_URL
     networks:
       - mafalda
 

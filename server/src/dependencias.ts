@@ -1,4 +1,3 @@
-import sanitizedConfig from "../config/config";
 import { DeviceRunService } from "./application/device/DeviceRunService";
 import { MongoDatabase } from "./Infrastructure/databse/MongoDataBase";
 import { TaskScheduler } from "./domain/TaskScheduler";
@@ -25,6 +24,7 @@ import { FileTaskRepository } from "./Infrastructure/filePersistencia/FileTaskRe
 import { MongoTaskRepository } from "./Infrastructure/task/MongoTaskRepository";
 import { TaskService } from "./application/task/TaskService";
 import { DevicePerformer } from "./domain/DevicePerformer";
+import sanitizedConfig from "../config/config";
 
 const ENVIRONMENT = sanitizedConfig.NODE_ENV;
 
@@ -91,6 +91,7 @@ async function createDBRepositories() {
 
 export async function initializeDependencias() {
   global.appConfiguration = await prepareApplicationProperties();
+
 
   const serverMessages = ServerMessages.getInstance();
   const eventEmitter = new EventEmitter();

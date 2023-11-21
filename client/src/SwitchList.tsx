@@ -1,11 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { RxDropdownMenu } from "react-icons/rx";
-import { getSwitches} from "./services";
+import { getSwitches } from "./services";
 import SwitchModule from "./SwitchModule";
 import TaskList from "./TaskList";
-import {  useNavigate } from "react-router-dom";
-
-
+import { AuthorizationContext } from "./App";
 
 export interface SwitchInterface {
   id: string;
@@ -14,10 +12,11 @@ export interface SwitchInterface {
 }
 
 const SwitchesList: React.FC = () => {
+  const authorizationContext = useContext(AuthorizationContext);
 
-  const navigate = useNavigate();
-
-  const [switches, setSwitches] = useState<{switches: SwitchInterface[]}>({switches: []});
+  const [switches, setSwitches] = useState<{ switches: SwitchInterface[] }>({
+    switches: [],
+  });
 
   const [showSwitches, setShowSwitches] = useState<boolean>(false);
   const [deviceShowsTaskModule, setDeviceShowTaskModule] =
@@ -30,25 +29,19 @@ const SwitchesList: React.FC = () => {
     const response = await getSwitches(token);
     if (response.ok) {
       const data = await response.json();
-      return data
+      return data;
     }
     if (response.status === 401) {
-      navigate('/', {replace:true})
-
-        return
-      }
+      authorizationContext.setIsLoggedIn(false);
+      return;
+    }
   }
-
-  
 
   useEffect(() => {
     if (!showSwitches) {
-      getSwitchList().then((data)=>{
-      setSwitches({switches:data});
-
-    }
-      )
-
+      getSwitchList().then((data) => {
+        setSwitches({ switches: data });
+      });
     }
     if (deviceShowsTaskModule) {
       setShowSwitches(false);
@@ -57,7 +50,6 @@ const SwitchesList: React.FC = () => {
     if (refreshList) {
       setRefreshList(false);
     }
-    
   }, [JSON.stringify(switches), showSwitches, deviceShowsTaskModule]);
 
   return (
@@ -75,7 +67,7 @@ const SwitchesList: React.FC = () => {
       <div className=" overflow-y-auto ">
         {showSwitches
           ? switches.switches.map((switchDevice: SwitchInterface) => {
-            return (
+              return (
                 <div key={switchDevice.id}>
                   <SwitchModule
                     switchDevice={switchDevice}
@@ -92,7 +84,7 @@ const SwitchesList: React.FC = () => {
         {deviceShowsTaskModule ? (
           <TaskList
             setDeviceShowTaskModule={setDeviceShowTaskModule}
-            setShowSwitches= {setShowSwitches}
+            setShowSwitches={setShowSwitches}
             device={deviceShowsTaskModule}
           ></TaskList>
         ) : (

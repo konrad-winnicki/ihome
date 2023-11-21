@@ -1,6 +1,6 @@
 import { Model, mongo } from "mongoose";
 import { Device } from "../../domain/Device";
-import { MongoDeviceRepository } from "../../Infrastructure/device/MongoDeviceRepository";
+import { MongoDeviceRepository } from "../../Infrastructure/databasePersistencia/MongoDeviceRepository";
 import { ServerMessages } from "../../ServerMessages";
 
 export class CustomMongoServerError extends mongo.MongoServerError {
@@ -29,7 +29,7 @@ export type AddToDatabaseStatus =
   | "DuplicatedId"
   | "MongoServerError"
   | "MongoError"
-  |undefined;
+  | undefined;
 
 export type DeleteFromDBStatus = "success" | "error" | undefined;
 export type FindOneById = "success" | "error" | null | undefined;

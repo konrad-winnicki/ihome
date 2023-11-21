@@ -25,7 +25,7 @@ export const SettingsButton: React.FC<SetingsButtonProps> = (props) => {
         ></RenderedComponent>
       ) : (
         <button
-          className="m-1 bg-blue-700 hover:bg-green-700 text-white text-sm font-bold py-2 px-2 rounded"
+          className="w-full m-1 bg-blue-700 hover:bg-green-700 text-white text-sm font-bold py-2 px-2 rounded"
           onClick={() => {
             props.setAddSettings(props.name);
           }}

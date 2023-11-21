@@ -1,15 +1,18 @@
-import { useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import CreateSensor from "./CreateSensor";
-import CreateSwitch from "./CreateSwitch";
 import SwitchesList from "./SwitchList";
 import { SettingsButton } from "./SettingsButton";
-import SetIP from "./SetIP";
 import SensorList from "./SensorList";
+import { CreateSwitch } from "./CreateSwitch";
+import { AuthorizationContext } from "./App";
 
 const Dashboard: React.FC = () => {
   const [settings, setAddSettings] = useState<string | null>(null);
+  const authorizationContext = useContext(AuthorizationContext);
 
-
+  useEffect(() => {
+    console.log(settings);
+  }, [settings]);
 
   return (
     <div className="h-screen app-container bg-white rounded-lg m-2">
@@ -23,14 +26,12 @@ const Dashboard: React.FC = () => {
       </div>
       <div
         className={`flex ${
-          settings === "Sensors" ||
-          settings === "IP" ||
-          settings === "Switches"
+          settings === "Sensors" || settings === "Switches"
             ? "w-full"
-            : "h-1/3 grid grid-cols-4 gap-1"
+            : "grid grid-cols-3 gap-1"
         }`}
       >
-        <div className="col-span-1">
+        <div className="col-span-1 ml-2">
           {!settings || settings === "Sensors" ? (
             <SettingsButton
               name={"Sensors"}
@@ -41,8 +42,7 @@ const Dashboard: React.FC = () => {
           ) : (
             ""
           )}
-        </div>
-        <div className="col-span-1">
+
           {!settings || settings === "Switches" ? (
             <SettingsButton
               name={"Switches"}
@@ -54,14 +54,20 @@ const Dashboard: React.FC = () => {
             ""
           )}
         </div>
-        <div className="col-span-1">
-          {!settings || settings === "IP" ? (
-            <SettingsButton
-              name={"IP"}
-              componentToRender={SetIP}
-              setAddSettings={setAddSettings}
-              settings={settings}
-            ></SettingsButton>
+        <div className="col-span-1 ml-2"></div>
+
+        <div className="col-span-1 ml-2">
+          {!settings ? (
+            <button
+              className="m-1 bg-blue-700 hover:bg-green-700 text-white text-sm font-bold py-2 px-2 rounded"
+              onClick={() => {
+                authorizationContext.setIsLoggedIn(false);
+              }}
+            >
+              <div className="flex justify-center items-center">
+                <div className=" m-1">Log out</div>
+              </div>
+            </button>
           ) : (
             ""
           )}

@@ -1,5 +1,5 @@
 import Koa, { Next } from "koa";
-import { isRunSwitch } from "./guardHelpers/runSwitchGuardHelpers";
+import { isRunDevice } from "./guardHelpers/runSwitchGuardHelpers";
 
 export type RunDeviceRequestBody = {
   onStatus: boolean;
@@ -8,7 +8,7 @@ export type RunDeviceRequestBody = {
 export async function runDeviceGuardMiddleware(ctx: Koa.Context, next: Next) {
   const body = (await ctx.request.body) as RunDeviceRequestBody;
 
-  if (isRunSwitch(body)) {
+  if (isRunDevice(body)) {
     ctx.onStatus = body;
     await next();
     return;

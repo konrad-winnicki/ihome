@@ -2,6 +2,7 @@ import React from "react";
 import { v4 } from "uuid";
 
 const SensorDisplay: React.FC<{ displayData: string[] }> = (props) => {
+    
   return (
     <div className="grid grid-rows-2 m-2 items-center justify-center ">
       {props.displayData

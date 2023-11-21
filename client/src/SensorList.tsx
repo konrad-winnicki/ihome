@@ -1,13 +1,12 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useContext } from "react";
 import Sensor, { SensorDescription } from "./Sensor";
-import { getSensors} from "./services";
+import { getSensors } from "./services";
 import SensorDisplay from "./SensorDisplay";
 import { RxDropdownMenu } from "react-icons/rx";
-import { useLocation, useNavigate } from "react-router-dom";
+import { AuthorizationContext } from "./App";
 
 const SensorList: React.FC = () => {
-  const navigate = useNavigate();
-  const location = useLocation();
+  const authorizationContext = useContext(AuthorizationContext);
 
   const [sensors, setSensors] = useState<SensorDescription[]>([]);
   const [displayData, setDisplayData] = useState<string[]>([]);
@@ -17,17 +16,15 @@ const SensorList: React.FC = () => {
   const token = localStorage.getItem("token");
 
   const fetchSensors = useCallback(async () => {
-    console.log(location);
     const response = await getSensors(token);
     if (response.ok) {
       const data = await response.json();
       return data;
     }
     if (response.status === 401) {
-    navigate('/', {replace:true})
-      
+      authorizationContext.setIsLoggedIn(false);
     }
-  }, [token, location]);
+  }, [token, authorizationContext]);
 
   useEffect(() => {
     fetchSensors().then((meters) => {
@@ -38,13 +35,6 @@ const SensorList: React.FC = () => {
       setRefreshList(false);
     }
   }, [showSensors, refreshList, fetchSensors]);
-  /*
-  if (statusCode === 401) {
-    //return <div>Unauthorized. Please log in.</div>;
-    //const url = prepareURL();
-    navigate(`/api/login/`,{ replace: true });
-    
-  }*/
 
   return (
     <div className="flex-col h-full items-center justify-center border-5 border-sky-500">

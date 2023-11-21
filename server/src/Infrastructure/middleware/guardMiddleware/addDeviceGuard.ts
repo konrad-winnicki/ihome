@@ -1,8 +1,8 @@
 import {
   prepareSwitchClassInstance,
-  prepareMeterClassInstance,
+  prepareSensorClassInstance,
 } from "./guardHelpers/deviceClassInstancePreparators";
-import { isMeter, isSwitch } from "./guardHelpers/addDeviceGuardHelpers";
+import { isSensor, isSwitch } from "./guardHelpers/addDeviceGuardHelpers";
 import { Sensor } from "../../../domain/Sensor";
 import { Switch } from "../../../domain/Switch";
 import Koa, { Next } from "koa";
@@ -14,7 +14,7 @@ interface DeviceRequest {
 export async function addDeviceGuardMiddleware(ctx: Koa.Context, next: Next) {
   const body = await ctx.request.body;
   const deviceType: string = (body as DeviceRequest).deviceType;
-
+  console.log("ffff", deviceType);
   if (deviceType == "switch") {
     const maybeSwitch = body as Switch;
     if (isSwitch(maybeSwitch)) {
@@ -22,10 +22,10 @@ export async function addDeviceGuardMiddleware(ctx: Koa.Context, next: Next) {
       await next();
       return;
     }
-  } else if (deviceType == "meter") {
-    const maybeMeter = body as Sensor;
-    if (isMeter(maybeMeter)) {
-      ctx.device = prepareMeterClassInstance(maybeMeter);
+  } else if (deviceType == "sensor") {
+    const maybeSensor = body as Sensor;
+    if (isSensor(maybeSensor)) {
+      ctx.device = prepareSensorClassInstance(maybeSensor);
       await next();
       return;
     }

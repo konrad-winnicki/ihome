@@ -1,20 +1,22 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { login, renewSession } from "./services";
 import jwt_decode from "jwt-decode";
+import { AuthorizationContext, AuthContextValue } from "./App";
 
 interface DecodedToken {
   sessionId: string;
   iat: number;
   exp: number;
 }
-
+/*
 type LoginType = {
   setIsLoggedIn: (param: boolean) => void;
-};
-export const Login: React.FC<LoginType> = (props) => {
+};*/
+export const Login: React.FC = () => {
   const [formData, setFormData] = useState({
     password: "",
   });
+  const authorizationContext = useContext(AuthorizationContext);
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
@@ -33,9 +35,9 @@ export const Login: React.FC<LoginType> = (props) => {
         const data = await response.json();
         const token = data.token;
         localStorage.setItem("token", token);
-        props.setIsLoggedIn(true);
+        authorizationContext.setIsLoggedIn(true);
         renewTokenTiming(token).then((token: string) => {
-          logOutTiming(token, props);
+          logOutTiming(token, authorizationContext);
         });
       } else {
         alert("Password incorrect");
@@ -113,11 +115,14 @@ async function renewTokenTiming(currentToken: string): Promise<string> {
   });
 }
 
-function logOutTiming(currentToken: string, props: LoginType) {
+function logOutTiming(
+  currentToken: string,
+  authorizationContext: AuthContextValue
+) {
   const decodedToken: DecodedToken = jwt_decode(currentToken);
   const timeToLogout = calculateTimeToFinishToken(decodedToken);
   setTimeout(() => {
-    props.setIsLoggedIn(false);
+    authorizationContext.setIsLoggedIn(false);
   }, timeToLogout);
 }
 

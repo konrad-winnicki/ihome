@@ -7,7 +7,7 @@ export class DeviceController {
     this.deviceService = deviceService;
     this.addDevice = this.addDevice.bind(this);
     this.deleteDevice = this.deleteDevice.bind(this);
-    this.getMeters = this.getMeters.bind(this);
+    this.getSensors = this.getSensors.bind(this);
     this.getSwitches = this.getSwitches.bind(this);
   }
   async addDevice(ctx: Koa.Context) {
@@ -41,9 +41,9 @@ export class DeviceController {
         ctx.body = error;
       });
   }
-  async getMeters(ctx: Koa.Context) {
+  async getSensors(ctx: Koa.Context) {
     return this.deviceService
-      .getMeterList()
+      .getSensorList()
       .then((response) => {
         ctx.status = 200;
         ctx.body = response;

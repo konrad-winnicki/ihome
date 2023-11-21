@@ -39,7 +39,7 @@ export const renewSession = async (token: string | null): Promise<Response> => {
   });
   return response;
 };
-
+/*
 export async function getMeasurement(meterId: string, token: string | null) {
   const URL = prepareURL();
 
@@ -52,11 +52,11 @@ export async function getMeasurement(meterId: string, token: string | null) {
   });
   return response;
 }
-
+*/
 export async function getSensors(token: string | null) {
   const URL = prepareURL();
 
-  const response = await fetch(`${URL}/meters`, {
+  const response = await fetch(`${URL}/sensors`, {
     method: "GET",
     headers: {
       Authorization: `Bearer ${token}`,
@@ -123,7 +123,7 @@ export async function deleteDevice(taskId: string, token: string | null) {
 
 export const createSensor = async (sensor: object, token: string | null) => {
   const URL = prepareURL();
-
+console.log('sensor in function', sensor)
   const response = await fetch(`${URL}/devices`, {
     method: "POST",
     headers: {

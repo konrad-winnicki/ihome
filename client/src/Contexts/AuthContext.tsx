@@ -1,27 +1,28 @@
-import React, {useState, ReactNode} from "react";
-
+import React, { useState, ReactNode } from "react";
 
 type Props = {
-    children?: ReactNode
-}
+  children?: ReactNode;
+};
 
-type IAuthContext = {
-    isLoggedIn: boolean;
-    setIsLoggedIn: (param:boolean)=>void
-}
+type IAuthorizationContext = {
+  isLoggedIn: boolean;
+  setIsLoggedIn: (param: boolean) => void;
+};
 const initValue = {
-    isLoggedIn:false,
-    setIsLoggedIn: ()=>{}
-}
-const AuthContext = React.createContext<IAuthContext>(initValue)
+  isLoggedIn: false,
+  setIsLoggedIn: () => {},
+};
+const AuthorizationContext =
+  React.createContext<IAuthorizationContext>(initValue);
 
+const AuthProvider = ({ children }: Props) => {
+  const [isLoggedIn, setIsLoggedIn] = useState(initValue.isLoggedIn);
 
+  return (
+    <AuthorizationContext.Provider value={{ isLoggedIn, setIsLoggedIn }}>
+      {children}
+    </AuthorizationContext.Provider>
+  );
+};
 
-const AuthProvider = ({children}:Props)=>{
-const [isLoggedIn, setIsLoggedIn] = useState(initValue.isLoggedIn)
-
-return(<AuthContext.Provider value={{isLoggedIn, setIsLoggedIn}} >{children }</AuthContext.Provider>)
-}
-
-
-export {AuthContext, AuthProvider}
+export { AuthorizationContext, AuthProvider };

@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { createSwitch } from "./services";
-import { useNavigate } from "react-router-dom";
+import { AuthorizationContext } from "./App";
 
 export type CreateSwitchProps = {
   setAddSettings: (param: string | null) => void;
@@ -12,8 +12,7 @@ export const CreateSwitch: React.FC<CreateSwitchProps> = (props) => {
     commandOn: "",
     commandOff: "",
   });
-
-  const navigate = useNavigate();
+  const authorizationContext = useContext(AuthorizationContext);
 
   useEffect(() => {
     console.log("form data", formData);
@@ -47,8 +46,9 @@ export const CreateSwitch: React.FC<CreateSwitchProps> = (props) => {
       if (response.status == 409) {
         alert("Name already in use");
       }
-      if (response.status == 403) {
-        navigate("/login");
+      if (response.status === 401) {
+        authorizationContext.setIsLoggedIn(false);
+        return;
       }
     } catch (error) {
       console.error("an error occurred:", error);
@@ -135,5 +135,3 @@ export const CreateSwitch: React.FC<CreateSwitchProps> = (props) => {
     </div>
   );
 };
-
-export default CreateSwitch;

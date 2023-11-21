@@ -5,51 +5,46 @@ import { initializeDependencias } from "../../dependencias";
 import { Application } from "../../dependencias";
 import { cleanupDatabase } from "./auxilaryFunctionsForTests/dbCleanup";
 import { loginUser } from "./auxilaryFunctionsForTests/loginUser";
-import { addMeter } from "./auxilaryFunctionsForTests/addMeter";
+import { addSensor } from "./auxilaryFunctionsForTests/addSensor";
 import { cleanupFiles } from "./auxilaryFunctionsForTests/fileCleanup";
 import { Connection } from "mongoose";
 //import appConfiguration from "../../../config/sanitizedProperties";
 import cron from "node-cron";
 
-
-const environment = sanitizedConfig.NODE_ENV
+const environment = sanitizedConfig.NODE_ENV;
 
 describe("API RUN METER TEST", () => {
   let app: Application;
   let token: string;
-  let meterId: string;
-  let meterWithNonExistingScriptId: string;
-let requestUri: string
+  let sensorId: string;
+  let sensorWithNonExistingScriptId: string;
+  let requestUri: string;
   beforeAll(async () => {
-
     app = await initializeDependencias();
     requestUri = `http://localhost:${appConfiguration.PORT}`;
     token = await loginUser(requestUri, "testPassword");
-    if (environment === "test_api_database"){
-      const connection = (app.databaseInstance?.connection) as Connection
+    if (environment === "test_api_database") {
+      const connection = app.databaseInstance?.connection as Connection;
       await cleanupDatabase(connection);
-
+    } else if (environment === "test_api_file") {
+      await cleanupFiles(["devices.json"]);
     }
-    else if (environment === "test_api_file"){
-      await cleanupFiles(['devices.json']);
 
-    }    
-    
     app.devicesInMemory.devices.clear();
 
-    meterId = await addMeter(
+    sensorId = await addSensor(
       requestUri,
       token,
-      "meter",
-      "meter1",
+      "sensor",
+      "sensor1",
       { temperature: "oC", humidity: "%" },
-      ". ./src/__tests__/apiTests/shellScripts/runMeter.sh"
+      ". ./src/__tests__/apiTests/shellScripts/runSensor.sh"
     );
-    meterWithNonExistingScriptId = await addMeter(
+    sensorWithNonExistingScriptId = await addSensor(
       requestUri,
       token,
-      "meter",
-      "meter2",
+      "sensor",
+      "sensor2",
       { temperature: "oC", humidity: "%" },
       ". ./src/__tests__/apiTests/shellScripts/notExisting.sh"
     );
@@ -59,7 +54,7 @@ let requestUri: string
 
   test("Should run command on script:", async () => {
     const responseFromMeter = await request(requestUri)
-      .post(`/devices/run/${meterId}`)
+      .post(`/devices/run/${sensorId}`)
       .set("Authorization", token)
       .send({
         onStatus: true,
@@ -74,7 +69,7 @@ let requestUri: string
 
   test("Should return error if file not exists:", async () => {
     const responseFromMeter = await request(requestUri)
-      .post(`/devices/run/${meterWithNonExistingScriptId}`)
+      .post(`/devices/run/${sensorWithNonExistingScriptId}`)
       .set("Authorization", token)
       .send({
         onStatus: true,
@@ -82,20 +77,19 @@ let requestUri: string
       .expect(500)
       .expect("Content-Type", /text\/plain/);
 
-    expect(responseFromMeter.text).toMatch(
-      "Acomplished with error:"
-    );
+    expect(responseFromMeter.text).toMatch("Acomplished with error:");
   });
 
   afterAll(async () => {
-    if (environment === "test_api_database"){
+    if (environment === "test_api_database") {
       //await app.databaseInstance?.connection.dropDatabase()
-      await app.databaseInstance?.connection.close();}
-      if (environment === "test_api_file") {
-        await cleanupFiles(['devices.json', 'tasks.json']);
-      }
-      cron.getTasks().forEach((task) => task.stop());
-      cron.getTasks().clear();
-      await app.appServer.stopServer();
+      await app.databaseInstance?.connection.close();
+    }
+    if (environment === "test_api_file") {
+      await cleanupFiles(["devices.json", "tasks.json"]);
+    }
+    cron.getTasks().forEach((task) => task.stop());
+    cron.getTasks().clear();
+    await app.appServer.stopServer();
   });
 });

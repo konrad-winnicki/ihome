@@ -31,7 +31,7 @@ export const SetIP: React.FC<CreateSwitchProps> = (props) => {
           </label>
 
           <input
-            className="w-full w-1/2 p-2 m-2 border rounded-md focus:outline-none focus:border-blue-500"
+            className="w-full p-2 m-2 border rounded-md focus:outline-none focus:border-blue-500"
             type="text"
             id="ip"
             name="ip"
@@ -41,7 +41,7 @@ export const SetIP: React.FC<CreateSwitchProps> = (props) => {
         </div>
         <div className=" flex m-2 items-center justify-center">
           <button
-            className="w-1/4 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring focus:ring-blue-300"
+            className="w-1/2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring focus:ring-blue-300"
             type="submit"
             onClick={() => props.setAddSettings(null)}
           >

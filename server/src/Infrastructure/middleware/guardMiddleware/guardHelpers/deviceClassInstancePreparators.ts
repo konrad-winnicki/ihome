@@ -12,12 +12,12 @@ export function prepareSwitchClassInstance(switchDevice: Switch) {
   );
 }
 
-export function prepareMeterClassInstance(meter: Sensor) {
+export function prepareSensorClassInstance(sensor: Sensor) {
   return new Sensor(
     v4(),
-    meter.deviceType,
-    meter.name,
-    meter.parameters,
-    meter.commandOn
+    sensor.deviceType,
+    sensor.name,
+    sensor.parameters,
+    sensor.commandOn
   );
 }

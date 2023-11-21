@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { createSensor as createSensor } from "./services";
-import { useNavigate } from "react-router-dom";
+import { AuthorizationContext } from "./App";
 
 export interface Parameters {
   [key: string]: string;
@@ -15,8 +15,7 @@ export const CreateSensor: React.FC<CreateMeterProps> = (props) => {
     unitString: "",
     commandOn: "",
   });
-
-  const navigate = useNavigate();
+  const authorizationContext = useContext(AuthorizationContext);
 
   useEffect(() => {
     console.log("form data", formData);
@@ -50,7 +49,9 @@ export const CreateSensor: React.FC<CreateMeterProps> = (props) => {
     const token = localStorage.getItem("token");
 
     try {
+      console.log("sensor", sensor);
       const response = await createSensor(sensor, token);
+      console.log("respnse", response);
       if (response.ok) {
         alert("Sensor created");
         console.log(await response.json());
@@ -58,8 +59,9 @@ export const CreateSensor: React.FC<CreateMeterProps> = (props) => {
       if (response.status == 409) {
         alert("Name already in use");
       }
-      if (response.status == 403) {
-        navigate("/login");
+      if (response.status === 401) {
+        authorizationContext.setIsLoggedIn(false);
+        return;
       }
     } catch (error) {
       console.error("an error occurred:", error);

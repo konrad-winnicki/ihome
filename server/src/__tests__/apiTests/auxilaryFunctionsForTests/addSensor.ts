@@ -1,18 +1,16 @@
 import request from "supertest";
 
 type Parameters = {
-  [key:string]:string,
+  [key: string]: string;
+};
 
-}
-
-export async function addMeter(
+export async function addSensor(
   requestUri: string,
   token: string,
   deviceType: string,
   name: string,
-  parameters:Parameters,
-  commandOn: string,
-  
+  parameters: Parameters,
+  commandOn: string
 ) {
   const response = await request(requestUri)
     .post("/devices")
@@ -23,7 +21,6 @@ export async function addMeter(
       name: name,
       parameters: parameters,
       commandOn: commandOn,
-
     });
   return response.body.deviceId;
 }

@@ -16,8 +16,8 @@ import { ServerMessages } from "./ServerMessages";
 import { FileDeviceRepository } from "./Infrastructure/filePersistencia/FileDeviceRepository";
 import { FileRepositoryHelpers } from "./Infrastructure/filePersistencia/auxilaryFunctions";
 import prepareApplicationProperties from "../config/sanitizedProperties";
-import { MongoDeviceRepository } from "./Infrastructure/device/MongoDeviceRepository";
-import { CacheDeviceRepository } from "./Infrastructure/device/CacheDeviceRepository";
+import { MongoDeviceRepository } from "./Infrastructure/databasePersistencia/MongoDeviceRepository";
+import { CacheDeviceRepository } from "./Infrastructure/databasePersistencia/CacheDeviceRepository";
 import { DeviceService } from "./application/device/DeviceService";
 import { CronTaskManager } from "./Infrastructure/task/CronTaskManager";
 import { FileTaskRepository } from "./Infrastructure/filePersistencia/FileTaskRepository";
@@ -91,7 +91,6 @@ async function createDBRepositories() {
 
 export async function initializeDependencias() {
   global.appConfiguration = await prepareApplicationProperties();
-
 
   const serverMessages = ServerMessages.getInstance();
   const eventEmitter = new EventEmitter();

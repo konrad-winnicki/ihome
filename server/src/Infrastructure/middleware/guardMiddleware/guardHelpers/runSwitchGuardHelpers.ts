@@ -3,11 +3,10 @@ import {
   checkIfNotMissingParams,
 } from "./guardFunctionHelpers";
 
-
-export type RunSwitchRequestBody = {
+export type RunDeviceRequestBody = {
   onStatus: boolean;
 };
-export function isRunSwitch(reqBody: RunSwitchRequestBody): boolean {
+export function isRunDevice(reqBody: RunDeviceRequestBody): boolean {
   const expectedParameters = ["onStatus"];
 
   return (

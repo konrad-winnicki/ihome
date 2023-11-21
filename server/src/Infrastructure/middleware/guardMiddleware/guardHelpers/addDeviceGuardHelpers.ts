@@ -5,14 +5,14 @@ import {
   checkIfNotMissingParams,
 } from "./guardFunctionHelpers";
 
-export function isMeter(maybeMeter: Sensor) {
+export function isSensor(maybeSensor: Sensor) {
   const expectedParameters = ["deviceType", "name", "parameters", "commandOn"];
 
   function chackIfParametersObjectValid() {
-    for (const key in maybeMeter.parameters) {
+    for (const key in maybeSensor.parameters) {
       if (
         typeof key !== "string" ||
-        typeof maybeMeter.parameters[key] !== "string"
+        typeof maybeSensor.parameters[key] !== "string"
       ) {
         return false;
       }
@@ -21,12 +21,12 @@ export function isMeter(maybeMeter: Sensor) {
   }
 
   return (
-    checkIfNotExceededParams(maybeMeter, expectedParameters) &&
-    checkIfNotMissingParams(maybeMeter, expectedParameters) &&
+    checkIfNotExceededParams(maybeSensor, expectedParameters) &&
+    checkIfNotMissingParams(maybeSensor, expectedParameters) &&
     chackIfParametersObjectValid() &&
-    typeof maybeMeter.name === "string" &&
-    typeof maybeMeter.commandOn === "string" &&
-    typeof maybeMeter.parameters === "object"
+    typeof maybeSensor.name === "string" &&
+    typeof maybeSensor.commandOn === "string" &&
+    typeof maybeSensor.parameters === "object"
   );
 }
 

@@ -46,7 +46,7 @@ export function initAppRouter(
     deviceControllers.deleteDevice
   );
 
-  appRouter.get("/meters", authenticate, deviceControllers.getMeters);
+  appRouter.get("/sensors", authenticate, deviceControllers.getSensors);
   appRouter.get("/switches", authenticate, deviceControllers.getSwitches);
   appRouter.get(
     "/tasks/device/:id",

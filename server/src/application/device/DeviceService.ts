@@ -27,9 +27,9 @@ export class DeviceService {
     });
   }
 
-  async getMeterList(): Promise<Sensor[]> {
+  async getSensorList(): Promise<Sensor[]> {
     return this.deviceRepository
-      .listByType("meter")
+      .listByType("sensor")
       .then((devices) => {
         const meters = devices as unknown as Sensor[];
         return Promise.resolve(meters);

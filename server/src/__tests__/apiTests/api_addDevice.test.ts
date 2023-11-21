@@ -88,15 +88,15 @@ describe("API ADD DEVICE TEST", () => {
     });
   });
 
-  test("Should add meter to database and inMemoryStorage:", async () => {
+  test("Should add sensor to database and inMemoryStorage:", async () => {
     const response = await request(requestUri)
       .post(`/devices`)
       .set("Authorization", token)
       .send({
-        deviceType: "meter",
-        name: "meter1",
+        deviceType: "sensor",
+        name: "sensor1",
         parameters: { temperature: "oC", humidity: "%" },
-        commandOn: "meter on",
+        commandOn: "sensor on",
       })
       .expect(201)
       .expect("Content-Type", /application\/json/);
@@ -108,18 +108,18 @@ describe("API ADD DEVICE TEST", () => {
     expect(response.body).toHaveProperty("deviceId");
     expect(devicesInMemory).toEqual({
       id: deviceId,
-      deviceType: "meter",
-      name: "meter1",
+      deviceType: "sensor",
+      name: "sensor1",
       parameters: { temperature: "oC", humidity: "%" },
-      commandOn: "meter on",
+      commandOn: "sensor on",
     });
 
     expect(device).toMatchObject({
       id: deviceId,
-      deviceType: "meter",
-      name: "meter1",
+      deviceType: "sensor",
+      name: "sensor1",
       parameters: { temperature: "oC", humidity: "%" },
-      commandOn: "meter on",
+      commandOn: "sensor on",
 
     });
   });
@@ -282,33 +282,33 @@ describe("API ADD DEVICE TEST", () => {
     {
       description: "body lacks deviceType",
       body: {
-        name: "meter1",
+        name: "sensor1",
         parameters: { temperature: "oC", humidity: "%" },
-        commandOn: "meter on",
+        commandOn: "sensor on",
       },
     },
     {
       description: "body lacks name",
       body: {
-        deviceType: "meter",
+        deviceType: "sensor",
         parameters: { temperature: "oC", humidity: "%" },
-        commandOn: "meter on",
+        commandOn: "sensor on",
       },
     },
     {
       description: "body lacks parameters",
       body: {
-        name: "meter1",
-        deviceType: "meter",
-        commandOn: "meter on",
+        name: "sensor1",
+        deviceType: "sensor",
+        commandOn: "sensor on",
       },
     },
 
     {
       description: "body lacks commandOn",
       body: {
-        deviceType: "meter",
-        name: "meter1",
+        deviceType: "sensor",
+        name: "sensor1",
         parameters: { temperature: "oC", humidity: "%" },
       },
     },
@@ -316,10 +316,10 @@ describe("API ADD DEVICE TEST", () => {
     {
       description: "body has additional parameter",
       body: {
-        deviceType: "meter",
-        name: "meter1",
+        deviceType: "sensor",
+        name: "sensor1",
         parameters: { temperature: "oC", humidity: "%" },
-        commandOn: "meter on",
+        commandOn: "sensor on",
         id: "id1",
       },
     },
@@ -327,25 +327,25 @@ describe("API ADD DEVICE TEST", () => {
       description: "deviceType is a number",
       body: {
         deviceType: 1,
-        name: "meter1",
+        name: "sensor1",
         parameters: { temperature: "oC", humidity: "%" },
-        commandOn: "meter on",
+        commandOn: "sensor on",
       },
     },
     {
       description: "name is a number",
       body: {
-        deviceType: "meter",
+        deviceType: "sensor",
         name: 1,
         parameters: { temperature: "oC", humidity: "%" },
-        commandOn: "meter on",
+        commandOn: "sensor on",
       },
     },
     {
       description: "commandOn is a number",
       body: {
-        deviceType: "meter",
-        name: "meter1",
+        deviceType: "sensor",
+        name: "sensor1",
         parameters: { temperature: "oC", humidity: "%" },
         commandOn: 1,
       },
@@ -353,14 +353,14 @@ describe("API ADD DEVICE TEST", () => {
     {
       description: "parameter is not an object",
       body: {
-        deviceType: "meter",
-        name: "meter1",
+        deviceType: "sensor",
+        name: "sensor1",
         parameters: "not an object",
-        commandOn: "meter on",
+        commandOn: "sensor on",
       },
     },
   ].forEach(({ description, body }) => {
-    it(`Add meter should return bad request error if ${description}`, async () => {
+    it(`Add sensor should return bad request error if ${description}`, async () => {
       const response = await request(requestUri)
         .post(`/devices`)
         .set("Authorization", token)

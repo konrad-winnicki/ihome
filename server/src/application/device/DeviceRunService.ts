@@ -26,6 +26,7 @@ export class DeviceRunService implements DeviceRunInterface {
         if (device.deviceType === "switch") {
           this.cachedDevices.changeStatus(device.id, true);
         }
+        console.log(this.cachedDevices.devices)
 
         return response;
       });
@@ -47,7 +48,7 @@ export class DeviceRunService implements DeviceRunInterface {
         .switchOff(device as Switch)
         .then((response) => {
             this.cachedDevices.changeStatus(device.id, false);
-          
+          console.log(this.cachedDevices.devices)
           return response;
         });
 

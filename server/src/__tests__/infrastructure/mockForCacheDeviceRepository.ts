@@ -1,4 +1,4 @@
-import { CacheDeviceRepository } from "../../Infrastructure/device/CacheDeviceRepository";
+import { CacheDeviceRepository } from "../../Infrastructure/databasePersistencia/CacheDeviceRepository";
 import { ServerMessages } from "../../ServerMessages";
 import { DeviceRepository } from "../../application/device/DeviceRepository";
 import { Device } from "../../domain/Device";
@@ -8,13 +8,11 @@ export function prepareCacheDeviceRepositoryWithMockPerameters(
   inMemoryStorage: CachedDevice,
   deviceRepository: DeviceRepository
 ) {
-
-  
   const serverMessages = new ServerMessages();
   const cacheDeviceRepository = new CacheDeviceRepository(
     inMemoryStorage,
     deviceRepository,
-    serverMessages,
+    serverMessages
   );
 
   return cacheDeviceRepository;

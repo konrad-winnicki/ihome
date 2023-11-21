@@ -1,10 +1,11 @@
 import { useContext, useState } from "react";
 import CreateSensor from "./sensorComponents/CreateSensor";
 import SwitchesList from "./switchComponents/SwitchList";
-import { SettingsButton } from "./buttons/SettingsButton";
+
 import SensorList from "./sensorComponents/SensorList";
 import { CreateSwitch } from "./switchComponents/CreateSwitch";
 import { AuthorizationContext } from "./contexts/AuthorizationContext";
+import { SettingsButton } from "./SettingsButton";
 
 const Dashboard: React.FC = () => {
   const [settings, setAddSettings] = useState<string | null>(null);
@@ -57,7 +58,7 @@ const Dashboard: React.FC = () => {
             <button
               className="m-1 bg-blue-700 hover:bg-green-700 text-white text-sm font-bold py-2 px-2 rounded"
               onClick={() => {
-                authorizationContext.setIsLoggedIn(false);
+                authorizationContext.setLoggedIn(false);
               }}
             >
               <div className="flex justify-center items-center">

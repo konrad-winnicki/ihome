@@ -4,24 +4,23 @@ type Props = {
   children?: ReactNode;
 };
 
+export type AuthContextValue = {
+  isLoggedIn: boolean;
+  setLoggedIn: (newParam: boolean) => void;
+};
 
-  export type AuthContextValue = {
-    isLoggedIn: boolean;
-    setIsLoggedIn: (newParam: boolean) => void;
-  };
-  
-  export const AuthorizationContext = createContext<AuthContextValue>({
-    isLoggedIn: false,
-    setIsLoggedIn: () => {},
-  });
-
-
+export const AuthorizationContext = createContext<AuthContextValue>({
+  isLoggedIn: false,
+  setLoggedIn: () => {},
+});
 
 export const AuthContextProvider = ({ children }: Props) => {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLoggedIn, setLoggedIn] = useState(false);
   return (
     <div>
-      <AuthorizationContext.Provider value={{ isLoggedIn, setIsLoggedIn }}>
+      <AuthorizationContext.Provider
+        value={{ isLoggedIn, setLoggedIn: setLoggedIn }}
+      >
         {children}
       </AuthorizationContext.Provider>
     </div>

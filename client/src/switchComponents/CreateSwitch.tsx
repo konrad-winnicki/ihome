@@ -43,7 +43,7 @@ export const CreateSwitch: React.FC<CreateSwitchProps> = (props) => {
         alert("Name already in use");
       }
       if (response.status === 401) {
-        authorizationContext.setIsLoggedIn(false);
+        authorizationContext.setLoggedIn(false);
         return;
       }
     } catch (error) {

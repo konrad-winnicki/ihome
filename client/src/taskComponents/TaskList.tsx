@@ -44,7 +44,7 @@ const TaskList: React.FC<TaskListInterface> = (props) => {
       return sortFunction(data);
     }
     if (response.status === 401) {
-      authorizationContext.setIsLoggedIn(false);
+      authorizationContext.setLoggedIn(false);
       return Promise.reject();
     }
     return Promise.reject();

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import Login from "./Login";
-import { SettingsButton } from "./buttons/SettingsButton";
 import SetIP from "./ipComponents/SetIP";
+import { SettingsButton } from "./SettingsButton";
 
 function StartPage() {
   const [install, setInstall] = useState<string | null>(null);

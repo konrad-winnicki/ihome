@@ -22,7 +22,7 @@ const SensorList: React.FC = () => {
       return data;
     }
     if (response.status === 401) {
-      authorizationContext.setIsLoggedIn(false);
+      authorizationContext.setLoggedIn(false);
     }
   }, [token, authorizationContext]);
 

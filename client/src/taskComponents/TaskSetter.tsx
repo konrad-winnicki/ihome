@@ -4,7 +4,7 @@ import "react-time-picker/dist/TimePicker.css";
 import "react-clock/dist/Clock.css";
 import { MdOutlineSendToMobile } from "react-icons/md";
 import { OnOffOption } from "./OnOffOption";
-import "./time.css";
+import "../styles/time.css";
 import { createTask } from "../services";
 interface TimeProps {
   switchId: string;

@@ -55,7 +55,7 @@ export const CreateSensor: React.FC<CreateSensorProps> = (props) => {
         alert("Name already in use");
       }
       if (response.status === 401) {
-        authorizationContext.setIsLoggedIn(false);
+        authorizationContext.setLoggedIn(false);
         return;
       }
     } catch (error) {

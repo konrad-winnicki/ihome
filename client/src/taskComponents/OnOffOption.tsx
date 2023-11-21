@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import "./OnOffOption.css"; // Import your CSS file for styling
+import "../styles/OnOffOption.css"; // Import your CSS file for styling
 
 interface Option {
   value: string;

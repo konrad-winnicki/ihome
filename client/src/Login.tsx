@@ -5,7 +5,6 @@ import {
   AuthContextValue,
   AuthorizationContext,
 } from "./contexts/AuthorizationContext";
-import { useNavigate } from "react-router-dom";
 
 interface DecodedToken {
   sessionId: string;
@@ -25,7 +24,6 @@ export const Login: React.FC = () => {
       [name]: value,
     }));
   };
-  const navigate = useNavigate();
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
 
@@ -35,8 +33,7 @@ export const Login: React.FC = () => {
         const data = await response.json();
         const token = data.token;
         localStorage.setItem("token", token);
-        authorizationContext.setIsLoggedIn(true);
-        navigate("/");
+        authorizationContext.setLoggedIn(true);
         renewToken(token).then((token: string) => {
           autoLogOutTiming(token, authorizationContext);
         });
@@ -123,7 +120,7 @@ function autoLogOutTiming(
   const decodedToken: DecodedToken = jwt_decode(currentToken);
   const timeToLogout = calculateTimeToFinishToken(decodedToken);
   setTimeout(() => {
-    authorizationContext.setIsLoggedIn(false);
+    authorizationContext.setLoggedIn(false);
   }, timeToLogout);
 }
 

@@ -1,18 +1,14 @@
-import { useContext, useEffect, useState } from "react";
-import CreateSensor from "./CreateSensor";
-import SwitchesList from "./SwitchList";
-import { SettingsButton } from "./SettingsButton";
-import SensorList from "./SensorList";
-import { CreateSwitch } from "./CreateSwitch";
-import { AuthorizationContext } from "./App";
+import { useContext, useState } from "react";
+import CreateSensor from "./sensorComponents/CreateSensor";
+import SwitchesList from "./switchComponents/SwitchList";
+import { SettingsButton } from "./buttons/SettingsButton";
+import SensorList from "./sensorComponents/SensorList";
+import { CreateSwitch } from "./switchComponents/CreateSwitch";
+import { AuthorizationContext } from "./contexts/AuthorizationContext";
 
 const Dashboard: React.FC = () => {
   const [settings, setAddSettings] = useState<string | null>(null);
   const authorizationContext = useContext(AuthorizationContext);
-
-  useEffect(() => {
-    console.log(settings);
-  }, [settings]);
 
   return (
     <div className="h-screen app-container bg-white rounded-lg m-2">

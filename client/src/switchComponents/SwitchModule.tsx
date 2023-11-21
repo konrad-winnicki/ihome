@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import { BiTask } from "react-icons/bi";
 import ToggleSwitch from "./ToogleSwitch";
 import { FaTrashRestoreAlt } from "react-icons/fa";
-import { deleteDevice } from "./services";
+import { deleteDevice } from "../services";
 import { SwitchInterface } from "./SwitchList";
 
 export interface Parameters {

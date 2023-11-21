@@ -4,6 +4,7 @@ import "./index.css";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import App from "./App.tsx";
 import { StrictMode } from "react";
+import { AuthContextProvider } from "./contexts/AuthorizationContext.tsx";
 
 export const AppRoutes = () => (
   <Routes>
@@ -15,7 +16,9 @@ export const AppRoutes = () => (
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <Router>
-      <AppRoutes />
+      <AuthContextProvider>
+        <AppRoutes />
+      </AuthContextProvider>
     </Router>
   </StrictMode>
 );

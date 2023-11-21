@@ -1,23 +1,23 @@
 import React, { useContext, useState } from "react";
 import { login, renewSession } from "./services";
 import jwt_decode from "jwt-decode";
-import { AuthorizationContext, AuthContextValue } from "./App";
+import {
+  AuthContextValue,
+  AuthorizationContext,
+} from "./contexts/AuthorizationContext";
+import { useNavigate } from "react-router-dom";
 
 interface DecodedToken {
   sessionId: string;
   iat: number;
   exp: number;
 }
-/*
-type LoginType = {
-  setIsLoggedIn: (param: boolean) => void;
-};*/
+
 export const Login: React.FC = () => {
   const [formData, setFormData] = useState({
     password: "",
   });
   const authorizationContext = useContext(AuthorizationContext);
-
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
     setFormData((prevData) => ({
@@ -25,7 +25,7 @@ export const Login: React.FC = () => {
       [name]: value,
     }));
   };
-
+  const navigate = useNavigate();
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
 
@@ -36,8 +36,9 @@ export const Login: React.FC = () => {
         const token = data.token;
         localStorage.setItem("token", token);
         authorizationContext.setIsLoggedIn(true);
-        renewTokenTiming(token).then((token: string) => {
-          logOutTiming(token, authorizationContext);
+        navigate("/");
+        renewToken(token).then((token: string) => {
+          autoLogOutTiming(token, authorizationContext);
         });
       } else {
         alert("Password incorrect");
@@ -99,7 +100,7 @@ function calculateTimeToFinishToken(token: DecodedToken) {
   return timeoutInMiliseconds;
 }
 
-async function renewTokenTiming(currentToken: string): Promise<string> {
+async function renewToken(currentToken: string): Promise<string> {
   const decodedToken: DecodedToken = jwt_decode(currentToken);
   const timeoutToRefreshToken = calculateTimeToFinishToken(decodedToken);
   return new Promise<string>((resolve) => {
@@ -115,7 +116,7 @@ async function renewTokenTiming(currentToken: string): Promise<string> {
   });
 }
 
-function logOutTiming(
+function autoLogOutTiming(
   currentToken: string,
   authorizationContext: AuthContextValue
 ) {

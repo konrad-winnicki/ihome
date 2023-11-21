@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { FaTrashRestoreAlt } from "react-icons/fa";
-import { deleteTask } from "./services";
+import { deleteTask } from "../services";
 
 export interface Parameters {
   [key: string]: string;
@@ -35,10 +35,9 @@ export const TaskModule: React.FC<{
     }
   }
 
-
-  useEffect(()=>{
-    'task module render'
-  },[])
+  useEffect(() => {
+    "task module render";
+  }, []);
   return (
     <div className="flex flex-row justify-center items-center">
       <h1 className=" border border-black p-2 text-black rounded-xl text-lg font-semibold m-2">

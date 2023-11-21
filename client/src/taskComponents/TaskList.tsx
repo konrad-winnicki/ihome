@@ -1,9 +1,10 @@
-import React, { useState, useEffect, useCallback } from "react";
-import { getTasksWhereDeviceId } from "./services";
+import React, { useState, useEffect, useCallback, useContext } from "react";
+import { getTasksWhereDeviceId } from "../services";
 import TaskModule, { Task } from "./TaskModule";
-import { SwitchInterface } from "./SwitchList";
+import { SwitchInterface } from "../switchComponents/SwitchList";
 import { RiDeleteBack2Line } from "react-icons/ri";
 import { TaskSetter } from "./TaskSetter";
+import { AuthorizationContext } from "../contexts/AuthorizationContext";
 
 export interface Parameters {
   [key: string]: string;
@@ -20,6 +21,7 @@ const TaskList: React.FC<TaskListInterface> = (props) => {
   const [tasks, setTasks] = useState<Task[] | null>(null);
   const [isNewAdded, setNewAdded] = useState<boolean>(false);
   const [isDeleted, setDeleted] = useState<boolean>(false);
+  const authorizationContext = useContext(AuthorizationContext);
 
   const sortFunction = (data: Task[]) => {
     data.sort((a: Task, b: Task) => {
@@ -41,8 +43,12 @@ const TaskList: React.FC<TaskListInterface> = (props) => {
       const data = (await response.json()) as Task[];
       return sortFunction(data);
     }
+    if (response.status === 401) {
+      authorizationContext.setIsLoggedIn(false);
+      return Promise.reject();
+    }
     return Promise.reject();
-  }, [deviceId, token]);
+  }, [deviceId, token, authorizationContext]);
 
   useEffect(() => {
     getTasks().then((tasks) => setTasks(tasks));

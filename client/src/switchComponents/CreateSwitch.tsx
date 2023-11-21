@@ -1,6 +1,6 @@
-import React, { useContext, useEffect, useState } from "react";
-import { createSwitch } from "./services";
-import { AuthorizationContext } from "./App";
+import React, { useContext, useState } from "react";
+import { createSwitch } from "../services";
+import { AuthorizationContext } from "../contexts/AuthorizationContext";
 
 export type CreateSwitchProps = {
   setAddSettings: (param: string | null) => void;
@@ -13,10 +13,6 @@ export const CreateSwitch: React.FC<CreateSwitchProps> = (props) => {
     commandOff: "",
   });
   const authorizationContext = useContext(AuthorizationContext);
-
-  useEffect(() => {
-    console.log("form data", formData);
-  });
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;

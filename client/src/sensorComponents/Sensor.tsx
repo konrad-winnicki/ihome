@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 
-import { deleteDevice, runDevice } from "./services";
+import { deleteDevice, runDevice } from "../services";
 import { FaTrashRestoreAlt } from "react-icons/fa";
 
 export interface SensorDescription {

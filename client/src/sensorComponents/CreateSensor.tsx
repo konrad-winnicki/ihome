@@ -1,14 +1,14 @@
-import React, { useContext, useEffect, useState } from "react";
-import { createSensor as createSensor } from "./services";
-import { AuthorizationContext } from "./App";
+import React, { useContext, useState } from "react";
+import { createSensor as createSensor } from "../services";
+import { AuthorizationContext } from "../contexts/AuthorizationContext";
 
 export interface Parameters {
   [key: string]: string;
 }
-export type CreateMeterProps = {
+export type CreateSensorProps = {
   setAddSettings: (param: string | null) => void;
 };
-export const CreateSensor: React.FC<CreateMeterProps> = (props) => {
+export const CreateSensor: React.FC<CreateSensorProps> = (props) => {
   const [formData, setFormData] = useState({
     name: "",
     parameterString: "",
@@ -17,9 +17,6 @@ export const CreateSensor: React.FC<CreateMeterProps> = (props) => {
   });
   const authorizationContext = useContext(AuthorizationContext);
 
-  useEffect(() => {
-    console.log("form data", formData);
-  });
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
     setFormData((prevData) => ({
@@ -49,9 +46,7 @@ export const CreateSensor: React.FC<CreateMeterProps> = (props) => {
     const token = localStorage.getItem("token");
 
     try {
-      console.log("sensor", sensor);
       const response = await createSensor(sensor, token);
-      console.log("respnse", response);
       if (response.ok) {
         alert("Sensor created");
         console.log(await response.json());

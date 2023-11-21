@@ -5,7 +5,7 @@ import "react-clock/dist/Clock.css";
 import { MdOutlineSendToMobile } from "react-icons/md";
 import { OnOffOption } from "./OnOffOption";
 import "./time.css";
-import { createTask } from "./services";
+import { createTask } from "../services";
 interface TimeProps {
   switchId: string;
   setNewAdded: (param: boolean) => void;
@@ -21,7 +21,7 @@ export const TaskSetter: React.FC<TimeProps> = (props) => {
       setIsDisabled(false);
     }
 
-    console.log('task setter', onStatus)
+    console.log("task setter", onStatus);
   }, [time, onStatus]);
 
   const addTask = async () => {

@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useContext } from "react";
 import { RxDropdownMenu } from "react-icons/rx";
-import { getSwitches } from "./services";
+import { getSwitches } from "../services";
 import SwitchModule from "./SwitchModule";
-import TaskList from "./TaskList";
-import { AuthorizationContext } from "./App";
+import TaskList from "../taskComponents/TaskList";
+import { AuthorizationContext } from "../contexts/AuthorizationContext";
 
 export interface SwitchInterface {
   id: string;

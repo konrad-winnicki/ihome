@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useCallback, useContext } from "react";
 import Sensor, { SensorDescription } from "./Sensor";
-import { getSensors } from "./services";
+import { getSensors } from "../services";
 import SensorDisplay from "./SensorDisplay";
 import { RxDropdownMenu } from "react-icons/rx";
-import { AuthorizationContext } from "./App";
+import { AuthorizationContext } from "../contexts/AuthorizationContext";
 
 const SensorList: React.FC = () => {
   const authorizationContext = useContext(AuthorizationContext);

@@ -1,7 +1,8 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useContext } from "react";
 
 import { deleteDevice, runDevice } from "../services";
 import { FaTrashRestoreAlt } from "react-icons/fa";
+import { AuthorizationContext } from "../contexts/AuthorizationContext";
 
 export interface SensorDescription {
   id: string;
@@ -22,6 +23,7 @@ interface SensorProps {
 const Sensor: React.FC<SensorProps> = (props) => {
   const [collectedData, setCollectedData] = useState<Measurement>({});
   const { sensor, setDisplayData, setRefreshList } = props;
+  const authorizationContext = useContext(AuthorizationContext);
 
   const sensorId = sensor.id;
   const token = localStorage.getItem("token");
@@ -32,7 +34,12 @@ const Sensor: React.FC<SensorProps> = (props) => {
     if (response.ok) {
       const measurements = await response.json();
       setCollectedData(measurements);
-    } else {
+    } 
+    if (response.status === 401) {
+      authorizationContext.setLoggedIn(false);
+    }
+    
+    else {
       setDisplayData(["Error occurred:\n", "try again."]);
     }
   }
@@ -40,8 +47,14 @@ const Sensor: React.FC<SensorProps> = (props) => {
   async function deleteItem() {
     const confirmation = confirm("Do you want to delete device?");
     if (confirmation) {
-      await deleteDevice(sensor.id, token);
-      setRefreshList(true);
+      const response = await deleteDevice(sensor.id, token)
+      if (response.ok) {
+        setRefreshList(true);
+
+      } 
+      if (response.status === 401) {
+        authorizationContext.setLoggedIn(false);
+      }
     }
   }
 

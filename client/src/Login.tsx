@@ -26,7 +26,6 @@ export const Login: React.FC = () => {
   };
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-
     try {
       const response = await login(formData);
       if (response.ok) {

@@ -1,9 +1,10 @@
-import React, { useEffect } from "react";
+import React, { useContext, useEffect } from "react";
 import { BiTask } from "react-icons/bi";
 import ToggleSwitch from "./ToogleSwitch";
 import { FaTrashRestoreAlt } from "react-icons/fa";
 import { deleteDevice } from "../services";
 import { SwitchInterface } from "./SwitchList";
+import { AuthorizationContext } from "../contexts/AuthorizationContext";
 
 export interface Parameters {
   [key: string]: string;
@@ -23,12 +24,19 @@ export interface DeviceInterface {
 
 export const SwitchModule: React.FC<SwitchModuleInterface> = (props) => {
   const token = localStorage.getItem("token");
+  const authorizationContext = useContext(AuthorizationContext);
 
   async function deleteItem() {
     const confirmation = confirm("Do you want to delete device?");
     if (confirmation) {
-      await deleteDevice(props.switchDevice.id, token);
-      props.setRefreshList(true);
+      const response = await deleteDevice(props.switchDevice.id, token);
+      if (response.ok) {
+        props.setRefreshList(true);
+
+      } 
+      if (response.status === 401) {
+        authorizationContext.setLoggedIn(false);
+      }
     }
   }
 

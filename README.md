@@ -2,7 +2,7 @@
 # iHome
 
 NOTE:
-This application is under construction. Documentation may not be complete, hovewer main components can be used and tested by users.
+This is MVP version.The application is still under construction, hovewer main components can be used and tested by users. Documentation may not be complete. 
 
 <br>
 

@@ -128,7 +128,7 @@ docker-compose down
 - indicate sensor name to be shown in app
 - parameters name (separated by comma, without spaces)
 - parameter units (separated by comma, without spaces)
-- command to run script (e.g. python3.9 /home/pi/senspr.py on)
+- command to run script (e.g. python3.9 /home/pi/sensor.py on)
 
 <font color="#356CF3">**IMPORTANT:**</font>
  In case of sensors, after sensor script is run the application is waiting for its stdout.
@@ -143,7 +143,13 @@ docker-compose down
 
 ## Switch installation
 
+<p align="center">
+  <img src="_pictures/registerSwitch.png" alt="switch registration panel" width="150" />
+</p>
 
+- indicate switch name to be shown in app
+- command to run switch on script (e.g. python3.9 /home/pi/switch.py on)
+- command to run switch off script (e.g. python3.9 /home/pi/switch.py off)
 
 
 

@@ -25,10 +25,13 @@ const portQuestion = [
   {
     type: "input",
     name: "PORT",
-    message: "Indicate port on which server will run:",
-
+    message: "Press enter or indicate port on which server will run:",
+    default: '4000',
     validate: (input: string) => {
       const regExp = /^\d{4}$/;
+      if (!input){
+        return true
+      }
       if (input.match(regExp)) {
         return true;
       }

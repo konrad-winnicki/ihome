@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "",
   "main": "app.ts",
+  "engines": {
+    "node": ">=18.18.0"
+  },
   "scripts": {
     "build": "npx tsc",
     "eslint": "npx eslint .",

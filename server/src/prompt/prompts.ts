@@ -21,7 +21,7 @@ const passwordQuestions = [
   },
 ];
 
-const portQuestion = [
+const portHttpQuestion =
   {
     type: "input",
     name: "PORT",
@@ -37,8 +37,26 @@ const portQuestion = [
       }
       return "Port must contain 4 digits. Please try again.";
     },
-  },
-];
+  }
+
+  const portHttpsQuestion =
+  {
+    type: "input",
+    name: "PORT",
+    message: "Press enter or indicate port on which server will run:",
+    default: '443',
+    validate: (input: string) => {
+      const regExp = /^\d{3}$/;
+      if (!input){
+        return true
+      }
+      if (input.match(regExp)) {
+        return true;
+      }
+      return "Port must contain 3 digits. Please try again.";
+    },
+  }
+
 
 const persistenciaQuestions = [
   {
@@ -56,8 +74,27 @@ const persistenciaQuestions = [
   },
 ];
 
+const serverTypeQuestions = [
+  {
+    type: "list",
+    name: "SERVER_TYPE",
+    message: "Choose place of data persistencia:",
+    choices: ["http", "https"],
+  },
+  {
+    ...portHttpQuestion,
+    when: (answers: { [key: string]: string }) =>
+      answers.SERVER_TYPE === "http",
+  },
+  {
+    ...portHttpsQuestion,
+    when: (answers: { [key: string]: string }) =>
+      answers.SERVER_TYPE === "https",
+  },
+];
+
 const questions = [
-  ...portQuestion,
+  ...serverTypeQuestions,
   ...persistenciaQuestions,
   ...passwordQuestions,
 ];

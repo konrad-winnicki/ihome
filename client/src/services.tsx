@@ -2,7 +2,7 @@ import { PORT } from "./config/config";
 
 export function prepareURL() {
   const ip = localStorage.getItem("ip");
-  return `http://${ip}:${PORT}`;
+  return `https://${ip}:${PORT}`;
 }
 
 export interface FormData {
@@ -123,7 +123,7 @@ export async function deleteDevice(taskId: string, token: string | null) {
 
 export const createSensor = async (sensor: object, token: string | null) => {
   const URL = prepareURL();
-console.log('sensor in function', sensor)
+  console.log("sensor in function", sensor);
   const response = await fetch(`${URL}/devices`, {
     method: "POST",
     headers: {

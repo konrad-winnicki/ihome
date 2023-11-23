@@ -2,7 +2,7 @@ import PropertiesReader, { Value } from "properties-reader";
 import { choosePropertyFile } from "../src/propertyWriter";
 import { prepareAppProperties as prepareProductionPropertyFile } from "../src/prepareAppProperties";
 import sanitizedConfig from "./config";
-
+import fs from 'node:fs/promises'
 interface DATABASE_PROPERTIES {
   PASSWORD: Value | null;
   PERSISTENCIA: Value | null;
@@ -10,6 +10,8 @@ interface DATABASE_PROPERTIES {
   JWT_SECRET: Value | null;
   DATABASE_URL: Value | null;
   DATABASE: Value | null;
+  SERVER_TYPE:Value|null
+
 }
 
 interface FILE_PROPERTIES {
@@ -17,6 +19,8 @@ interface FILE_PROPERTIES {
   PERSISTENCIA: Value | null;
   PORT: Value | null;
   JWT_SECRET: Value | null;
+  SERVER_TYPE:Value|null
+
 }
 
 export interface DATABASE_CONFIGURATION {
@@ -26,6 +30,8 @@ export interface DATABASE_CONFIGURATION {
   JWT_SECRET: string;
   DATABASE_URL: string;
   DATABASE: string;
+  SERVER_TYPE:string;
+
 }
 
 export interface FILE_CONFIGURATION {
@@ -33,6 +39,7 @@ export interface FILE_CONFIGURATION {
   PERSISTENCIA: string;
   PORT: number;
   JWT_SECRET: string;
+  SERVER_TYPE:string;
 }
 const ENVIRONMENT = sanitizedConfig.NODE_ENV;
 
@@ -48,6 +55,7 @@ class EnvAwarePropertiesReader {
 }
 
 async function prepareApplicationProperties() {
+await prepareAppPropertiesFile()
   const propertiesPath = choosePropertyFile(ENVIRONMENT);
   const propertiesReader = PropertiesReader(propertiesPath, undefined, {
     writer: { saveSections: true },
@@ -70,6 +78,7 @@ async function prepareApplicationProperties() {
           ? process.env.DATABASE_URL
           : properties.get("DATABASE_URL"),
         DATABASE: properties.get("DATABASE"),
+        SERVER_TYPE: properties.get("SERVER_TYPE"),
       };
     } else {
       readedProperties = {
@@ -77,6 +86,8 @@ async function prepareApplicationProperties() {
         PERSISTENCIA: properties.get("PERSISTENCIA"),
         PORT: properties.get("PORT"),
         JWT_SECRET: properties.get("JWT_SECRET"),
+        SERVER_TYPE: properties.get("SERVER_TYPE"),
+
       };
     }
     console.log("PROPERTIES:", readedProperties);
@@ -98,6 +109,17 @@ async function prepareApplicationProperties() {
 
   const config = getConfiguration();
   return setAppConfiguration(config);
+}
+
+
+async function prepareAppPropertiesFile() {
+  
+  const dataTyWrite = ""
+  return fs
+      .writeFile('./src/properties/app.properties', dataTyWrite)
+      .catch((err) => {
+        console.log('Error during construction app.propersties file:', err)
+        throw new Error('Error during construction app.propersties file')})
 }
 
 export default prepareApplicationProperties;

@@ -13,12 +13,14 @@ function checkIfValidPropertyFile(properties: PropertiesReader.Reader) {
     "JWT_SECRET",
     "DATABASE_URL",
     "DATABASE",
+    "SERVER_TYPE",
   ];
   const expectedFileParameters = [
     "PASSWORD",
     "PERSISTENCIA",
     "PORT",
     "JWT_SECRET",
+    "SERVER_TYPE",
   ];
 
   if (properties.get("PERSISTENCIA") === "mongoDatabase") {
@@ -50,6 +52,10 @@ export async function prepareAppProperties(
         const responseKeys = Object.keys(response);
         responseKeys.forEach((key) => properties.set(key, response[key]));
         properties.set("JWT_SECRET", v4());
+        if (response.PERSISTENCIA === "mongoDatabase") {
+          properties.set("DATABASE", "raspberrypi");
+        }
+
         return propertyWriter(properties, propertiesPath);
       })
       .catch((err) => {

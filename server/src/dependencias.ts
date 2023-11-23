@@ -53,6 +53,31 @@ async function choosePersistenciaType(environment: string) {
   throw new Error("Imposible to choose persistencia type");
 }
 
+async function chooseServerType(
+  environment: string,
+  appServer: AppServer,
+  port: number
+) {
+  if (appConfiguration.SERVER_TYPE === "https") {
+    return appServer
+      .startHttpsServer(port)
+      .then(() => console.log("Https server started"))
+      .catch((err) => console.log("Error during starting https server:", err));
+  }
+  if (
+    appConfiguration.SERVER_TYPE === "http" ||
+    environment.includes("test_api_") ||
+    environment.includes("dev_")
+  ) {
+    return appServer
+      .startHttpServer(port)
+      .then(() => console.log("Http server started"))
+      .catch((err) => console.log("Error during starting http server:", err));
+  }
+
+  throw new Error("Imposible to choose server type");
+}
+
 function createFileRepositories() {
   const serverMessages = ServerMessages.getInstance();
   const fileHelperMethods = new FileRepositoryHelpers();
@@ -149,11 +174,8 @@ export async function initializeDependencias() {
 
   const port = Number(appConfiguration.PORT);
 
-  appServer
-    .startServer(port)
-    .then(() => console.log("App server started"))
-    .catch((err) => console.log("error", err));
-
+  await chooseServerType(ENVIRONMENT, appServer, port)
+  
   if ("mongoDatabase" in persistenciaType) {
     return Application.getInstance(
       appServer,

@@ -8,3 +8,8 @@ production.env
 server/src/properties/app.properties
 **/androidw/
 **/android/
+server/src/_ssl/*.csr
+server/src/_ssl/*.crt
+server/src/_ssl/*.key
+server/src/_ssl/*.key
+server/src/_ssl/*.pub

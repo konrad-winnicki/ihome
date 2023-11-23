@@ -3,6 +3,8 @@ import { choosePropertyFile } from "../src/propertyWriter";
 import { prepareAppProperties as prepareProductionPropertyFile } from "../src/prepareAppProperties";
 import sanitizedConfig from "./config";
 import fs from 'node:fs/promises'
+import * as sync from "node:fs";
+
 interface DATABASE_PROPERTIES {
   PASSWORD: Value | null;
   PERSISTENCIA: Value | null;
@@ -113,7 +115,9 @@ await prepareAppPropertiesFile()
 
 
 async function prepareAppPropertiesFile() {
-  
+  if (sync.existsSync('./src/properties/app.properties')) {
+    return 'File exists'
+  }
   const dataTyWrite = ""
   return fs
       .writeFile('./src/properties/app.properties', dataTyWrite)

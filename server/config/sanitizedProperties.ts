@@ -1,49 +1,44 @@
 import PropertiesReader, { Value } from "properties-reader";
 import { choosePropertyFile } from "../src/propertyWriter";
 import { prepareAppProperties as prepareProductionPropertyFile } from "../src/prepareAppProperties";
-import sanitizedConfig from "./config";
-import fs from 'node:fs/promises'
+import { getEnvironmentType } from "./config";
+import fs from "node:fs/promises";
 import * as sync from "node:fs";
 
-interface DATABASE_PROPERTIES {
+// TODO: remove nulls here
+interface COMMON_PROPERTIES {
   PASSWORD: Value | null;
   PERSISTENCIA: Value | null;
   PORT: Value | null;
   JWT_SECRET: Value | null;
+  SERVER_TYPE: Value | null;
+  SWITCH_REPLY_TIMEOUT: Value | null;
+}
+interface DATABASE_PROPERTIES extends COMMON_PROPERTIES {
   DATABASE_URL: Value | null;
   DATABASE: Value | null;
-  SERVER_TYPE:Value|null
-
 }
 
-interface FILE_PROPERTIES {
-  PASSWORD: Value | null;
-  PERSISTENCIA: Value | null;
-  PORT: Value | null;
-  JWT_SECRET: Value | null;
-  SERVER_TYPE:Value|null
+interface FILE_PROPERTIES extends COMMON_PROPERTIES {}
 
-}
+export type PersistenceType = "DATABASE" | "FILE";
 
-export interface DATABASE_CONFIGURATION {
+interface COMMON_CONFIGURATION {
   PASSWORD: string;
-  PERSISTENCIA: string;
+  PERSISTENCIA: PersistenceType; // TODO: rename
   PORT: number;
   JWT_SECRET: string;
+  SERVER_TYPE: string;
+  SWITCH_REPLY_TIMEOUT: number;
+}
+export interface DATABASE_CONFIGURATION extends COMMON_CONFIGURATION {
   DATABASE_URL: string;
   DATABASE: string;
-  SERVER_TYPE:string;
-
 }
 
-export interface FILE_CONFIGURATION {
-  PASSWORD: string;
-  PERSISTENCIA: string;
-  PORT: number;
-  JWT_SECRET: string;
-  SERVER_TYPE:string;
-}
-const ENVIRONMENT = sanitizedConfig.NODE_ENV;
+export interface FILE_CONFIGURATION extends COMMON_CONFIGURATION {}
+
+const ENVIRONMENT = getEnvironmentType();
 
 class EnvAwarePropertiesReader {
   private properties: PropertiesReader.Reader;
@@ -57,7 +52,7 @@ class EnvAwarePropertiesReader {
 }
 
 async function prepareApplicationProperties() {
-await prepareAppPropertiesFile()
+  await assureProductionPropertiesFileExists();
   const propertiesPath = choosePropertyFile(ENVIRONMENT);
   const propertiesReader = PropertiesReader(propertiesPath, undefined, {
     writer: { saveSections: true },
@@ -69,36 +64,30 @@ await prepareAppPropertiesFile()
   }
 
   const getConfiguration = (): DATABASE_PROPERTIES | FILE_PROPERTIES => {
-    let readedProperties: DATABASE_PROPERTIES | FILE_PROPERTIES;
-    if (properties.get("PERSISTENCIA") === "mongoDatabase") {
-      readedProperties = {
-        PASSWORD: properties.get("PASSWORD"),
-        PERSISTENCIA: properties.get("PERSISTENCIA"),
-        PORT: properties.get("PORT"),
-        JWT_SECRET: properties.get("JWT_SECRET"),
-        DATABASE_URL: process.env.DATABASE_URL
-          ? process.env.DATABASE_URL
-          : properties.get("DATABASE_URL"),
-        DATABASE: properties.get("DATABASE"),
-        SERVER_TYPE: properties.get("SERVER_TYPE"),
-      };
-    } else {
-      readedProperties = {
-        PASSWORD: properties.get("PASSWORD"),
-        PERSISTENCIA: properties.get("PERSISTENCIA"),
-        PORT: properties.get("PORT"),
-        JWT_SECRET: properties.get("JWT_SECRET"),
-        SERVER_TYPE: properties.get("SERVER_TYPE"),
+    const commonProperties = {
+      PASSWORD: properties.get("PASSWORD"),
+      PERSISTENCIA: properties.get("PERSISTENCIA"),
+      PORT: properties.get("PORT"),
+      JWT_SECRET: properties.get("JWT_SECRET"),
+      SERVER_TYPE: properties.get("SERVER_TYPE"),
+      SWITCH_REPLY_TIMEOUT: properties.get("SWITCH_REPLY_TIMEOUT"),
+    };
+    const readedProperties =
+      properties.get("PERSISTENCIA") === "DATABASE"
+        ? {
+            ...commonProperties,
+            DATABASE_URL: properties.get("DATABASE_URL"),
+            DATABASE: properties.get("DATABASE"),
+          }
+        : commonProperties;
 
-      };
-    }
     console.log("PROPERTIES:", readedProperties);
     return readedProperties;
   };
 
   const setAppConfiguration = (
     config: DATABASE_PROPERTIES | FILE_PROPERTIES
-  ): DATABASE_CONFIGURATION & FILE_CONFIGURATION => {
+  ): DATABASE_CONFIGURATION | FILE_CONFIGURATION => {
     for (const [key, value] of Object.entries(config)) {
       if (value === null) {
         throw new Error(
@@ -106,24 +95,64 @@ await prepareAppPropertiesFile()
         );
       }
     }
-    return config as DATABASE_CONFIGURATION & FILE_CONFIGURATION;
+    function parseString(name: string, value: Value | null): string {
+      if (!value) {
+        throw Error(`Missing value for ${name}`);
+      }
+      return value.toString();
+    }
+    function parseNumber(name: string, value: Value | null): number {
+      if (!value) {
+        throw Error(`Missing value for ${name}`);
+      }
+      return value as number; // TODO: test if it's not
+    }
+    // conversion of Values to expected type
+    const persistenceType = parseString(
+      "persistencia",
+      config.PERSISTENCIA
+    ) as PersistenceType;
+    const commonProperties = {
+      PASSWORD: parseString("password", config.PASSWORD),
+      PERSISTENCIA: persistenceType,
+      PORT: parseNumber("port", config.PORT),
+      JWT_SECRET: parseString("jwt secret", config.JWT_SECRET),
+      SERVER_TYPE: parseString("http server type", config.SERVER_TYPE),
+      SWITCH_REPLY_TIMEOUT: parseNumber(
+        "switch reply timeout",
+        config.SWITCH_REPLY_TIMEOUT
+      ),
+    };
+    return persistenceType === "DATABASE"
+      ? {
+          ...commonProperties,
+          DATABASE_URL: parseString(
+            "database url",
+            (config as DATABASE_PROPERTIES).DATABASE_URL
+          ),
+          DATABASE: parseString(
+            "database name",
+            (config as DATABASE_PROPERTIES).DATABASE
+          ),
+        }
+      : commonProperties;
   };
 
   const config = getConfiguration();
   return setAppConfiguration(config);
 }
 
-
-async function prepareAppPropertiesFile() {
-  if (sync.existsSync('./src/properties/app.properties')) {
-    return 'File exists'
+async function assureProductionPropertiesFileExists() {
+  if (sync.existsSync("./src/properties/app.properties")) {
+    return "File exists";
   }
-  const dataTyWrite = ""
+  const dataToWrite = "";
   return fs
-      .writeFile('./src/properties/app.properties', dataTyWrite)
-      .catch((err) => {
-        console.log('Error during construction app.propersties file:', err)
-        throw new Error('Error during construction app.propersties file')})
+    .writeFile("./src/properties/app.properties", dataToWrite)
+    .catch((err) => {
+      console.log("Error during construction app.propersties file:", err);
+      throw new Error("Error during construction app.propersties file");
+    });
 }
 
 export default prepareApplicationProperties;

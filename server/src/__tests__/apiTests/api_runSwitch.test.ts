@@ -1,6 +1,5 @@
 import request from "supertest";
 import { describe, afterAll, beforeAll } from "@jest/globals";
-import sanitizedConfig from "../../../config/config";
 import { initializeDependencias } from "../../dependencias";
 import { Application } from "../../dependencias";
 import { cleanupDatabase } from "./auxilaryFunctionsForTests/dbCleanup";
@@ -9,29 +8,26 @@ import { addSwitch } from "./auxilaryFunctionsForTests/addSwitch";
 import { Connection } from "mongoose";
 import { cleanupFiles } from "./auxilaryFunctionsForTests/fileCleanup";
 import cron from "node-cron";
+import { getEnvironmentType } from "../../../config/config";
 
-const environment = sanitizedConfig.NODE_ENV
+const environment = getEnvironmentType();
 
 describe("API RUN SWITCH TEST", () => {
   let app: Application;
   let token: string;
   let switchId: string;
   let switchWithNonExistingScriptId: string;
-  let listeningSwitch: string;
+  let hangingSwitch: string;
   let switchWithNoPrint: string;
-  let requestUri:string
+  let requestUri: string;
   beforeAll(async () => {
-
     app = await initializeDependencias();
-    if (environment === "test_api_database"){
-      const connection = (app.databaseInstance?.connection) as Connection
+    if (environment === "test_api_database") {
+      const connection = app.databaseInstance?.connection as Connection;
       await cleanupDatabase(connection);
-
+    } else if (environment === "test_api_file") {
+      await cleanupFiles(["devices.json"]);
     }
-   else if (environment === "test_api_file"){
-      await cleanupFiles(['devices.json']);
-
-    }    
     requestUri = `http://localhost:${appConfiguration.PORT}`;
 
     app.devicesInMemory.devices.clear();
@@ -53,7 +49,7 @@ describe("API RUN SWITCH TEST", () => {
       ". ./src/__tests__/apiTests/shellScripts/nonExisiting.sh",
       ". ./src/__tests__/apiTests/shellScripts/nonExisting.sh"
     );
-    listeningSwitch = await addSwitch(
+    hangingSwitch = await addSwitch(
       requestUri,
       token,
       "switch",
@@ -83,6 +79,7 @@ describe("API RUN SWITCH TEST", () => {
   });
 
   test("Should run command off script:", async () => {
+    await switchOn(requestUri, switchId, token);
     const responseFromSwitch = await request(requestUri)
       .post(`/devices/run/${switchId}`)
       .set("Authorization", token)
@@ -101,9 +98,7 @@ describe("API RUN SWITCH TEST", () => {
       .expect(500)
       .expect("Content-Type", /text\/plain/);
 
-    expect(responseFromSwitch.text).toMatch(
-      "Acomplished with error:"
-    );
+    expect(responseFromSwitch.text).toMatch("Acomplished with error:");
   });
 
   test("Switch off should return error if file not exists:", async () => {
@@ -113,9 +108,7 @@ describe("API RUN SWITCH TEST", () => {
       .send({ onStatus: true })
       .expect(500)
       .expect("Content-Type", /text\/plain/);
-    expect(responseFromMeter.text).toMatch(
-      "Acomplished with error:"
-    );
+    expect(responseFromMeter.text).toMatch("Acomplished with error:");
   });
 
   test("Switch off should return error if is already off:", async () => {
@@ -125,18 +118,15 @@ describe("API RUN SWITCH TEST", () => {
       .send({ onStatus: false })
       .expect(500)
       .expect("Content-Type", /text\/plain/);
-    expect(responseFromMeter.text).toMatch(
-      "Device is currently off"
-    );
+    expect(responseFromMeter.text).toMatch("Device is currently off");
   });
 
   test("Switch off should return error if is already on:", async () => {
     await request(requestUri)
       .post(`/devices/run/${switchId}`)
       .set("Authorization", token)
-      .send({ onStatus: true })
-     
-    
+      .send({ onStatus: true });
+
     const responseFromMeter = await request(requestUri)
       .post(`/devices/run/${switchId}`)
       .set("Authorization", token)
@@ -144,14 +134,12 @@ describe("API RUN SWITCH TEST", () => {
       .expect(500)
       .expect("Content-Type", /text\/plain/);
     console.log(responseFromMeter.text);
-    expect(responseFromMeter.text).toMatch(
-      "Device is currently on"
-    );
+    expect(responseFromMeter.text).toMatch("Device is currently on");
   });
 
-  test("Should resolve promise even if process not ended:", async () => {
+  test("Should timeout waiting for switch command result", async () => {
     const responseFromMeter = await request(requestUri)
-      .post(`/devices/run/${listeningSwitch}`)
+      .post(`/devices/run/${hangingSwitch}`)
       .set("Authorization", token)
       .send({ onStatus: true })
       .expect(200)
@@ -175,16 +163,22 @@ describe("API RUN SWITCH TEST", () => {
     );
   });
 
-
   afterAll(async () => {
-    if (environment=== "test_api_database"){
-     // await app.databaseInstance?.connection.dropDatabase()
-      await app.databaseInstance?.connection.close();}
-      if (environment === "test_api_file") {
-        await cleanupFiles(['devices.json', 'tasks.json']);
-      }
-      cron.getTasks().forEach((task) => task.stop());
-      cron.getTasks().clear();
-      await app.appServer.stopServer();
+    if (environment === "test_api_database") {
+      await app.databaseInstance?.connection.close();
+    }
+    if (environment === "test_api_file") {
+      await cleanupFiles(["devices.json", "tasks.json"]);
+    }
+    cron.getTasks().forEach((task) => task.stop());
+    cron.getTasks().clear();
+    await app.appServer.stopServer();
   });
 });
+
+async function switchOn(requestUri: string, switchId: string, token: string) {
+  await request(requestUri)
+    .post(`/devices/run/${switchId}`)
+    .set("Authorization", token)
+    .send({ onStatus: true });
+}

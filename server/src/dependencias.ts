@@ -24,9 +24,10 @@ import { FileTaskRepository } from "./Infrastructure/filePersistencia/FileTaskRe
 import { MongoTaskRepository } from "./Infrastructure/task/MongoTaskRepository";
 import { TaskService } from "./application/task/TaskService";
 import { DevicePerformer } from "./domain/DevicePerformer";
-import sanitizedConfig from "../config/config";
+import { getEnvironmentType } from "../config/config";
+import { DATABASE_CONFIGURATION } from "../config/sanitizedProperties";
 
-const ENVIRONMENT = sanitizedConfig.NODE_ENV;
+const ENVIRONMENT = getEnvironmentType();
 
 function createMongoDocs(database: MongoDatabase) {
   const deviceDoc = database.createDeviceDoc();
@@ -34,23 +35,19 @@ function createMongoDocs(database: MongoDatabase) {
   return { deviceDoc, taskDoc };
 }
 
-async function choosePersistenciaType(environment: string) {
-  if (
-    appConfiguration.PERSISTENCIA === "mongoDatabase" ||
-    environment === "test_api_database" ||
-    environment === "dev_database"
-  ) {
-    return createDBRepositories();
-  }
-  if (
-    appConfiguration.PERSISTENCIA === "file" ||
-    environment === "test_api_file" ||
-    environment === "dev_file"
-  ) {
-    return createFileRepositories();
+async function createRepositories() {
+  function throwUnknownPersistenceType(unknownType: never): never {
+    throw new Error("Unknown persistence type: " + unknownType);
   }
 
-  throw new Error("Imposible to choose persistencia type");
+  switch (appConfiguration.PERSISTENCIA) {
+    case "DATABASE":
+      return createDBRepositories(appConfiguration as DATABASE_CONFIGURATION);
+    case "FILE":
+      return createFileRepositories();
+    default:
+      return throwUnknownPersistenceType(appConfiguration.PERSISTENCIA);
+  }
 }
 
 async function chooseServerType(
@@ -93,13 +90,11 @@ function createFileRepositories() {
   return { deviceRepository, taskRepository };
 }
 
-async function createDBRepositories() {
+async function createDBRepositories(config: DATABASE_CONFIGURATION) {
   const serverMessages = ServerMessages.getInstance();
 
-  const mongoDatabase = new MongoDatabase(
-    appConfiguration.DATABASE_URL,
-    appConfiguration.DATABASE
-  );
+  const mongoDatabase = new MongoDatabase(config.DATABASE_URL, config.DATABASE);
+
   const mongoDocs = createMongoDocs(mongoDatabase);
 
   const deviceRepository = new MongoDeviceRepository(
@@ -122,12 +117,12 @@ export async function initializeDependencias() {
 
   const devicesInMemory = CachedDevice.getInstance();
 
-  const persistenciaType = await choosePersistenciaType(ENVIRONMENT);
+  const repositories = await createRepositories();
   const deviceRunService = new DeviceRunService(devicesInMemory);
 
   const cacheDeviceRepository = new CacheDeviceRepository(
     devicesInMemory,
-    persistenciaType.deviceRepository,
+    repositories.deviceRepository,
     serverMessages
   );
 
@@ -136,7 +131,7 @@ export async function initializeDependencias() {
   const appCorn = new TaskScheduler(deviceRunService);
   const cronTaskManager = new CronTaskManager(
     appCorn,
-    persistenciaType.taskRepository,
+    repositories.taskRepository,
     serverMessages
   );
 
@@ -162,26 +157,26 @@ export async function initializeDependencias() {
   const appServer = new AppServer(appRouter);
 
   const cronTaskRepository = new TaskRecoveryManager(
-    persistenciaType.taskRepository,
+    repositories.taskRepository,
     appCorn
   );
 
   await switchOffAllDevicesAfterServerStart(deviceService)
-    .then((result) => console.log(result))
+    .then((result) => console.log("Switched off all devices:", result))
     .catch((error) => console.log(error));
 
   await recoverTasks(cronTaskRepository);
 
-  const port = Number(appConfiguration.PORT);
+  const port = appConfiguration.PORT;
 
-  await chooseServerType(ENVIRONMENT, appServer, port)
-  
-  if ("mongoDatabase" in persistenciaType) {
+  await chooseServerType(ENVIRONMENT, appServer, port);
+
+  if ("mongoDatabase" in repositories) {
     return Application.getInstance(
       appServer,
       devicesInMemory,
       serverMessages,
-      persistenciaType.mongoDatabase
+      repositories.mongoDatabase
     );
   } else {
     return Application.getInstance(appServer, devicesInMemory, serverMessages);
@@ -242,7 +237,7 @@ async function switchOffAllDevicesAfterServerStart(
       .catch(() => {
         const message = {
           [`Switch ${device.id}`]:
-            "Error occureed during switching off after server restart",
+            "Error occured during switching off after server restart",
         };
         return Promise.resolve(message);
       });

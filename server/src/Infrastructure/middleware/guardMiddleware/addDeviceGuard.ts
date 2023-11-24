@@ -14,7 +14,6 @@ interface DeviceRequest {
 export async function addDeviceGuardMiddleware(ctx: Koa.Context, next: Next) {
   const body = await ctx.request.body;
   const deviceType: string = (body as DeviceRequest).deviceType;
-  console.log("ffff", deviceType);
   if (deviceType == "switch") {
     const maybeSwitch = body as Switch;
     if (isSwitch(maybeSwitch)) {

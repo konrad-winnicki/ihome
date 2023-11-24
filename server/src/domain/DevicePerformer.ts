@@ -1,4 +1,3 @@
-import sanitizedConfig from "../../config/config";
 import { Device } from "./Device";
 import { Switch } from "./Switch";
 import { exec } from "child_process";
@@ -18,12 +17,11 @@ export class DevicePerformer {
   }
 
   public async switchOn(device: Device) {
-      return this.executeAndCollectSdtout(device.commandOn);
+    return this.executeAndCollectSdtout(device.commandOn);
   }
 
-  
   public async switchOff(device: Switch) {
-      return this.executeAndCollectSdtout(device.commandOff);
+    return this.executeAndCollectSdtout(device.commandOff);
   }
 
   private async executeAndCollectSdtout(command: string): Promise<string> {
@@ -47,12 +45,9 @@ export class DevicePerformer {
 
   private async longLastingProcResolver() {
     return new Promise<string>((resolve) => {
-      setTimeout(
-        () => {
-          resolve("Timeout: Proccess not ended. Not waiting more for stdout.");
-        },
-        sanitizedConfig.NODE_ENV.includes("test") ? 500 : 60000
-      );
+      setTimeout(() => {
+        resolve("Timeout: Proccess not ended. Not waiting more for stdout.");
+      }, appConfiguration.SWITCH_REPLY_TIMEOUT);
     });
   }
 }

@@ -8,46 +8,25 @@ const authenticate = async (ctx: Koa.Context, next: Next) => {
   const token = data?.replace("Bearer ", "");
   if (!token) {
     ctx.status = 401;
-    return (ctx.body = {"Error": "Token reqired"});
+    return (ctx.body = { Error: "Token required" });
   }
   return tokenValidation(token)
     .then(() => next())
     .catch((error) => {
-      console.log('errr', error)
       ctx.status = 401;
-      return (ctx.body = {"Token validation error": error});
+      return (ctx.body = { "Token validation error": error });
     });
-
-  /*
-  try {
-    jwt.verify(token, sanitizedConfig.JWT_SECRET, {
-      ignoreExpiration: false,
-    }) as JwtPayload;
-    await next();
-  } catch (error) {
-    if (error === "jwt expired") {
-      await next();
-    }
-    await next();
-  }
-
-  */
 };
 
-
-const tokenValidation = (token: string) => {
-  console.log('tonenvalidation', token)
-  
-  return new Promise<string>((resolve) => {
+const tokenValidation = (token: string) =>
+  new Promise<string>((resolve) => {
     jwt.verify(token, appConfiguration.JWT_SECRET, {
       ignoreExpiration: false,
     }) as JwtPayload;
-    console.log('resolve')
     resolve("access granted");
-  }).catch((error:Error) => 
-   error.message === "jwt expired"
-      ? Promise.reject('jwt expired')
+  }).catch((error: Error) =>
+    error.message === "jwt expired"
+      ? Promise.reject("jwt expired")
       : Promise.reject(`During token verification error occured: ${error}`)
-);
-};
+  );
 export default authenticate;

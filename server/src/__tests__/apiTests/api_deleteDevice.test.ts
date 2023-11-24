@@ -1,6 +1,5 @@
 import request from "supertest";
 import { describe, afterAll, beforeEach, beforeAll } from "@jest/globals";
-import sanitizedConfig from "../../../config/config";
 import { initializeDependencias } from "../../dependencias";
 import { Application } from "../../dependencias";
 import { cleanupDatabase } from "./auxilaryFunctionsForTests/dbCleanup";
@@ -18,8 +17,9 @@ import { cleanupFiles } from "./auxilaryFunctionsForTests/fileCleanup";
 import { Connection } from "mongoose";
 import { Device } from "../../domain/Device";
 import cron from "node-cron";
+import { getEnvironmentType } from "../../../config/config";
 
-const environment = sanitizedConfig.NODE_ENV;
+const environment = getEnvironmentType();
 
 describe("API DELETE DEVICE TEST", () => {
   let app: Application;
@@ -51,7 +51,7 @@ describe("API DELETE DEVICE TEST", () => {
       console.log("sfter cleanup", app.devicesInMemory.devices);
     }
     if (environment === "test_api_file") {
-      await cleanupFiles(["devices.json", 'tasks.json']);
+      await cleanupFiles(["devices.json", "tasks.json"]);
     }
     app.devicesInMemory.devices.clear();
     token = await loginUser(requestUri, "testPassword");
@@ -83,13 +83,14 @@ describe("API DELETE DEVICE TEST", () => {
       .expect(500)
       .expect("Content-Type", /application\/json/);
 
-
     const devicesInDB = await listDevices();
     const [device1, device2] = app.devicesInMemory.devices.values();
     expect(response.body).toEqual({
-      ["Device not deleted"]: {"Persistence error": {
-        NonExistsError: "Device with id nonExisitingId does not exist.",
-      }},
+      ["Device not deleted"]: {
+        "Persistence error": {
+          NonExistsError: "Device with id nonExisitingId does not exist.",
+        },
+      },
     });
     expect(devicesInDB).toMatchObject([
       {
@@ -162,12 +163,12 @@ describe("API DELETE DEVICE TEST", () => {
       .expect("Content-Type", /application\/json/);
 
     expect(response.body).toEqual({
-      Error: "Token reqired",
+      Error: "Token required",
     });
   });
   afterAll(async () => {
     if (environment === "test_api_database") {
-     // await app.databaseInstance?.connection.dropDatabase()
+      // await app.databaseInstance?.connection.dropDatabase()
       await app.databaseInstance?.connection.close();
     }
     if (environment === "test_api_file") {

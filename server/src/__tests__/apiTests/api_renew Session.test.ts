@@ -1,6 +1,6 @@
 import request from "supertest";
 import { describe, afterAll, beforeAll, it } from "@jest/globals";
-import sanitizedConfig from "../../../config/config";
+import { getEnvironmentType } from "../../../config/config";
 import { initializeDependencias } from "../../dependencias";
 import { Application } from "../../dependencias";
 import { loginUser } from "./auxilaryFunctionsForTests/loginUser";
@@ -9,7 +9,7 @@ import cron from "node-cron";
 import { cleanupFiles } from "./auxilaryFunctionsForTests/fileCleanup";
 import { tokenExpirationTimeInSeconds } from "../../domain/tokenGenerator";
 
-const environment = sanitizedConfig.NODE_ENV;
+const environment = getEnvironmentType()
 
 describe("API RENEW SESSION TEST", () => {
   let app: Application;

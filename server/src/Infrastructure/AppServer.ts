@@ -1,7 +1,7 @@
 import bodyParser from "koa-bodyparser";
 import Router from "koa-router";
 import Koa from "koa";
-import cors from "koa-cors";
+import cors from "@koa/cors";
 import * as httpLibrary from "http";
 import https from "https";
 import fs from "fs/promises";
@@ -29,7 +29,7 @@ export class AppServer {
   startHttpServer(port: number) {
     return new Promise((resolve, reject) => {
       const server = this.serverConfig.listen(port, () => {
-        console.log(`Server listen at port ${port}`);
+        console.log(`Server listen on port ${port}`);
         this.server = server;
         resolve(this.server);
       });
@@ -75,7 +75,7 @@ export class AppServer {
   public stopServer() {
     return new Promise((resolve) => {
       this.server?.close(() => {
-        console.log(`Server stops listen`);
+        console.log(`Server closed.`);
         this.server = undefined;
         resolve("Server closed");
       });

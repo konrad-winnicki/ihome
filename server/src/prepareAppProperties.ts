@@ -6,31 +6,29 @@ import { propertyWriter } from "./propertyWriter";
 import { checkIfNotMissingParams } from "./Infrastructure/middleware/guardMiddleware/guardHelpers/guardFunctionHelpers";
 
 function checkIfValidPropertyFile(properties: PropertiesReader.Reader) {
-  const expectedDatabaseParameters = [
+  const commonExpectedParameters = [
     "PASSWORD",
     "PERSISTENCIA",
     "PORT",
     "JWT_SECRET",
+    "SERVER_TYPE",
+    "SWITCH_REPLY_TIMEOUT",
+  ];
+  const expectedDatabaseParameters = [
+    ...commonExpectedParameters,
     "DATABASE_URL",
     "DATABASE",
-    "SERVER_TYPE",
   ];
-  const expectedFileParameters = [
-    "PASSWORD",
-    "PERSISTENCIA",
-    "PORT",
-    "JWT_SECRET",
-    "SERVER_TYPE",
-  ];
+  const expectedFileParameters = commonExpectedParameters;
 
-  if (properties.get("PERSISTENCIA") === "mongoDatabase") {
+  if (properties.get("PERSISTENCIA") === "DATABASE") {
     return checkIfNotMissingParams(
       properties.getAllProperties(),
       expectedDatabaseParameters
     );
   }
 
-  if (properties.get("PERSISTENCIA") === "file") {
+  if (properties.get("PERSISTENCIA") === "FILE") {
     return checkIfNotMissingParams(
       properties.getAllProperties(),
       expectedFileParameters
@@ -52,7 +50,8 @@ export async function prepareAppProperties(
         const responseKeys = Object.keys(response);
         responseKeys.forEach((key) => properties.set(key, response[key]));
         properties.set("JWT_SECRET", v4());
-        if (response.PERSISTENCIA === "mongoDatabase") {
+        properties.set("SWITCH_REPLY_TIMEOUT", 60000);
+        if (response.PERSISTENCIA === "DATABASE") {
           properties.set("DATABASE", "raspberrypi");
         }
 

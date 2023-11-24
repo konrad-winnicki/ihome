@@ -1,6 +1,5 @@
 import request from "supertest";
 import { describe, afterAll, beforeEach, beforeAll } from "@jest/globals";
-import sanitizedConfig from "../../../config/config";
 import { initializeDependencias } from "../../dependencias";
 import { Application } from "../../dependencias";
 import { cleanupDatabase } from "./auxilaryFunctionsForTests/dbCleanup";
@@ -15,8 +14,9 @@ import {
   getTasksForDeviceFromDB,
   getTasksForDeviceFromFile,
 } from "./auxilaryFunctionsForTests/getTasksForDevice";
+import { getEnvironmentType } from "../../../config/config";
 
-const environment = sanitizedConfig.NODE_ENV;
+const environment = getEnvironmentType();
 
 describe("API DELETE TASK TEST", () => {
   let app: Application;
@@ -25,7 +25,7 @@ describe("API DELETE TASK TEST", () => {
   let task1Id: string;
   let task2Id: string;
   let getTasksForDevice: (deviceId: string) => Promise<Task[]>;
-let requestUri: string;
+  let requestUri: string;
   beforeAll(async () => {
     app = await initializeDependencias();
     if (environment === "test_api_database") {
@@ -39,7 +39,6 @@ let requestUri: string;
     token = await loginUser(requestUri, "testPassword");
   });
 
-
   beforeEach(async () => {
     if (environment === "test_api_database") {
       const connection = app.databaseInstance?.connection as Connection;
@@ -49,10 +48,8 @@ let requestUri: string;
       await cleanupFiles(["devices.json", "tasks.json"]);
     }
 
-
     cron.getTasks().forEach((task) => task.stop());
     cron.getTasks().clear();
-
 
     switch1Id = await addSwitch(
       requestUri,
@@ -98,7 +95,7 @@ let requestUri: string;
     expect(deletedTaskFromMemory).toEqual(undefined);
     expect(remainingTaskInDB.id).toEqual(task2Id);
   });
-  
+
   test("Should not delete task from database if wrong task Id:", async () => {
     const nonExisitingId = "nonExisitingId";
     const response = await request(requestUri)
@@ -107,9 +104,9 @@ let requestUri: string;
       .expect(500)
       .expect("Content-Type", /application\/json/);
 
-
-
-    expect(response.body).toEqual({ 'Task not deleted': { 'error': 'Task not exists' } });
+    expect(response.body).toEqual({
+      "Task not deleted": { error: "Task not exists" },
+    });
   });
 
   test("Should not delete task if not valid token:", async () => {
@@ -134,23 +131,21 @@ let requestUri: string;
       .expect("Content-Type", /application\/json/);
 
     expect(response.body).toEqual({
-      Error: "Token reqired",
+      Error: "Token required",
     });
   });
-
 
   afterAll(async () => {
     if (environment === "test_api_database") {
       //await app.databaseInstance?.connection.dropDatabase()
       await app.databaseInstance?.connection.close();
     }
-    if (environment=== "test_api_file") {
+    if (environment === "test_api_file") {
       await cleanupFiles(["devices.json", "tasks.json"]);
     }
 
     cron.getTasks().forEach((task) => task.stop());
     cron.getTasks().clear();
-
 
     await app.appServer.stopServer();
   });

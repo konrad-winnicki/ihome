@@ -5,7 +5,7 @@ import {
 
 declare global {
   // eslint-disable-next-line no-var
-  var appConfiguration: DATABASE_CONFIGURATION & FILE_CONFIGURATION;
+  var appConfiguration: DATABASE_CONFIGURATION | FILE_CONFIGURATION;
 }
 
 export {};

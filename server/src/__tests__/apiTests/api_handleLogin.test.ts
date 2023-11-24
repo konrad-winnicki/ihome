@@ -1,12 +1,12 @@
 import request from "supertest";
 import { describe, afterAll, beforeAll, it } from "@jest/globals";
-import sanitizedConfig from "../../../config/config";
 import { initializeDependencias } from "../../dependencias";
 import { Application } from "../../dependencias";
 import cron from "node-cron";
 import { cleanupFiles } from "./auxilaryFunctionsForTests/fileCleanup";
+import { getEnvironmentType } from "../../../config/config";
 
-const environment = sanitizedConfig.NODE_ENV
+const environment = getEnvironmentType()
 
 describe("API HANDLE LOGIN TEST", () => {
   let app: Application;

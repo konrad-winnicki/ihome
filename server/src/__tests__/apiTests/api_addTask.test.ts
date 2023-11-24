@@ -1,6 +1,6 @@
 import request from "supertest";
 import { describe, afterAll, beforeEach, beforeAll } from "@jest/globals";
-import sanitizedConfig from "../../../config/config";
+import { getEnvironmentType } from "../../../config/config";
 import { initializeDependencias } from "../../dependencias";
 import { Application } from "../../dependencias";
 import { cleanupDatabase } from "./auxilaryFunctionsForTests/dbCleanup";
@@ -15,7 +15,7 @@ import {
   getTasksForDeviceFromFile,
 } from "./auxilaryFunctionsForTests/getTasksForDevice";
 
-const environment = sanitizedConfig.NODE_ENV;
+const environment = getEnvironmentType();
 
 describe("API ADD TASK TEST", () => {
   const badRequestResponse = {
@@ -27,7 +27,7 @@ describe("API ADD TASK TEST", () => {
   let switch1Id: string;
   let task1Id: string;
   let task2Id: string;
-  let requestUri:string
+  let requestUri: string;
   let getTasksForDevice: (deviceId: string) => Promise<Task[]>;
 
   beforeAll(async () => {
@@ -40,15 +40,13 @@ describe("API ADD TASK TEST", () => {
       getTasksForDevice = getTasksForDeviceFromFile("tasks.json");
     }
     requestUri = `http://localhost:${appConfiguration.PORT}`;
-
   });
 
   beforeEach(async () => {
-    if (environment=== "test_api_database") {
+    if (environment === "test_api_database") {
       const connection = app.databaseInstance?.connection as Connection;
       await cleanupDatabase(connection);
-    }
-    else if (environment=== "test_api_file") {
+    } else if (environment === "test_api_file") {
       await cleanupFiles(["devices.json", "tasks.json"]);
     }
 
@@ -89,7 +87,6 @@ describe("API ADD TASK TEST", () => {
 
       .expect(201)
       .expect("Content-Type", /application\/json/);
-
 
     task1Id = await responseTask1.body.taskId;
     const responseTask2 = await request(requestUri)
@@ -144,7 +141,9 @@ describe("API ADD TASK TEST", () => {
       .expect("Content-Type", /application\/json/);
 
     expect(responseTask1.body).toStrictEqual({
-     "Persistence error": {NonExistsError: "Device with id notExistingId does not exist."},
+      "Persistence error": {
+        NonExistsError: "Device with id notExistingId does not exist.",
+      },
     });
   });
 
@@ -264,13 +263,13 @@ describe("API ADD TASK TEST", () => {
       .expect("Content-Type", /application\/json/);
 
     expect(response.body).toEqual({
-      Error: "Token reqired",
+      Error: "Token required",
     });
   });
 
   afterAll(async () => {
     if (environment === "test_api_database") {
-     // await app.databaseInstance?.connection.dropDatabase()
+      // await app.databaseInstance?.connection.dropDatabase()
       await app.databaseInstance?.connection.close();
     }
     if (environment === "test_api_file") {

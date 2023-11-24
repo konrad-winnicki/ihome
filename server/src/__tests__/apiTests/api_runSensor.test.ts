@@ -1,6 +1,5 @@
 import request from "supertest";
 import { describe, afterAll, beforeAll } from "@jest/globals";
-import sanitizedConfig from "../../../config/config";
 import { initializeDependencias } from "../../dependencias";
 import { Application } from "../../dependencias";
 import { cleanupDatabase } from "./auxilaryFunctionsForTests/dbCleanup";
@@ -10,8 +9,9 @@ import { cleanupFiles } from "./auxilaryFunctionsForTests/fileCleanup";
 import { Connection } from "mongoose";
 //import appConfiguration from "../../../config/sanitizedProperties";
 import cron from "node-cron";
+import { getEnvironmentType } from "../../../config/config";
 
-const environment = sanitizedConfig.NODE_ENV;
+const environment = getEnvironmentType()
 
 describe("API RUN METER TEST", () => {
   let app: Application;

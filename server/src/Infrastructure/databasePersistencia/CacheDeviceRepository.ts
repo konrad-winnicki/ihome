@@ -11,7 +11,7 @@ export class CacheDeviceRepository implements DeviceRepository {
   constructor(
     cachedDevices: CachedDevice,
     delegate: DeviceRepository,
-    serverMessages: ServerMessages,
+    serverMessages: ServerMessages
   ) {
     this.cachedDevices = cachedDevices;
     this.delegate = delegate;
@@ -92,7 +92,6 @@ export class CacheDeviceRepository implements DeviceRepository {
         return device.deviceType === deviceType;
       }
     );
-    console.log(devices, devices.length)
     if (devices.length !== 0) {
       return devices;
     }
@@ -152,23 +151,4 @@ export class CacheDeviceRepository implements DeviceRepository {
         return Promise.reject(rejectMessage);
       });
   }
-
-  
-  /*
-  async switchOffPerformer(switchDevice: Switch) {
-    return this.deviceRunSevice
-      .switchOff(switchDevice)
-      .then(() => {
-        return Promise.resolve({
-          [switchDevice.id]: "Item switched off during server restart",
-        });
-      })
-      .catch(() => {
-        const message = {
-          [`Switch ${switchDevice.id}`]:
-            "Error occureed during switching off after server restart",
-        };
-        return Promise.reject(message);
-      });
-  }*/
 }

@@ -21,56 +21,39 @@ const passwordQuestions = [
   },
 ];
 
-const portHttpQuestion =
-  {
+const portQuestion =
+  [{
     type: "input",
     name: "PORT",
     message: "Press enter or indicate port on which server will run:",
     default: '4000',
     validate: (input: string) => {
-      const regExp = /^\d{4}$/;
+      const regExp = /^\d{3,4}$/;
       if (!input){
         return true
       }
       if (input.match(regExp)) {
         return true;
       }
-      return "Port must contain 4 digits. Please try again.";
+      return "Port must contain 3 or 4 digits. Please try again.";
     },
-  }
+  }]
 
-  const portHttpsQuestion =
-  {
-    type: "input",
-    name: "PORT",
-    message: "Press enter or indicate port on which server will run:",
-    default: '443',
-    validate: (input: string) => {
-      const regExp = /^\d{3}$/;
-      if (!input){
-        return true
-      }
-      if (input.match(regExp)) {
-        return true;
-      }
-      return "Port must contain 3 digits. Please try again.";
-    },
-  }
-
+ 
 
 const persistenciaQuestions = [
   {
     type: "list",
     name: "PERSISTENCIA",
     message: "Choose place of data persistencia:",
-    choices: ["file", "mongoDatabase"],
+    choices: ["FILE", "DATABASE"],
   },
   {
     type: "input",
     name: "DATABASE_URL",
     message: "Enter url to Mongo Atlas:",
     when: (answers: { [key: string]: string }) =>
-      answers.PERSISTENCIA === "mongoDatabase",
+      answers.PERSISTENCIA === "DATABASE",
   },
 ];
 
@@ -81,20 +64,12 @@ const serverTypeQuestions = [
     message: "Choose place of data persistencia:",
     choices: ["http", "https"],
   },
-  {
-    ...portHttpQuestion,
-    when: (answers: { [key: string]: string }) =>
-      answers.SERVER_TYPE === "http",
-  },
-  {
-    ...portHttpsQuestion,
-    when: (answers: { [key: string]: string }) =>
-      answers.SERVER_TYPE === "https",
-  },
+  
 ];
 
 const questions = [
   ...serverTypeQuestions,
+  ...portQuestion,
   ...persistenciaQuestions,
   ...passwordQuestions,
 ];

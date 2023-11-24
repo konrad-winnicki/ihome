@@ -1,6 +1,6 @@
 import request from "supertest";
 import { describe, afterAll, beforeEach, beforeAll } from "@jest/globals";
-import sanitizedConfig from "../../../config/config";
+import { getEnvironmentType } from "../../../config/config";
 import { initializeDependencias } from "../../dependencias";
 import { Application } from "../../dependencias";
 import { cleanupDatabase } from "./auxilaryFunctionsForTests/dbCleanup";
@@ -16,7 +16,7 @@ import { Device } from "../../domain/Device";
 //import appConfiguration from "../../../config/sanitizedProperties";
 import cron from "node-cron";
 
-const environment = sanitizedConfig.NODE_ENV
+const environment = getEnvironmentType()
 
 describe("API ADD DEVICE TEST", () => {
   const badRequestResponse = {
@@ -405,7 +405,7 @@ describe("API ADD DEVICE TEST", () => {
       .expect("Content-Type", /application\/json/);
 
     expect(response.body).toEqual({
-      Error: "Token reqired",
+      Error: "Token required",
     });
   });
 

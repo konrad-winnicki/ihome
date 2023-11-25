@@ -95,18 +95,7 @@ async function prepareApplicationProperties() {
         );
       }
     }
-    function parseString(name: string, value: Value | null): string {
-      if (!value) {
-        throw Error(`Missing value for ${name}`);
-      }
-      return value.toString();
-    }
-    function parseNumber(name: string, value: Value | null): number {
-      if (!value) {
-        throw Error(`Missing value for ${name}`);
-      }
-      return value as number; // TODO: test if it's not
-    }
+
     // conversion of Values to expected type
     const persistenceType = parseString(
       "persistencia",
@@ -124,22 +113,35 @@ async function prepareApplicationProperties() {
       ),
     };
     return persistenceType === "DATABASE"
-      ? {
-          ...commonProperties,
-          DATABASE_URL: parseString(
-            "database url",
-            (config as DATABASE_PROPERTIES).DATABASE_URL
-          ),
-          DATABASE: parseString(
-            "database name",
-            (config as DATABASE_PROPERTIES).DATABASE
-          ),
-        }
+      ? createDatabaseConfiguration(commonProperties, config as DATABASE_CONFIGURATION)
       : commonProperties;
   };
 
   const config = getConfiguration();
   return setAppConfiguration(config);
+}
+
+function parseString(name: string, value: Value | null): string {
+  if (!value) {
+    throw Error(`Missing value for ${name}`);
+  }
+  return value.toString();
+}
+function parseNumber(name: string, value: Value | null): number {
+  if (!value) {
+    throw Error(`Missing value for ${name}`);
+  }
+  return value as number; // TODO: test if it's not
+}
+function createDatabaseConfiguration(
+  commonProperties: COMMON_CONFIGURATION,
+  config: DATABASE_PROPERTIES
+) {
+  return {
+    ...commonProperties,
+    DATABASE_URL: parseString("database url", config.DATABASE_URL),
+    DATABASE: parseString("database name", config.DATABASE),
+  };
 }
 
 async function assureProductionPropertiesFileExists() {

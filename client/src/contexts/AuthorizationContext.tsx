@@ -14,12 +14,16 @@ export const AuthorizationContext = createContext<AuthContextValue>({
   setLoggedIn: () => {},
 });
 
+
+
+
+
 export const AuthContextProvider = ({ children }: Props) => {
   const [isLoggedIn, setLoggedIn] = useState(false);
   return (
     <div>
       <AuthorizationContext.Provider
-        value={{ isLoggedIn, setLoggedIn: setLoggedIn }}
+        value={{ isLoggedIn, setLoggedIn }}
       >
         {children}
       </AuthorizationContext.Provider>

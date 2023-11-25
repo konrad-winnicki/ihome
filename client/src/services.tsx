@@ -2,7 +2,7 @@ import { PORT } from "./config/config";
 
 export function prepareURL() {
   const ip = localStorage.getItem("ip");
-  return `https://${ip}:${PORT}`;
+  return `http://${ip}:${PORT}`;
 }
 
 export interface FormData {

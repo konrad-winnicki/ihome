@@ -4,6 +4,7 @@ import { getSwitches } from "../services";
 import SwitchModule from "./SwitchModule";
 import TaskList from "../taskComponents/TaskList";
 import { AuthorizationContext } from "../contexts/AuthorizationContext";
+import { SwitchModuleContext } from "../contexts/SwitchModuleContext";
 
 export interface SwitchInterface {
   id: string;
@@ -38,6 +39,7 @@ const SwitchesList: React.FC = () => {
   }
 
   useEffect(() => {
+    console.log(refreshList);
     if (!showSwitches) {
       getSwitchList().then((data) => {
         setSwitches({ switches: data });
@@ -48,9 +50,17 @@ const SwitchesList: React.FC = () => {
     }
 
     if (refreshList) {
-      setRefreshList(false);
+      getSwitchList().then((data) => {
+        setSwitches({ switches: data });
+        setRefreshList(false);
+      });
     }
-  }, [JSON.stringify(switches), showSwitches, deviceShowsTaskModule]);
+  }, [
+    JSON.stringify(switches),
+    showSwitches,
+    deviceShowsTaskModule,
+    refreshList,
+  ]);
 
   return (
     <div className="flex-col h-full items-center justify-center border-5 border-sky-500">
@@ -69,11 +79,15 @@ const SwitchesList: React.FC = () => {
           ? switches.switches.map((switchDevice: SwitchInterface) => {
               return (
                 <div key={switchDevice.id}>
-                  <SwitchModule
-                    switchDevice={switchDevice}
-                    setShowTaskDetails={setDeviceShowTaskModule}
-                    setRefreshList={setRefreshList}
-                  ></SwitchModule>
+                  <SwitchModuleContext.Provider
+                    value={{
+                      switchDevice,
+                      setDeviceShowTaskModule,
+                      setRefreshList,
+                    }}
+                  >
+                    <SwitchModule></SwitchModule>
+                  </SwitchModuleContext.Provider>
                 </div>
               );
             })

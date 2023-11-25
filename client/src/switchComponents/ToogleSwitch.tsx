@@ -1,25 +1,28 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useState } from "react";
 import ReactSwitch from "react-switch";
 import { runDevice } from "../services";
-import { SwitchInterface } from "./SwitchList";
+import { AuthorizationContext } from "../contexts/AuthorizationContext";
+import { SwitchModuleContext } from "../contexts/SwitchModuleContext";
 
-const ToggleSwitch: React.FC<{
-  switchDevice: SwitchInterface;
-}> = (props) => {
-  const [checked, setChecked] = useState(props.switchDevice.onStatus);
+const ToggleSwitch: React.FC = () => {
+  const authorizationContext = useContext(AuthorizationContext);
+  const switchModuleContext = useContext(SwitchModuleContext);
+  const [checked, setChecked] = useState(
+    switchModuleContext.switchDevice.onStatus
+  );
   const token = localStorage.getItem("token");
 
-  const handleChange = (val: boolean) => {
-    console.log("before", val, checked);
-
+  const handleChange = async (val: boolean) => {
     setChecked(val);
-    console.log("after", val, checked);
-    runDevice(props.switchDevice.id, val, token);
+    const response = await runDevice(
+      switchModuleContext.switchDevice.id,
+      val,
+      token
+    );
+    if (response.status === 401) {
+      authorizationContext.setLoggedIn(false);
+    }
   };
-
-  useEffect(() => {
-    console.log("togle mounted");
-  }, []);
 
   return (
     <ReactSwitch

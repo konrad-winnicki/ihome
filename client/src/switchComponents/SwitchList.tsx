@@ -5,6 +5,7 @@ import SwitchModule from "./SwitchModule";
 import TaskList from "../taskComponents/TaskList";
 import { AuthorizationContext } from "../contexts/AuthorizationContext";
 import { SwitchModuleContext } from "../contexts/SwitchModuleContext";
+import { TaskModuleContext } from "../contexts/TaskModuleContext";
 
 export interface SwitchInterface {
   id: string;
@@ -59,7 +60,7 @@ const SwitchesList: React.FC = () => {
     JSON.stringify(switches),
     showSwitches,
     deviceShowsTaskModule,
-    refreshList,
+    refreshList, getSwitchList
   ]);
 
   return (
@@ -84,6 +85,8 @@ const SwitchesList: React.FC = () => {
                       switchDevice,
                       setDeviceShowTaskModule,
                       setRefreshList,
+                      setShowSwitches,
+                      showSwitches
                     }}
                   >
                     <SwitchModule></SwitchModule>
@@ -96,11 +99,15 @@ const SwitchesList: React.FC = () => {
 
       <div className="flex-row">
         {deviceShowsTaskModule ? (
-          <TaskList
-            setDeviceShowTaskModule={setDeviceShowTaskModule}
-            setShowSwitches={setShowSwitches}
-            device={deviceShowsTaskModule}
-          ></TaskList>
+          <TaskModuleContext.Provider
+          value={{
+            switchDevice:deviceShowsTaskModule,
+            setDeviceShowTaskModule,
+            setShowSwitches,
+          }}
+        >
+          <TaskList></TaskList>
+        </TaskModuleContext.Provider>
         ) : (
           ""
         )}

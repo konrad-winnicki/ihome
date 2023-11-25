@@ -17,7 +17,6 @@ export interface DeviceInterface {
   onStatus: boolean;
 }
 */
-
 export const SwitchModule: React.FC = () => {
   const token = localStorage.getItem("token");
   const authorizationContext = useContext(AuthorizationContext);

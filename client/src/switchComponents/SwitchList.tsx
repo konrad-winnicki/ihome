@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext, useCallback } from "react";
 import { RxDropdownMenu } from "react-icons/rx";
 import { getSwitches } from "../services";
 import SwitchModule from "./SwitchModule";
@@ -27,7 +27,7 @@ const SwitchesList: React.FC = () => {
 
   const token = localStorage.getItem("token");
 
-  async function getSwitchList() {
+  const getSwitchList = useCallback(async()=> {
     const response = await getSwitches(token);
     if (response.ok) {
       const data = await response.json();
@@ -37,10 +37,9 @@ const SwitchesList: React.FC = () => {
       authorizationContext.setLoggedIn(false);
       return;
     }
-  }
+  }, [authorizationContext, token]) 
 
   useEffect(() => {
-    console.log(refreshList);
     if (!showSwitches) {
       getSwitchList().then((data) => {
         setSwitches({ switches: data });
@@ -60,7 +59,8 @@ const SwitchesList: React.FC = () => {
     JSON.stringify(switches),
     showSwitches,
     deviceShowsTaskModule,
-    refreshList, getSwitchList
+    refreshList,
+    getSwitchList,
   ]);
 
   return (
@@ -86,7 +86,7 @@ const SwitchesList: React.FC = () => {
                       setDeviceShowTaskModule,
                       setRefreshList,
                       setShowSwitches,
-                      showSwitches
+                      showSwitches,
                     }}
                   >
                     <SwitchModule></SwitchModule>
@@ -100,14 +100,14 @@ const SwitchesList: React.FC = () => {
       <div className="flex-row">
         {deviceShowsTaskModule ? (
           <TaskModuleContext.Provider
-          value={{
-            switchDevice:deviceShowsTaskModule,
-            setDeviceShowTaskModule,
-            setShowSwitches,
-          }}
-        >
-          <TaskList></TaskList>
-        </TaskModuleContext.Provider>
+            value={{
+              switchDevice: deviceShowsTaskModule,
+              setDeviceShowTaskModule,
+              setShowSwitches,
+            }}
+          >
+            <TaskList></TaskList>
+          </TaskModuleContext.Provider>
         ) : (
           ""
         )}

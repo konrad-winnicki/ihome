@@ -1,3 +1,3 @@
 const PORT = "4000";
-
-export { PORT };
+const PROTOCOL = 'HTTPS'
+export { PORT, PROTOCOL };

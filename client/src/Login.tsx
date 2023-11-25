@@ -52,7 +52,7 @@ export const Login: React.FC = () => {
           className="block text-gray-700 text-sm font-bold mb-2"
           htmlFor="password"
         >
-          Introduce password to pair cliant and server
+          Introduce password to pair client and server
         </label>
         <div className="flex m-2 items-center justify-center">
           <label

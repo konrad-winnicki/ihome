@@ -2,11 +2,9 @@ import React, { useState, useEffect, useContext, useCallback } from "react";
 import { RxDropdownMenu } from "react-icons/rx";
 import { getSwitches } from "../services";
 import SwitchModule from "./SwitchModule";
-import TaskList from "../taskComponents/TaskList";
 import { AuthorizationContext } from "../contexts/AuthorizationContext";
 import { SwitchModuleContext } from "../contexts/SwitchModuleContext";
-import { TaskModuleContext } from "../contexts/TaskModuleContext";
-
+import { useLocation } from "react-router-dom";
 export interface SwitchInterface {
   id: string;
   name: string;
@@ -15,19 +13,23 @@ export interface SwitchInterface {
 
 const SwitchesList: React.FC = () => {
   const authorizationContext = useContext(AuthorizationContext);
-
   const [switches, setSwitches] = useState<{ switches: SwitchInterface[] }>({
     switches: [],
   });
 
-  const [showSwitches, setShowSwitches] = useState<boolean>(false);
-  const [deviceShowsTaskModule, setDeviceShowTaskModule] =
-    useState<SwitchInterface | null>(null);
-  const [refreshList, setRefreshList] = useState(false);
+  const location = useLocation();
+  const { search } = location;
+  const paramsInUrl = new URLSearchParams(search);
+  const showSwitcherParamFromUrl = paramsInUrl.get("showSwitchesParam");
+  const showSwitchesDefaultValue = showSwitcherParamFromUrl === "true";
 
+  const [showSwitches, setShowSwitches] = useState<boolean>(
+    showSwitchesDefaultValue
+  );
+  const [refreshList, setRefreshList] = useState(false);
   const token = localStorage.getItem("token");
 
-  const getSwitchList = useCallback(async()=> {
+  const getSwitchList = useCallback(async () => {
     const response = await getSwitches(token);
     if (response.ok) {
       const data = await response.json();
@@ -37,30 +39,23 @@ const SwitchesList: React.FC = () => {
       authorizationContext.setLoggedIn(false);
       return;
     }
-  }, [authorizationContext, token]) 
+  }, [authorizationContext, token]);
 
   useEffect(() => {
-    if (!showSwitches) {
+    if (switches.switches.length === 0 || refreshList) {
       getSwitchList().then((data) => {
         setSwitches({ switches: data });
-      });
-    }
-    if (deviceShowsTaskModule) {
-      setShowSwitches(false);
-    }
 
-    if (refreshList) {
-      getSwitchList().then((data) => {
-        setSwitches({ switches: data });
         setRefreshList(false);
       });
     }
   }, [
-    JSON.stringify(switches),
+    // JSON.stringify(switches),
     showSwitches,
-    deviceShowsTaskModule,
     refreshList,
     getSwitchList,
+    switches.switches.length,
+    switches.switches,
   ]);
 
   return (
@@ -83,10 +78,7 @@ const SwitchesList: React.FC = () => {
                   <SwitchModuleContext.Provider
                     value={{
                       switchDevice,
-                      setDeviceShowTaskModule,
                       setRefreshList,
-                      setShowSwitches,
-                      showSwitches,
                     }}
                   >
                     <SwitchModule></SwitchModule>
@@ -95,22 +87,6 @@ const SwitchesList: React.FC = () => {
               );
             })
           : ""}
-      </div>
-
-      <div className="flex-row">
-        {deviceShowsTaskModule ? (
-          <TaskModuleContext.Provider
-            value={{
-              switchDevice: deviceShowsTaskModule,
-              setDeviceShowTaskModule,
-              setShowSwitches,
-            }}
-          >
-            <TaskList></TaskList>
-          </TaskModuleContext.Provider>
-        ) : (
-          ""
-        )}
       </div>
     </div>
   );

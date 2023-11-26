@@ -92,7 +92,7 @@ npm build
 npm run dev
 ```
 Now you can use `iHouse` client interface by going to:
-http://localhost:5173/api/login
+http://localhost:5173/login
 
 2. as an Android App:
 - download APK file and install on SmartPhone

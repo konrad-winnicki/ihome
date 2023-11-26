@@ -5,6 +5,7 @@ import {
   AuthContextValue,
   AuthorizationContext,
 } from "./contexts/AuthorizationContext";
+import { useNavigate } from "react-router-dom";
 
 interface DecodedToken {
   sessionId: string;
@@ -17,6 +18,7 @@ export const Login: React.FC = () => {
     password: "",
   });
   const authorizationContext = useContext(AuthorizationContext);
+  const navigation = useNavigate();
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
     setFormData((prevData) => ({
@@ -36,6 +38,7 @@ export const Login: React.FC = () => {
         renewToken(token).then((token: string) => {
           autoLogOutTiming(token, authorizationContext);
         });
+        navigation("/dashboard");
       } else {
         alert("Password incorrect");
         console.error("login failed");

@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React, {  useState } from "react";
 import "../styles/OnOffOption.css"; // Import your CSS file for styling
+import { OnStatus } from "./TaskSetter";
 
 interface Option {
   value: string;
@@ -7,35 +8,23 @@ interface Option {
 }
 
 interface OnOffOptionProps {
-  setOnStatus: (param: boolean) => void;
-  onStatus: boolean|null
+  setOnStatus: (param: OnStatus | null) => void;
+  onStatus: OnStatus|null
 }
 
 
 export const OnOffOption: React.FC<OnOffOptionProps> = (props) => {
-  const [isOn, setIsOn] = useState<string>("");
+  const [isOn, setIsOn] = useState<OnStatus|null>(props.onStatus);
   const options: Option[] = [
     { value: "ON", label: "ON" },
     { value: "OFF", label: "OFF" },
   ];
   const handleOptionChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    console.log(event.target.value)
-    setIsOn(event.target.value);
+    setIsOn(event.target.value as OnStatus);
+    props.setOnStatus(event.target.value as OnStatus)
   };
 
-  useEffect(() => {
-    if (isOn === "ON") {
-      props.setOnStatus(true);
-    }
-    if (isOn === "OFF") {
-      props.setOnStatus(false);
-    }
 
-    if(props.onStatus === null){
-        setIsOn("")
-    }
-
-  }, [isOn, props]);
 
   return (
     <div className="radio-button-container">

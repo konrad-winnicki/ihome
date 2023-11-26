@@ -14,7 +14,7 @@ export interface Task {
 
 export const TaskModule: React.FC<{
   task: Task;
-  setDeleted: (param: boolean) => void;
+  setRefreshTaskList: (param: boolean) => void
 }> = (props) => {
   const token = localStorage.getItem("token");
 
@@ -25,7 +25,7 @@ export const TaskModule: React.FC<{
         const response = await deleteTask(props.task.id, token);
         const data = await response.json();
         if (response.ok) {
-          props.setDeleted(true);
+          props.setRefreshTaskList(true);
         } else {
           console.log("Task not deleted", data);
         }

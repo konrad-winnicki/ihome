@@ -5,22 +5,13 @@ import { FaTrashRestoreAlt } from "react-icons/fa";
 import { deleteDevice } from "../services";
 import { AuthorizationContext } from "../contexts/AuthorizationContext";
 import { SwitchModuleContext } from "../contexts/SwitchModuleContext";
+import { useNavigate } from "react-router-dom";
 
-/*
-export interface Parameters {
-  [key: string]: string;
-}
-
-export interface DeviceInterface {
-  id: string;
-  name: string;
-  onStatus: boolean;
-}
-*/
 export const SwitchModule: React.FC = () => {
   const token = localStorage.getItem("token");
   const authorizationContext = useContext(AuthorizationContext);
   const switchModuleContext = useContext(SwitchModuleContext);
+  const navigation = useNavigate();
 
   async function deleteItem() {
     const confirmation = confirm("Do you want to delete device?");
@@ -50,9 +41,10 @@ export const SwitchModule: React.FC = () => {
         <div className="flex justify-center items-center">
           <button
             onClick={() => {
-              switchModuleContext.setDeviceShowTaskModule(
-                switchModuleContext.switchDevice
-              );
+              const switchDevice = switchModuleContext.switchDevice;
+              navigation(`/switches/${switchDevice.id}`, {
+                state: { name: switchDevice.name },
+              });
             }}
             className="bg-[#B804D8] px-1 py-1 text-white m-1 mr-4 rounded text-white text-lg font-semibold"
           >

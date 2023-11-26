@@ -8,27 +8,27 @@ import "../styles/time.css";
 import { createTask } from "../services";
 interface TimeProps {
   switchId: string;
-  setNewAdded: (param: boolean) => void;
+  setRefreshTaskList: (param: boolean) => void;
 }
+
+export type OnStatus = "ON" | "OFF";
 
 export const TaskSetter: React.FC<TimeProps> = (props) => {
   const [time, setTime] = useState<string | null>(null);
-  const [onStatus, setOnStatus] = useState<boolean | null>(null);
+  const [onStatus, setOnStatus] = useState<OnStatus | null>(null);
   const [isDisabled, setIsDisabled] = useState<boolean>(true);
 
   useEffect(() => {
     if (time && onStatus != null) {
       setIsDisabled(false);
     }
-
-    console.log("task setter", onStatus);
   }, [time, onStatus]);
 
   const addTask = async () => {
     const [hour, minutes] = time ? time.split(":") : "";
     const task = {
       deviceId: props.switchId,
-      onStatus: onStatus,
+      onStatus: onStatus === "ON" ? true : false,
       scheduledTime: { hour, minutes },
     };
     const token = localStorage.getItem("token");
@@ -39,7 +39,7 @@ export const TaskSetter: React.FC<TimeProps> = (props) => {
         setTime(null);
         setOnStatus(null);
         setIsDisabled(true);
-        props.setNewAdded(true);
+        props.setRefreshTaskList(true);
         alert("Task created");
       }
     } catch (error) {

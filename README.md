@@ -15,12 +15,14 @@ This is a MVP version, altough it's still work in progress - it can be already u
 - [Installation](#installation)
   - [Server-side application to install on RaspberryPi](#server-side-application-to-install-on-raspberrypi)
     - [Instalation prerequirements](#instalation-prerequirements)
+    - [Certificate generation](#certificate-generation)
     - [Predefined main scripts](#predefined-main-scripts)
   - [Client-side application](#client-side-application)
 - [Run all with Docker](#run-all-with-docker)
 - [Application usage](#application-usage)
   - [Sensor registration](#sensor-registration)
   - [Switch installation](#switch-installation)
+    - [aa bb](#aa-bb)
 
 # Description
 This project aims to optimze home energy consumption. It's a client-server application which manages devices connected to the Raspberry Pi.
@@ -57,9 +59,28 @@ npm run prod
 ```
 
 During running the app in the production mode, user will be asked to choose:
+- server type: you can choose `http` or `https` [(read more)](#certificate-generation) protocol (you need to assure that protocol defined in client config.ts match protocol choosen for the server)
 - port (default: 4000, if changed you need to modify port value in client config.ts file and generate new APK for android)
 - place of data persistence (if database is chosen, in the next step a connection string with password to MongoDB Atlas should be provided)
 - password to pair client and server
+  
+### Certificate generation
+If you want to use `https` protocool you need to generate a private key and certificate. Both files must be named iHome and placed in a _ssl folder (path: `server/src/_ssl/`). 
+
+- To create a 2048-bit RSA private key with the openssl command:
+```bash
+openssl genrsa -out iHome.key 2048
+
+```
+- To create a self-signed certificate (iHome.crt) with our existing private key and CSR:
+```bash
+openssl req -key iHome.key -new -x509 -days 365 -out iHome.crt
+```
+
+During the certificate generation you need to specyfy for the Common Name ip address of your Raspberry Pi or indicate `*`, which means all ip addresses.
+
+You can find more information here:
+https://www.baeldung.com/openssl-self-signed-cert#creating-a-certificate-signing-request
 
 ### Predefined main scripts 
 
@@ -150,6 +171,11 @@ docker-compose down
 - indicate switch name to be shown in app
 - command to run switch on script (e.g. python3.9 /home/pi/switch.py on)
 - command to run switch off script (e.g. python3.9 /home/pi/switch.py off)
+
+### aa bb
+ala ma kota
+
+
 
 
 

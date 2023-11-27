@@ -17,6 +17,7 @@ export const SetIP: React.FC<CreateSwitchProps> = (props) => {
     const ipStorage = localStorage.getItem("ip");
     const validIp = ipStorage ? ipStorage : "";
     setIp(validIp);
+    console.log(validIp, 'storage', localStorage.getItem("ip"))
   }, [ip]);
 
   return (

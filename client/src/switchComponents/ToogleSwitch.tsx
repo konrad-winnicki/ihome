@@ -19,6 +19,9 @@ const ToggleSwitch: React.FC = () => {
       val,
       token
     );
+    if (response.ok) {
+      switchModuleContext.setRefreshList(true);
+    }
     if (response.status === 401) {
       authorizationContext.setLoggedIn(false);
     }

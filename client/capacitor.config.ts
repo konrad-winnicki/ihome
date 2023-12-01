@@ -1,8 +1,8 @@
 import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'mafasoft.piManager',
-  appName: 'piManager',
+  appId: 'mafasoft.iHome',
+  appName: 'iHome',
   webDir: 'dist',
   server: {
     androidScheme: 'http'

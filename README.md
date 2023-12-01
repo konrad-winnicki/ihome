@@ -25,7 +25,7 @@ This is a MVP version, altough it's still work in progress - it can be already u
     - [aa bb](#aa-bb)
 
 # Description
-This project aims to optimze home energy consumption. It's a client-server application which manages devices connected to the Raspberry Pi.
+This project aims to optimze home energy consumption. It's a client-server application which together with the Raspberry Pi allow to manage home devices.
 The main design concept is to enable users to control connected devices using a language of their choice.
 Applications allows data persistence in MongoDB (ie. MongoDB Atlas) or files.
 <br>

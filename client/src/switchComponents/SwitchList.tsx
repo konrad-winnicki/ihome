@@ -42,8 +42,7 @@ const SwitchesList: React.FC = () => {
   }, [authorizationContext, token]);
 
   useEffect(() => {
-    if (showSwitches){
-      setRefreshList(true)}
+      setRefreshList(true)
     },[showSwitches]);
 
   useEffect(() => {

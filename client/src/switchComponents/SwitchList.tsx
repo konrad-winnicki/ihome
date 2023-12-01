@@ -42,16 +42,20 @@ const SwitchesList: React.FC = () => {
   }, [authorizationContext, token]);
 
   useEffect(() => {
+    if (showSwitches){
+      setRefreshList(true)}
+    },[showSwitches]);
+
+  useEffect(() => {
+    
     if (switches.switches.length === 0 || refreshList) {
       getSwitchList().then((data) => {
         setSwitches({ switches: data });
-
         setRefreshList(false);
       });
     }
+
   }, [
-    // JSON.stringify(switches),
-    showSwitches,
     refreshList,
     getSwitchList,
     switches.switches.length,

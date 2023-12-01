@@ -22,7 +22,6 @@ This is a MVP version, altough it's still work in progress - it can be already u
 - [Application usage](#application-usage)
   - [Sensor registration](#sensor-registration)
   - [Switch installation](#switch-installation)
-    - [aa bb](#aa-bb)
 
 # Description
 This project aims to optimze home energy consumption. It's a client-server application which together with the Raspberry Pi allow to manage home devices.
@@ -172,8 +171,7 @@ docker-compose down
 - command to run switch on script (e.g. python3.9 /home/pi/switch.py on)
 - command to run switch off script (e.g. python3.9 /home/pi/switch.py off)
 
-### aa bb
-ala ma kota
+
 
 
 

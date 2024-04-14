@@ -23,7 +23,7 @@ import { CronTaskManager } from "./Infrastructure/task/CronTaskManager";
 import { FileTaskRepository } from "./Infrastructure/filePersistencia/FileTaskRepository";
 import { MongoTaskRepository } from "./Infrastructure/task/MongoTaskRepository";
 import { TaskService } from "./application/task/TaskService";
-import { CommandExecutor } from "./domain/CommandExecutor";
+import { CommandExecutor } from "./Infrastructure/command/CommandExecutor";
 import { getEnvironmentType } from "../config/config";
 import { DATABASE_CONFIGURATION } from "../config/sanitizedProperties";
 

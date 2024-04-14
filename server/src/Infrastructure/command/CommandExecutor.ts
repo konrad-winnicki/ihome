@@ -1,5 +1,5 @@
-import { Device } from "./Device";
-import { Switch } from "./Switch";
+import { Device } from "../../domain/Device";
+import { Switch } from "../../domain/Switch";
 import { exec } from "child_process";
 import util from "util";
 

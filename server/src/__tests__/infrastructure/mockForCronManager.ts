@@ -7,7 +7,7 @@ import { Task } from "../../domain/Task";
 import { FileTaskRepository } from "../../Infrastructure/filePersistencia/FileTaskRepository";
 import { FileRepositoryHelpers } from "../../Infrastructure/filePersistencia/auxilaryFunctions";
 import { DeviceRunService } from "../../application/device/DeviceRunService";
-import { CachedDevice } from "../../domain/CachedDevices";
+import { CachedDevice } from "../../Infrastructure/cache/CachedDevices";
 
 export function prepareCronTaskManagerForDatabasePersistenceWithMockParameters(
   appCron: TaskScheduler,

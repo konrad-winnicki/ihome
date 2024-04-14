@@ -5,7 +5,7 @@ import { EventEmitter } from "node:events";
 import { recoverTasks } from "./domain/recoveryFunctions";
 import { AppServer } from "./Infrastructure/AppServer";
 import { initAppRouter } from "./Infrastructure/routes";
-import { CachedDevice } from "./domain/CachedDevices";
+import { CachedDevice } from "./Infrastructure/cache/CachedDevices";
 import { DeviceController } from "./controllers/DeviceController";
 import { RunDeviceController } from "./controllers/DeviceRunController";
 import { TaskController } from "./controllers/TaskController";

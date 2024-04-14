@@ -1,7 +1,7 @@
 import { DeviceRunInterface } from "./DeviceRunInterface";
 import { Switch } from "../../domain/Switch";
 import { Device } from "../../domain/Device";
-import { CachedDevice } from "../../domain/CachedDevices";
+import { CachedDevice } from "../../Infrastructure/cache/CachedDevices";
 import { CommandExecutor } from "../../Infrastructure/command/CommandExecutor";
 
 //PYTANIA: czy devicePerformer powinien byc przekazywany kalo zaleznosc

@@ -2,7 +2,7 @@ import { CacheDeviceRepository } from "../../Infrastructure/databasePersistencia
 import { ServerMessages } from "../../ServerMessages";
 import { DeviceRepository } from "../../application/device/DeviceRepository";
 import { Device } from "../../domain/Device";
-import { CachedDevice } from "../../domain/CachedDevices";
+import { CachedDevice } from "../../Infrastructure/cache/CachedDevices";
 
 export function prepareCacheDeviceRepositoryWithMockPerameters(
   inMemoryStorage: CachedDevice,

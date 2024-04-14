@@ -1,6 +1,6 @@
 import { describe, test, expect } from "@jest/globals";
 import { Device } from "../../domain/Device";
-import { CachedDevice } from "../../domain/CachedDevices";
+import { CachedDevice } from "../../Infrastructure/cache/CachedDevices";
 import { Sensor } from "../../domain/Sensor";
 import { Switch } from "../../domain/Switch";
 

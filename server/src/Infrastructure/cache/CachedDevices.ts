@@ -1,5 +1,5 @@
-import { Device } from "./Device";
-import { Switch } from "./Switch";
+import { Device } from "../../domain/Device";
+import { Switch } from "../../domain/Switch";
 
 export class CachedDevice {
   private static instance: CachedDevice | null = null;

@@ -23,7 +23,7 @@ import { CronTaskManager } from "./Infrastructure/task/CronTaskManager";
 import { FileTaskRepository } from "./Infrastructure/filePersistencia/FileTaskRepository";
 import { MongoTaskRepository } from "./Infrastructure/task/MongoTaskRepository";
 import { TaskService } from "./application/task/TaskService";
-import { DevicePerformer } from "./domain/DevicePerformer";
+import { CommandExecutor } from "./domain/CommandExecutor";
 import { getEnvironmentType } from "../config/config";
 import { DATABASE_CONFIGURATION } from "../config/sanitizedProperties";
 
@@ -224,7 +224,7 @@ async function switchOffAllDevicesAfterServerStart(
   deviceService: DeviceService
 ) {
   const devices = await deviceService.getSwitchList();
-  const switchPerformer = DevicePerformer.getInstance();
+  const switchPerformer = CommandExecutor.getInstance();
   const switchingResults = [];
   for (const device of devices) {
     const result = await switchPerformer

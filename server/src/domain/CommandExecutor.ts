@@ -5,15 +5,14 @@ import util from "util";
 
 const execAsync = util.promisify(exec);
 
-// CommandExecutor execute(command)
-export class DevicePerformer {
-  private static instance: DevicePerformer | null = null;
+export class CommandExecutor {
+  private static instance: CommandExecutor | null = null;
 
   public static getInstance() {
-    if (!DevicePerformer.instance) {
-      DevicePerformer.instance = new DevicePerformer();
+    if (!CommandExecutor.instance) {
+      CommandExecutor.instance = new CommandExecutor();
     }
-    return DevicePerformer.instance;
+    return CommandExecutor.instance;
   }
 
   public async switchOn(device: Device) {

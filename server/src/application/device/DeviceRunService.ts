@@ -2,16 +2,16 @@ import { DeviceRunInterface } from "./DeviceRunInterface";
 import { Switch } from "../../domain/Switch";
 import { Device } from "../../domain/Device";
 import { CachedDevice } from "../../domain/CachedDevices";
-import { DevicePerformer } from "../../domain/DevicePerformer";
+import { CommandExecutor } from "../../domain/CommandExecutor";
 
 //PYTANIA: czy devicePerformer powinien byc przekazywany kalo zaleznosc
 // czy inicjalizowany w konstruktorze
 export class DeviceRunService implements DeviceRunInterface {
   private cachedDevices: CachedDevice;
-  private devicePerformer: DevicePerformer;
+  private devicePerformer: CommandExecutor;
   constructor(cachedDevices: CachedDevice) {
     this.cachedDevices = cachedDevices;
-    this.devicePerformer = DevicePerformer.getInstance();
+    this.devicePerformer = CommandExecutor.getInstance();
     this.switchOn = this.switchOn.bind(this);
     this.switchOff = this.switchOff.bind(this);
   }
@@ -26,7 +26,7 @@ export class DeviceRunService implements DeviceRunInterface {
         if (device.deviceType === "switch") {
           this.cachedDevices.changeStatus(device.id, true);
         }
-        console.log(this.cachedDevices.devices)
+        console.log(this.cachedDevices.devices);
 
         return response;
       });
@@ -47,11 +47,10 @@ export class DeviceRunService implements DeviceRunInterface {
       return this.devicePerformer
         .switchOff(device as Switch)
         .then((response) => {
-            this.cachedDevices.changeStatus(device.id, false);
-          console.log(this.cachedDevices.devices)
+          this.cachedDevices.changeStatus(device.id, false);
+          console.log(this.cachedDevices.devices);
           return response;
         });
-
     });
   }
 

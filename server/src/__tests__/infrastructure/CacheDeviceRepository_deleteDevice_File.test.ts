@@ -6,7 +6,7 @@ import {
   inMemoryStoreWithMockMethods,
   prepareCacheDeviceRepositoryWithMockPerameters,
 } from "./mockForCacheDeviceRepository";
-import { FileRepositoryHelpers } from "../../Infrastructure/filePersistencia/auxilaryFunctions";
+import { FileRepositoryHelpers } from "../../Infrastructure/file/auxilaryFunctions";
 import { prepareFileDeviceRepositoryWithMockPerameters } from "./mockForFileDevicePersistence";
 import {
   DeviceTaskError,
@@ -75,11 +75,12 @@ describe("CacheDeviceReposiotory with file persistence CLASS TEST - delete devic
       "write",
       "write",
     ] as DeviceTaskError[];
-    const readFileMockImplemenmtationCalls = ["device", "device"] as DeviceTaskError[];
+    const readFileMockImplemenmtationCalls = [
+      "device",
+      "device",
+    ] as DeviceTaskError[];
     const readFileMockReturnValues = [deviceMockValue, deviceMockValue];
 
-
-    
     const cacheDeviceRepository = dependency(
       addToMemoryStatus,
       deleteFromMemoryStatus,
@@ -98,7 +99,10 @@ describe("CacheDeviceReposiotory with file persistence CLASS TEST - delete devic
   test("Should not delete device if device not exists", async () => {
     const addToMemoryStatus = "success";
     const deleteFromMemoryStatus = "success";
-    const writeFileMockImplementationCalls = ["write", "write"] as DeviceTaskError[];
+    const writeFileMockImplementationCalls = [
+      "write",
+      "write",
+    ] as DeviceTaskError[];
     const readFileMockImplemenmtationCalls = ["device"] as DeviceTaskError[];
 
     const deviceWithNonExistingItem = {
@@ -149,7 +153,7 @@ describe("CacheDeviceReposiotory with file persistence CLASS TEST - delete devic
       expect(result).toMatchObject({
         "Device not deleted": {
           "Persistence error": {
-            "Read file error": 'Internal read error',
+            "Read file error": "Internal read error",
           },
         },
       })
@@ -191,7 +195,11 @@ describe("CacheDeviceReposiotory with file persistence CLASS TEST - delete devic
       "write",
       "write",
     ] as DeviceTaskError[];
-    const readFileMockImplemenmtationCalls = ["device", "device", "device"] as DeviceTaskError[];
+    const readFileMockImplemenmtationCalls = [
+      "device",
+      "device",
+      "device",
+    ] as DeviceTaskError[];
     const readFileMockReturnValues = [deviceMockValue, deviceMockValue, {}];
 
     const cacheDeviceRepository = dependency(
@@ -215,7 +223,10 @@ describe("CacheDeviceReposiotory with file persistence CLASS TEST - delete devic
   test("Should not delete if reading from file failed", async () => {
     const addToMemoryStatus = "success";
     const deleteFromMemoryStatus = "success";
-    const writeFileMockImplementationCalls = ["write", "write"] as DeviceTaskError[];
+    const writeFileMockImplementationCalls = [
+      "write",
+      "write",
+    ] as DeviceTaskError[];
     const readFileMockImplemenmtationCalls = ["error"] as DeviceTaskError[];
     const readFileMockReturnValues = [deviceMockValue];
 
@@ -269,8 +280,17 @@ describe("CacheDeviceReposiotory with file persistence CLASS TEST - delete devic
       "write",
       "error",
     ] as DeviceTaskError[];
-    const readFileMockImplemenmtationCalls = ["device","device", "device"] as DeviceTaskError[];
-    const readFileMockReturnValues = [deviceMockValue, deviceMockValue, deviceMockValue, {}];
+    const readFileMockImplemenmtationCalls = [
+      "device",
+      "device",
+      "device",
+    ] as DeviceTaskError[];
+    const readFileMockReturnValues = [
+      deviceMockValue,
+      deviceMockValue,
+      deviceMockValue,
+      {},
+    ];
 
     const cacheDeviceRepository = dependency(
       addToMemoryStatus,
@@ -311,9 +331,13 @@ describe("CacheDeviceReposiotory with file persistence CLASS TEST - delete devic
       "write",
       "write",
       "write",
-      "write"
+      "write",
     ] as DeviceTaskError[];
-    const readFileMockImplemenmtationCalls = ['device', "device", "error"] as DeviceTaskError[];
+    const readFileMockImplemenmtationCalls = [
+      "device",
+      "device",
+      "error",
+    ] as DeviceTaskError[];
     const readFileMockReturnValues = [deviceMockValue, deviceMockValue];
 
     const cacheDeviceRepository = dependency(
@@ -324,9 +348,7 @@ describe("CacheDeviceReposiotory with file persistence CLASS TEST - delete devic
       readFileMockReturnValues
     );
 
-
-    
-      await cacheDeviceRepository.delete("12345").catch((result) => {
+    await cacheDeviceRepository.delete("12345").catch((result) => {
       expect(result).toEqual({
         "Device not deleted": {
           error: "Deletion from storage failed",

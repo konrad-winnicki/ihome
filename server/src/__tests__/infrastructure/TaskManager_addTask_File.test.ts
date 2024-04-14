@@ -6,7 +6,7 @@ import {
   appCronMockMethods,
   prepareCronTaskManagerForFilePersistenceWithMockParameters,
 } from "./mockForCronManager";
-import { FileRepositoryHelpers } from "../../Infrastructure/filePersistencia/auxilaryFunctions";
+import { FileRepositoryHelpers } from "../../Infrastructure/file/auxilaryFunctions";
 import {
   DeviceTaskError,
   EmptyObject,
@@ -184,11 +184,12 @@ describe("CronTaskManager with file persistence CLASS TEST - add task", () => {
     const writeFileMockImplementationCalls = [
       "write",
       "write",
-      "write","write"
-
+      "write",
+      "write",
     ] as DeviceTaskError[];
     const readFileMockImplementationCalls = [
-      "task", "task"
+      "task",
+      "task",
     ] as DeviceTaskError[];
 
     const readFileMockReturnValues = [{}, taskMockValue];
@@ -223,18 +224,13 @@ describe("CronTaskManager with file persistence CLASS TEST - add task", () => {
       "write",
       "write",
       "write",
-      
     ] as DeviceTaskError[];
     const readFileMockImplementationCalls = [
       "task",
       "error",
     ] as DeviceTaskError[];
 
-    const readFileMockReturnValues = [
-      {},
-      taskMockValue,
-      
-    ];
+    const readFileMockReturnValues = [{}, taskMockValue];
     const cronTaskManager = dependency(
       addToCronStatus,
       deleteFromCronStatus,
@@ -275,13 +271,9 @@ describe("CronTaskManager with file persistence CLASS TEST - add task", () => {
     const readFileMockImplementationCalls = [
       "task",
       "task",
-      
     ] as DeviceTaskError[];
 
-    const readFileMockReturnValues = [
-      {},
-      taskMockValue,
-    ];
+    const readFileMockReturnValues = [{}, taskMockValue];
 
     const cronTaskManager = dependency(
       addToCronStatus,
@@ -312,6 +304,4 @@ describe("CronTaskManager with file persistence CLASS TEST - add task", () => {
       },
     });
   });
-
- 
 });

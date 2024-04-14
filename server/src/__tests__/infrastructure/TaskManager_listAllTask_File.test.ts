@@ -2,10 +2,17 @@ import { describe } from "@jest/globals";
 import { SpiedFunction } from "jest-mock";
 import { expect, jest, test } from "@jest/globals";
 
-
-import { appCronMockMethods, prepareCronTaskManagerForFilePersistenceWithMockParameters } from "./mockForCronManager";
-import { FileRepositoryHelpers } from "../../Infrastructure/filePersistencia/auxilaryFunctions";
-import { DeviceTaskError, EmptyObject, ReadFileMockReturnValues, fsModuleMockForDevices } from "./mockForFileRepositoryHeplers";
+import {
+  appCronMockMethods,
+  prepareCronTaskManagerForFilePersistenceWithMockParameters,
+} from "./mockForCronManager";
+import { FileRepositoryHelpers } from "../../Infrastructure/file/auxilaryFunctions";
+import {
+  DeviceTaskError,
+  EmptyObject,
+  ReadFileMockReturnValues,
+  fsModuleMockForDevices,
+} from "./mockForFileRepositoryHeplers";
 import { MemeoryStatusType } from "./mockForCacheDeviceRepository";
 
 describe("cronTaskManager CLASS TEST - list all tasks", () => {
@@ -33,13 +40,13 @@ describe("cronTaskManager CLASS TEST - list all tasks", () => {
 
     return cronTaskManager;
   };
-  
+
   const taskMockValue = {
     "678910": {
       id: "678910",
       deviceId: "12345",
       onStatus: false,
-      scheduledTime: {hour:"10", minutes: "10" },
+      scheduledTime: { hour: "10", minutes: "10" },
     },
   };
 
@@ -51,10 +58,8 @@ describe("cronTaskManager CLASS TEST - list all tasks", () => {
       commandOn: "switch on",
       commandOff: "switch off",
     },
-  }
-  
-  
-  
+  };
+
   let consoleSpy: SpiedFunction;
 
   beforeEach(() => {
@@ -67,10 +72,15 @@ describe("cronTaskManager CLASS TEST - list all tasks", () => {
   test("Should list all tasks", async () => {
     const addToCronStatus = "success";
     const deleteFromCronStatus = "success";
-    const writeFileMockImplementationCalls = ["write", "write"] as DeviceTaskError[];
-    const readFileMockImplementationCalls = ["task", "device"] as DeviceTaskError[];
+    const writeFileMockImplementationCalls = [
+      "write",
+      "write",
+    ] as DeviceTaskError[];
+    const readFileMockImplementationCalls = [
+      "task",
+      "device",
+    ] as DeviceTaskError[];
 
-    
     const readFileMockReturnValues = [taskMockValue, deviceMockValue];
     const cronTaskManager = dependency(
       addToCronStatus,
@@ -80,26 +90,30 @@ describe("cronTaskManager CLASS TEST - list all tasks", () => {
       readFileMockReturnValues
     );
 
-
-    await cronTaskManager
-      .listAll()
-      .then((result) =>
-        expect(result).toStrictEqual([{
-          id: '678910',
-          deviceId: '12345',
+    await cronTaskManager.listAll().then((result) =>
+      expect(result).toStrictEqual([
+        {
+          id: "678910",
+          deviceId: "12345",
           onStatus: false,
-          scheduledTime: { hour: '10', minutes: '10' }}
-        ])
-      );
+          scheduledTime: { hour: "10", minutes: "10" },
+        },
+      ])
+    );
   });
 
   test("Should not list task if aggregated task array is empty", async () => {
     const addToCronStatus = "success";
     const deleteFromCronStatus = "success";
-    const writeFileMockImplementationCalls = ["write", "write"] as DeviceTaskError[];
-    const readFileMockImplementationCalls = ["task", "device"] as DeviceTaskError[];
+    const writeFileMockImplementationCalls = [
+      "write",
+      "write",
+    ] as DeviceTaskError[];
+    const readFileMockImplementationCalls = [
+      "task",
+      "device",
+    ] as DeviceTaskError[];
 
-    
     const readFileMockReturnValues = [{}, deviceMockValue];
     const cronTaskManager = dependency(
       addToCronStatus,
@@ -117,10 +131,15 @@ describe("cronTaskManager CLASS TEST - list all tasks", () => {
   test("Should return error if write to file error occured during aggregation", async () => {
     const addToCronStatus = "success";
     const deleteFromCronStatus = "success";
-    const writeFileMockImplementationCalls = ["write", "error"] as DeviceTaskError[];
-    const readFileMockImplementationCalls = ["task", "device"] as DeviceTaskError[];
+    const writeFileMockImplementationCalls = [
+      "write",
+      "error",
+    ] as DeviceTaskError[];
+    const readFileMockImplementationCalls = [
+      "task",
+      "device",
+    ] as DeviceTaskError[];
 
-    
     const readFileMockReturnValues = [{}, deviceMockValue];
     const cronTaskManager = dependency(
       addToCronStatus,
@@ -129,7 +148,6 @@ describe("cronTaskManager CLASS TEST - list all tasks", () => {
       readFileMockImplementationCalls,
       readFileMockReturnValues
     );
-
 
     await cronTaskManager.listAll().catch((result) =>
       expect(result).toStrictEqual({
@@ -141,10 +159,15 @@ describe("cronTaskManager CLASS TEST - list all tasks", () => {
   test("Should return error if read task from file error occured during aggregation", async () => {
     const addToCronStatus = "success";
     const deleteFromCronStatus = "success";
-    const writeFileMockImplementationCalls = ["write", "write"] as DeviceTaskError[];
-    const readFileMockImplementationCalls = ["error", "device"] as DeviceTaskError[];
+    const writeFileMockImplementationCalls = [
+      "write",
+      "write",
+    ] as DeviceTaskError[];
+    const readFileMockImplementationCalls = [
+      "error",
+      "device",
+    ] as DeviceTaskError[];
 
-    
     const readFileMockReturnValues = [{}, deviceMockValue];
     const cronTaskManager = dependency(
       addToCronStatus,
@@ -156,15 +179,22 @@ describe("cronTaskManager CLASS TEST - list all tasks", () => {
 
     await cronTaskManager.listAll().catch((result) =>
       expect(result).toStrictEqual({
-        "Read file error": "Internal read error"})
+        "Read file error": "Internal read error",
+      })
     );
   });
 
   test("Should return error if read task from file error occured during aggregation", async () => {
     const addToCronStatus = "success";
     const deleteFromCronStatus = "success";
-    const writeFileMockImplementationCalls = ["write", "write"] as DeviceTaskError[];
-    const readFileMockImplementationCalls = ["task", "error"] as DeviceTaskError[];
+    const writeFileMockImplementationCalls = [
+      "write",
+      "write",
+    ] as DeviceTaskError[];
+    const readFileMockImplementationCalls = [
+      "task",
+      "error",
+    ] as DeviceTaskError[];
 
     const readFileMockReturnValues = [{}, deviceMockValue];
     const cronTaskManager = dependency(
@@ -175,16 +205,10 @@ describe("cronTaskManager CLASS TEST - list all tasks", () => {
       readFileMockReturnValues
     );
 
-
     await cronTaskManager.listAll().catch((result) =>
       expect(result).toStrictEqual({
-        "Read file error": "Internal read error"})
+        "Read file error": "Internal read error",
+      })
     );
   });
-
-  
 });
-
-
-
-

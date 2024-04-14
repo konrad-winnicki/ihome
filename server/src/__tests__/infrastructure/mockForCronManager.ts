@@ -4,8 +4,8 @@ import { MongoTaskRepository } from "../../Infrastructure/task/MongoTaskReposito
 import { ServerMessages } from "../../ServerMessages";
 import { TaskScheduler } from "../../Infrastructure/task/TaskScheduler";
 import { Task } from "../../domain/Task";
-import { FileTaskRepository } from "../../Infrastructure/filePersistencia/FileTaskRepository";
-import { FileRepositoryHelpers } from "../../Infrastructure/filePersistencia/auxilaryFunctions";
+import { FileTaskRepository } from "../../Infrastructure/file/FileTaskRepository";
+import { FileRepositoryHelpers } from "../../Infrastructure/file/auxilaryFunctions";
 import { DeviceRunService } from "../../application/device/DeviceRunService";
 import { CachedDevice } from "../../Infrastructure/cache/CachedDevices";
 

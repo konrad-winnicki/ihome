@@ -6,7 +6,7 @@ import {
   appCronMockMethods,
   prepareCronTaskManagerForFilePersistenceWithMockParameters,
 } from "./mockForCronManager";
-import { FileRepositoryHelpers } from "../../Infrastructure/filePersistencia/auxilaryFunctions";
+import { FileRepositoryHelpers } from "../../Infrastructure/file/auxilaryFunctions";
 import {
   DeviceTaskError,
   EmptyObject,
@@ -40,7 +40,7 @@ describe("cronTaskManager with file persistence CLASS TEST - delete task", () =>
 
     return cronTaskManager;
   };
-  
+
   const taskMockValue = {
     "678910": {
       id: "678910",
@@ -49,7 +49,7 @@ describe("cronTaskManager with file persistence CLASS TEST - delete task", () =>
       scheduledTime: { hour: "10", minutes: "10" },
     },
   };
-  
+
   const taskToDelete = "678910";
   let consoleSpy: SpiedFunction;
 
@@ -63,10 +63,15 @@ describe("cronTaskManager with file persistence CLASS TEST - delete task", () =>
   test("Should delete task", async () => {
     const addToCronStatus = "success";
     const deleteFromCronStatus = "success";
-    const writeFileMockImplementationCalls = ["write", "write", "write"] as DeviceTaskError[];
-    const readFileMockImplementationCalls = ["task", "task"] as DeviceTaskError[];
-
-    
+    const writeFileMockImplementationCalls = [
+      "write",
+      "write",
+      "write",
+    ] as DeviceTaskError[];
+    const readFileMockImplementationCalls = [
+      "task",
+      "task",
+    ] as DeviceTaskError[];
 
     const readFileMockReturnValues = [taskMockValue, taskMockValue];
     const cronTaskManager = dependency(
@@ -86,8 +91,15 @@ describe("cronTaskManager with file persistence CLASS TEST - delete task", () =>
   test("Should not delete task if reading from file error during deletion", async () => {
     const addToCronStatus = "success";
     const deleteFromCronStatus = "success";
-    const writeFileMockImplementationCalls = ["write", "write", "write"] as DeviceTaskError[];
-    const readFileMockImplementationCalls = ["task", "error"] as DeviceTaskError[];
+    const writeFileMockImplementationCalls = [
+      "write",
+      "write",
+      "write",
+    ] as DeviceTaskError[];
+    const readFileMockImplementationCalls = [
+      "task",
+      "error",
+    ] as DeviceTaskError[];
 
     const readFileMockReturnValues = [taskMockValue, taskMockValue];
     const cronTaskManager = dependency(
@@ -110,10 +122,16 @@ describe("cronTaskManager with file persistence CLASS TEST - delete task", () =>
   test("Should not delete task if wriring to file error during deletion", async () => {
     const addToCronStatus = "success";
     const deleteFromCronStatus = "success";
-    const writeFileMockImplementationCalls = ["write", "error", "write"] as DeviceTaskError[];
-    const readFileMockImplementationCalls = ["task", "task"] as DeviceTaskError[];
+    const writeFileMockImplementationCalls = [
+      "write",
+      "error",
+      "write",
+    ] as DeviceTaskError[];
+    const readFileMockImplementationCalls = [
+      "task",
+      "task",
+    ] as DeviceTaskError[];
 
-    
     const readFileMockReturnValues = [taskMockValue, taskMockValue];
     const cronTaskManager = dependency(
       addToCronStatus,
@@ -142,8 +160,11 @@ describe("cronTaskManager with file persistence CLASS TEST - delete task", () =>
       "write",
       "write",
     ] as DeviceTaskError[];
-    const readFileMockImplementationCalls = ["task", "task", "task"] as DeviceTaskError[];
-
+    const readFileMockImplementationCalls = [
+      "task",
+      "task",
+      "task",
+    ] as DeviceTaskError[];
 
     const readFileMockReturnValues = [taskMockValue, taskMockValue, {}];
     const cronTaskManager = dependency(
@@ -154,19 +175,17 @@ describe("cronTaskManager with file persistence CLASS TEST - delete task", () =>
       readFileMockReturnValues
     );
 
-    await cronTaskManager
-      .delete(taskToDelete)
-      .catch((result) =>
-        expect(result).toEqual({
-          "Task not deleted": {
+    await cronTaskManager.delete(taskToDelete).catch((result) =>
+      expect(result).toEqual({
+        "Task not deleted": {
+          error: "Cron error during deletion.",
+          compensation: {
             error: "Cron error during deletion.",
-            compensation: {
-              error: "Cron error during deletion.",
-              compensation: { "Compensation succeded": { taskId: "678910" } },
-            },
+            compensation: { "Compensation succeded": { taskId: "678910" } },
           },
-        })
-      );
+        },
+      })
+    );
   });
 
   test("Compensation should fail if error during writing to file", async () => {
@@ -177,9 +196,12 @@ describe("cronTaskManager with file persistence CLASS TEST - delete task", () =>
       "write",
       "write",
       "error",
-     
     ] as DeviceTaskError[];
-    const readFileMockImplementationCalls = ["task", "task", "task"] as DeviceTaskError[];
+    const readFileMockImplementationCalls = [
+      "task",
+      "task",
+      "task",
+    ] as DeviceTaskError[];
 
     const readFileMockReturnValues = [taskMockValue, taskMockValue, {}];
     const cronTaskManager = dependency(
@@ -190,22 +212,20 @@ describe("cronTaskManager with file persistence CLASS TEST - delete task", () =>
       readFileMockReturnValues
     );
 
-    await cronTaskManager
-      .delete(taskToDelete)
-      .catch((result) =>
-        expect(result).toEqual({
-          "Task not deleted": {
-            error: "Cron error during deletion.",
-            compensation: {
-              "Compensation failed": {
-                "Task not added": {
-                  "Write file error": "Internal write error",
-                },
+    await cronTaskManager.delete(taskToDelete).catch((result) =>
+      expect(result).toEqual({
+        "Task not deleted": {
+          error: "Cron error during deletion.",
+          compensation: {
+            "Compensation failed": {
+              "Task not added": {
+                "Write file error": "Internal write error",
               },
             },
           },
-        })
-      );
+        },
+      })
+    );
   });
 
   test("Compensation should fail if error during reading from file", async () => {
@@ -215,10 +235,13 @@ describe("cronTaskManager with file persistence CLASS TEST - delete task", () =>
       "write",
       "write",
       "write",
-      "write"
-      
+      "write",
     ] as DeviceTaskError[];
-    const readFileMockImplementationCalls = ["task", "task", "error"] as DeviceTaskError[];
+    const readFileMockImplementationCalls = [
+      "task",
+      "task",
+      "error",
+    ] as DeviceTaskError[];
 
     const readFileMockReturnValues = [taskMockValue, taskMockValue, {}];
     const cronTaskManager = dependency(
@@ -229,38 +252,30 @@ describe("cronTaskManager with file persistence CLASS TEST - delete task", () =>
       readFileMockReturnValues
     );
 
-    await cronTaskManager
-      .delete(taskToDelete)
-      .catch((result) =>
-        expect(result).toEqual({
-          "Task not deleted": {
-            error: "Cron error during deletion.",
-            compensation: {
-              "Compensation failed": {
-                "Task not added": {
-                  "Read file error": "Internal read error"                },
+    await cronTaskManager.delete(taskToDelete).catch((result) =>
+      expect(result).toEqual({
+        "Task not deleted": {
+          error: "Cron error during deletion.",
+          compensation: {
+            "Compensation failed": {
+              "Task not added": {
+                "Read file error": "Internal read error",
               },
             },
           },
-        })
-      );
+        },
+      })
+    );
   });
-
 
   test("Should not delete task if task not exists", async () => {
     const addToCronStatus = "success";
     const deleteFromCronStatus = "success";
-    const writeFileMockImplementationCalls = [
-      "write",
-      
-      
-    ] as DeviceTaskError[];
+    const writeFileMockImplementationCalls = ["write"] as DeviceTaskError[];
     const readFileMockImplementationCalls = ["task"] as DeviceTaskError[];
 
-    
-
     const readFileMockReturnValues = [{}];
-      const cronTaskManager = dependency(
+    const cronTaskManager = dependency(
       addToCronStatus,
       deleteFromCronStatus,
       writeFileMockImplementationCalls,
@@ -268,28 +283,18 @@ describe("cronTaskManager with file persistence CLASS TEST - delete task", () =>
       readFileMockReturnValues
     );
 
-    await cronTaskManager
-      .delete(taskToDelete)
-      .catch((result) =>
-        expect(result).toEqual({
-          "Task not deleted": {"error": "Task not exists"},
-        })
-      );
+    await cronTaskManager.delete(taskToDelete).catch((result) =>
+      expect(result).toEqual({
+        "Task not deleted": { error: "Task not exists" },
+      })
+    );
   });
-
 
   test("Should not delete task if error during searching for task", async () => {
     const addToCronStatus = "success";
     const deleteFromCronStatus = "success";
-    const writeFileMockImplementationCalls = [
-      "write",
-      
-      
-    ] as DeviceTaskError[];
+    const writeFileMockImplementationCalls = ["write"] as DeviceTaskError[];
     const readFileMockImplementationCalls = ["error"] as DeviceTaskError[];
-
-    
-
 
     const readFileMockReturnValues = [taskMockValue];
     const cronTaskManager = dependency(
@@ -300,14 +305,12 @@ describe("cronTaskManager with file persistence CLASS TEST - delete task", () =>
       readFileMockReturnValues
     );
 
-    await cronTaskManager
-      .delete(taskToDelete)
-      .catch((result) =>
-        expect(result).toEqual({
-          "Task not deleted": {"error": {"Read file error": "Internal read error"}},
-        })
-      );
+    await cronTaskManager.delete(taskToDelete).catch((result) =>
+      expect(result).toEqual({
+        "Task not deleted": {
+          error: { "Read file error": "Internal read error" },
+        },
+      })
+    );
   });
-
-
 });

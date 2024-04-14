@@ -16,7 +16,7 @@ import { ServerMessages } from "./ServerMessages";
 import { FileDeviceRepository } from "./Infrastructure/file/FileDeviceRepository";
 import { FileRepositoryHelpers } from "./Infrastructure/file/auxilaryFunctions";
 import prepareApplicationProperties from "../config/sanitizedProperties";
-import { MongoDeviceRepository } from "./Infrastructure/databasePersistencia/MongoDeviceRepository";
+import { MongoDeviceRepository } from "./Infrastructure/database/MongoDeviceRepository";
 import { CacheDeviceRepository } from "./Infrastructure/cache/CacheDeviceRepository";
 import { DeviceService } from "./application/device/DeviceService";
 import { CronTaskManager } from "./Infrastructure/task/CronTaskManager";

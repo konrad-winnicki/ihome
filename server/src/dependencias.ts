@@ -1,5 +1,5 @@
 import { DeviceRunService } from "./application/device/DeviceRunService";
-import { MongoDatabase } from "./Infrastructure/databse/MongoDataBase";
+import { MongoDatabase } from "./Infrastructure/database/MongoDataBase";
 import { TaskScheduler } from "./domain/TaskScheduler";
 import { EventEmitter } from "node:events";
 import { recoverTasks } from "./domain/recoveryFunctions";

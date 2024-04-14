@@ -1,5 +1,5 @@
 import { Model } from "mongoose";
-import { CronTaskManager } from "../../Infrastructure/task/CronTaskManager";
+import { CronTaskManager } from "../../application/task/CronTaskManager";
 import { MongoTaskRepository } from "../../Infrastructure/task/MongoTaskRepository";
 import { ServerMessages } from "../../ServerMessages";
 import { TaskScheduler } from "../../Infrastructure/task/TaskScheduler";

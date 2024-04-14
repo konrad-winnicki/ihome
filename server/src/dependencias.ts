@@ -19,7 +19,7 @@ import prepareApplicationProperties from "../config/sanitizedProperties";
 import { MongoDeviceRepository } from "./Infrastructure/database/MongoDeviceRepository";
 import { CacheDeviceRepository } from "./Infrastructure/cache/CacheDeviceRepository";
 import { DeviceService } from "./application/device/DeviceService";
-import { CronTaskManager } from "./Infrastructure/task/CronTaskManager";
+import { CronTaskManager } from "./application/task/CronTaskManager";
 import { FileTaskRepository } from "./Infrastructure/file/FileTaskRepository";
 import { MongoTaskRepository } from "./Infrastructure/task/MongoTaskRepository";
 import { TaskService } from "./application/task/TaskService";

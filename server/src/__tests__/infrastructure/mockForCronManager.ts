@@ -2,7 +2,7 @@ import { Model } from "mongoose";
 import { CronTaskManager } from "../../Infrastructure/task/CronTaskManager";
 import { MongoTaskRepository } from "../../Infrastructure/task/MongoTaskRepository";
 import { ServerMessages } from "../../ServerMessages";
-import { TaskScheduler } from "../../domain/TaskScheduler";
+import { TaskScheduler } from "../../Infrastructure/task/TaskScheduler";
 import { Task } from "../../domain/Task";
 import { FileTaskRepository } from "../../Infrastructure/filePersistencia/FileTaskRepository";
 import { FileRepositoryHelpers } from "../../Infrastructure/filePersistencia/auxilaryFunctions";
@@ -62,7 +62,7 @@ export function appCronMockMethods(
         return Promise.resolve({ taskId: "678910" });
       case "error":
         //throw new Error("Internal cron error");
-        return Promise.reject("Internal cron error")
+        return Promise.reject("Internal cron error");
     }
   });
 

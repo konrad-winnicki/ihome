@@ -1,6 +1,6 @@
 import { TaskRepository } from "../../application/task/TaskRepository";
 import { TaskRecovery } from "../../application/task/TaskRecovery";
-import { TaskScheduler } from "../../domain/TaskScheduler";
+import { TaskScheduler } from "./TaskScheduler";
 import { ManagerResponse } from "../../application/task/TaskManager";
 import { Task } from "../../domain/Task";
 

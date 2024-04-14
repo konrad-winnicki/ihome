@@ -1,4 +1,4 @@
-import { TaskScheduler } from "../../domain/TaskScheduler";
+import { TaskScheduler } from "./TaskScheduler";
 import { TaskManager } from "../../application/task/TaskManager";
 import { ServerMessages } from "../../ServerMessages";
 

@@ -1,7 +1,7 @@
 import cron from "node-cron";
 
-import { ManagerResponse } from "../application/task/TaskManager";
-import { DeviceRunInterface } from "../application/device/DeviceRunInterface";
+import { ManagerResponse } from "../../application/task/TaskManager";
+import { DeviceRunInterface } from "../../application/device/DeviceRunInterface";
 
 export class TaskScheduler {
   private deviceRunService: DeviceRunInterface;

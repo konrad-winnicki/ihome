@@ -1,4 +1,4 @@
-import { CachedDevice } from "../cache/CachedDevices";
+import { CachedDevice } from "./CachedDevices";
 import { Device } from "../../domain/Device";
 import { ServerMessages } from "../../ServerMessages";
 import { ManagerResponse } from "../../application/task/TaskManager";

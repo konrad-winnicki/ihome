@@ -17,7 +17,7 @@ import { FileDeviceRepository } from "./Infrastructure/filePersistencia/FileDevi
 import { FileRepositoryHelpers } from "./Infrastructure/filePersistencia/auxilaryFunctions";
 import prepareApplicationProperties from "../config/sanitizedProperties";
 import { MongoDeviceRepository } from "./Infrastructure/databasePersistencia/MongoDeviceRepository";
-import { CacheDeviceRepository } from "./Infrastructure/databasePersistencia/CacheDeviceRepository";
+import { CacheDeviceRepository } from "./Infrastructure/cache/CacheDeviceRepository";
 import { DeviceService } from "./application/device/DeviceService";
 import { CronTaskManager } from "./Infrastructure/task/CronTaskManager";
 import { FileTaskRepository } from "./Infrastructure/filePersistencia/FileTaskRepository";

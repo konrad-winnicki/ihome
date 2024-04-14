@@ -1,4 +1,4 @@
-import { CacheDeviceRepository } from "../../Infrastructure/databasePersistencia/CacheDeviceRepository";
+import { CacheDeviceRepository } from "../../Infrastructure/cache/CacheDeviceRepository";
 import { ServerMessages } from "../../ServerMessages";
 import { DeviceRepository } from "../../application/device/DeviceRepository";
 import { Device } from "../../domain/Device";

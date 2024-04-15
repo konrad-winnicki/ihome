@@ -1,9 +1,8 @@
-import { TaskRepository } from "../../application/task/TaskRepository";
+import { TaskRepository } from "../../application/task/TaskRepositoryInterface";
 import { Task } from "../../domain/Task";
 import { Model, mongo } from "mongoose";
-import { RepositoryResponse } from "../../application/task/TaskRepository";
 import { ServerMessages } from "../../ServerMessages";
-
+import { ManagerResponse } from "../../application/task/TaskManagerInterface";
 
 export class MongoTaskRepository implements TaskRepository {
   private taskDocument: Model<Task>;
@@ -14,7 +13,7 @@ export class MongoTaskRepository implements TaskRepository {
     this.serverMessages = serverMessages;
   }
 
-  public async add(task: Task): Promise<RepositoryResponse<object>> {
+  public async add(task: Task): Promise<ManagerResponse<object>> {
     const newTask = {
       id: task.id,
       deviceId: task.deviceId,
@@ -29,15 +28,14 @@ export class MongoTaskRepository implements TaskRepository {
         return Promise.resolve({ [message]: task.id });
       })
       .catch((error) => {
-        const errorToPass = error instanceof Error? this.translateDbError(error): error
+        const errorToPass =
+          error instanceof Error ? this.translateDbError(error) : error;
 
         const message = this.serverMessages.addTask.FAILURE;
         const rejectMessage = { [message]: errorToPass };
         return Promise.reject(rejectMessage);
-
       });
   }
-
 
   private translateDbError(error: Error) {
     return error instanceof mongo.MongoServerError
@@ -52,7 +50,7 @@ export class MongoTaskRepository implements TaskRepository {
     }
     return { error: err.message };
   }
-  public async delete(taskId: string): Promise<RepositoryResponse<object>> {
+  public async delete(taskId: string): Promise<ManagerResponse<object>> {
     const messageSucces = this.serverMessages.deleteTask.SUCCESS;
     const messageFailure = this.serverMessages.deleteTask.FAILURE;
     return this.taskDocument
@@ -74,7 +72,7 @@ export class MongoTaskRepository implements TaskRepository {
   }
 
   public async findById(taskId: string): Promise<Task> {
-        return this.taskDocument
+    return this.taskDocument
       .findOne({ id: taskId })
       .then((task) => {
         if (task) {
@@ -91,13 +89,15 @@ export class MongoTaskRepository implements TaskRepository {
   }
 
   public async listAll(): Promise<Task[]> {
-    return this.taskDocument.find({})
+    return this.taskDocument
+      .find({})
       .then((tasks) => {
         return Promise.resolve(tasks as Task[]);
       })
       .catch((error) => {
         const persistenceError = this.serverMessages.persistenceError;
-        return Promise.reject({ [persistenceError]: error })});
+        return Promise.reject({ [persistenceError]: error });
+      });
   }
 
   public async getByDevice(deviceId: string): Promise<Task[]> {

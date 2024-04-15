@@ -1,7 +1,7 @@
 import { ServerMessages } from "../../ServerMessages";
-import { ManagerResponse } from "../../application/task/TaskManager";
+import { ManagerResponse } from "../../application/task/TaskManagerInterface";
 import { FileRepositoryHelpers } from "./auxilaryFunctions";
-import { TaskRepository } from "../../application/task/TaskRepository";
+import { TaskRepository } from "../../application/task/TaskRepositoryInterface";
 import { Task } from "../../domain/Task";
 
 export class FileTaskRepository implements TaskRepository {
@@ -53,7 +53,7 @@ export class FileTaskRepository implements TaskRepository {
     return this.helperMethods
       .readDataFromFile("tasks.json")
       .then((fileContent) => {
-        console.log('read file content duroing deletion', fileContent)
+        console.log("read file content duroing deletion", fileContent);
         const isExisting = this.helperMethods.findByIdInFile(fileContent, id);
         if (!isExisting) {
           const notFoundError = this.serverMessages.notFound;
@@ -84,7 +84,7 @@ export class FileTaskRepository implements TaskRepository {
   async listAll(): Promise<Task[]> {
     return this.helperMethods.readDataFromFile("tasks.json").then((taskMap) => {
       const tasks = Object.values(taskMap) as Task[];
-      return tasks
+      return tasks;
     });
   }
 
@@ -126,5 +126,4 @@ export class FileTaskRepository implements TaskRepository {
         return Promise.reject({ error: error });
       });
   }
-  
 }

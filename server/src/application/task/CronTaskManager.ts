@@ -1,8 +1,8 @@
 import { TaskScheduler } from "../../Infrastructure/task/TaskScheduler";
-import { TaskManager } from "./TaskManager";
+import { TaskManager } from "./TaskManagerInterface";
 import { ServerMessages } from "../../ServerMessages";
 
-import { TaskRepository } from "./TaskRepository";
+import { TaskRepository } from "./TaskRepositoryInterface";
 import { Task } from "../../domain/Task";
 
 type ManagerResponse<T> = {

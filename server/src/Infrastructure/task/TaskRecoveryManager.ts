@@ -1,7 +1,7 @@
-import { TaskRepository } from "../../application/task/TaskRepository";
+import { TaskRepository } from "../../application/task/TaskRepositoryInterface";
 import { TaskRecovery } from "../../application/task/TaskRecovery";
 import { TaskScheduler } from "./TaskScheduler";
-import { ManagerResponse } from "../../application/task/TaskManager";
+import { ManagerResponse } from "../../application/task/TaskManagerInterface";
 import { Task } from "../../domain/Task";
 
 export class TaskRecoveryManager implements TaskRecovery {

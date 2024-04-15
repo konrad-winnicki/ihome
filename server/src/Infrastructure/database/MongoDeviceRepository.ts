@@ -2,7 +2,7 @@ import { Model, mongo } from "mongoose";
 import { Device } from "../../domain/Device";
 import { DeviceRepository } from "../../application/device/DeviceRepository";
 import { ServerMessages } from "../../ServerMessages";
-import { ManagerResponse } from "../../application/task/TaskManager";
+import { ManagerResponse } from "../../application/task/TaskManagerInterface";
 
 //interface devicePersistence: adddevuce, deleteDevice, getMenager, Getswitch
 //mongo lub file impelement devicePersistence intrtface
@@ -26,7 +26,8 @@ export class MongoDeviceRepository implements DeviceRepository {
         return Promise.resolve(resolveMessage);
       })
       .catch((error) => {
-        const errorToPass = error instanceof Error? this.translateDbError(error): error
+        const errorToPass =
+          error instanceof Error ? this.translateDbError(error) : error;
 
         const messageFailure = this.serverMessages.addDevice.FAILURE;
         const rejectMessage = {

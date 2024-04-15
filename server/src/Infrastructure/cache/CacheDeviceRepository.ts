@@ -1,7 +1,7 @@
 import { CachedDevice } from "./CachedDevices";
 import { Device } from "../../domain/Device";
 import { ServerMessages } from "../../ServerMessages";
-import { ManagerResponse } from "../../application/task/TaskManager";
+import { ManagerResponse } from "../../application/task/TaskManagerInterface";
 import { DeviceRepository } from "../../application/device/DeviceRepository";
 
 export class CacheDeviceRepository implements DeviceRepository {

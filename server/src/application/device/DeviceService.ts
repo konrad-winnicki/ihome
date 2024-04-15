@@ -2,7 +2,7 @@ import { Sensor } from "../../domain/Sensor";
 import { Device } from "../../domain/Device";
 import { Switch } from "../../domain/Switch";
 import { EventEmitter } from "node:events";
-import { ManagerResponse } from "../task/TaskManager";
+import { ManagerResponse } from "../task/TaskManagerInterface";
 import { DeviceRepository } from "./DeviceRepository";
 
 export class DeviceService {

@@ -1,5 +1,5 @@
 import { DeviceService } from "../device/DeviceService";
-import { TaskManager } from "./TaskManager";
+import { TaskManager } from "./TaskManagerInterface";
 import { Task } from "../../domain/Task";
 import EventEmitter from "node:events";
 
@@ -10,7 +10,6 @@ type ManagerResponse<T> = {
 export class TaskService {
   private taskManager: TaskManager;
   private dviceService: DeviceService;
-
 
   constructor(
     taskManager: TaskManager,

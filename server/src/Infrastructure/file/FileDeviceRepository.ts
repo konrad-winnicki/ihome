@@ -1,9 +1,8 @@
 import { Device } from "../../domain/Device";
 import { DeviceRepository } from "../../application/device/DeviceRepository";
 import { ServerMessages } from "../../ServerMessages";
-import { ManagerResponse } from "../../application/task/TaskManager";
+import { ManagerResponse } from "../../application/task/TaskManagerInterface";
 import { FileRepositoryHelpers } from "./auxilaryFunctions";
-
 
 export class FileDeviceRepository implements DeviceRepository {
   private helperMethods: FileRepositoryHelpers;
@@ -50,7 +49,6 @@ export class FileDeviceRepository implements DeviceRepository {
           });
       })
       .catch((error) => {
-
         const messageFailure = this.serverMessages.addDevice.FAILURE;
         if (error instanceof Error) {
           return Promise.reject({ [messageFailure]: error.message });
@@ -101,9 +99,6 @@ export class FileDeviceRepository implements DeviceRepository {
       })
       .catch((error) => Promise.reject({ [persistencieError]: error }));
   }
-
-
-
 
   async getById(deviceId: string): Promise<Device> {
     const persistenceError = this.serverMessages.persistenceError;

@@ -8,7 +8,7 @@ import { addSwitch } from "./auxilaryFunctionsForTests/addSwitch";
 import { Connection } from "mongoose";
 import { cleanupFiles } from "./auxilaryFunctionsForTests/fileCleanup";
 import cron from "node-cron";
-import { getNodeEnvType } from "../../../config/config";
+import { getNodeEnvType } from "../../../config/getNodeEnvType";
 
 const environment = getNodeEnvType();
 

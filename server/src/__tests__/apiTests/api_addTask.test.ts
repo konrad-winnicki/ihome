@@ -1,6 +1,6 @@
 import request from "supertest";
 import { describe, afterAll, beforeEach, beforeAll } from "@jest/globals";
-import { getNodeEnvType } from "../../../config/config";
+import { getNodeEnvType } from "../../../config/getNodeEnvType";
 import { initializeApplication } from "../../initializeApplication";
 import { Application } from "../../dependencies/Application";
 import { cleanupDatabase } from "./auxilaryFunctionsForTests/dbCleanup";
@@ -32,7 +32,6 @@ describe("API ADD TASK TEST", () => {
 
   beforeAll(async () => {
     app = await initializeApplication();
-    console.log("SERVER IS UP");
     if (environment === "test_api_database") {
       const connection = app.databaseInstance?.connection as Connection;
       getTasksForDevice = getTasksForDeviceFromDB(connection);

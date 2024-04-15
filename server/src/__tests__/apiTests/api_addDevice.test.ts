@@ -1,6 +1,6 @@
 import request from "supertest";
 import { describe, afterAll, beforeEach, beforeAll } from "@jest/globals";
-import { getNodeEnvType } from "../../../config/config";
+import { getNodeEnvType } from "../../../config/getNodeEnvType";
 import { initializeApplication } from "../../initializeApplication";
 import { Application } from "../../dependencies/Application";
 import { cleanupDatabase } from "./auxilaryFunctionsForTests/dbCleanup";

@@ -17,7 +17,7 @@ import { cleanupFiles } from "./auxilaryFunctionsForTests/fileCleanup";
 import { Connection } from "mongoose";
 import { Device } from "../../domain/Device";
 import cron from "node-cron";
-import { getNodeEnvType } from "../../../config/config";
+import { getNodeEnvType } from "../../../config/getNodeEnvType";
 
 const environment = getNodeEnvType();
 
@@ -128,6 +128,7 @@ describe("API DELETE DEVICE TEST", () => {
   });
 
   test("Should delete switch from database and inMemoryStorage:", async () => {
+    
     const response = await request(requestUri)
       .delete(`/devices/${switch1Id}`)
       .set("Authorization", token)

@@ -14,7 +14,7 @@ import {
   getTasksForDeviceFromDB,
   getTasksForDeviceFromFile,
 } from "./auxilaryFunctionsForTests/getTasksForDevice";
-import { getNodeEnvType } from "../../../config/config";
+import { getNodeEnvType } from "../../../config/getNodeEnvType";
 
 const environment = getNodeEnvType();
 

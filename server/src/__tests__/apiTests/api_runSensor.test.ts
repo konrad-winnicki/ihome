@@ -9,7 +9,7 @@ import { cleanupFiles } from "./auxilaryFunctionsForTests/fileCleanup";
 import { Connection } from "mongoose";
 //import appConfiguration from "../../../config/sanitizedProperties";
 import cron from "node-cron";
-import { getNodeEnvType } from "../../../config/config";
+import { getNodeEnvType } from "../../../config/getNodeEnvType";
 
 const environment = getNodeEnvType();
 

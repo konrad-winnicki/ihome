@@ -17,7 +17,7 @@ import { CacheDeviceRepository } from "./application/device/CacheDeviceRepositor
 import { DeviceService } from "./application/device/DeviceService";
 import { CronTaskManager } from "./application/task/CronTaskManager";
 import { TaskService } from "./application/task/TaskService";
-import { getNodeEnvType } from "../config/config";
+import { getNodeEnvType } from "../config/getNodeEnvType";
 import { chooseServerType } from "./dependencies/chooseServerType";
 import { chooseRepositoryType } from "./dependencies/chooseRepositoryType";
 import { Application } from "./dependencies/Application";

@@ -1,26 +1,9 @@
 import PropertiesReader, { Value } from "properties-reader";
 import { choosePropertyFile } from "../src/propertyWriter";
 import { prepareAppProperties as prepareProductionPropertyFile } from "../src/prepareAppProperties";
-import { getNodeEnvType } from "./config";
+import { getNodeEnvType } from "./getNodeEnvType";
 import fs from "node:fs/promises";
 import * as sync from "node:fs";
-
-// TODO: remove nulls here
-
-interface COMMON_PROPERTIES {
-  PASSWORD: Value | null;
-  PERSISTENCIA: Value | null;
-  PORT: Value | null;
-  JWT_SECRET: Value | null;
-  SERVER_TYPE: Value | null;
-  SWITCH_REPLY_TIMEOUT: Value | null;
-}
-interface DATABASE_PROPERTIES extends COMMON_PROPERTIES {
-  DATABASE_URL: Value | null;
-  DATABASE: Value | null;
-}
-
-interface FILE_PROPERTIES extends COMMON_PROPERTIES {}
 
 export type PersistenceType = "DATABASE" | "FILE";
 
@@ -64,65 +47,38 @@ async function prepareApplicationProperties() {
     await prepareProductionPropertyFile(propertiesReader, propertiesPath);
   }
 
-  const getConfiguration = (): DATABASE_PROPERTIES | FILE_PROPERTIES => {
-    const commonProperties = {
-      PASSWORD: properties.get("PASSWORD"),
-      PERSISTENCIA: properties.get("PERSISTENCIA"),
-      PORT: properties.get("PORT"),
-      JWT_SECRET: properties.get("JWT_SECRET"),
-      SERVER_TYPE: properties.get("SERVER_TYPE"),
-      SWITCH_REPLY_TIMEOUT: properties.get("SWITCH_REPLY_TIMEOUT"),
-    };
-    const customProperties =
-      properties.get("PERSISTENCIA") === "DATABASE"
-        ? {
-            ...commonProperties,
-            DATABASE_URL: properties.get("DATABASE_URL"),
-            DATABASE: properties.get("DATABASE"),
-          }
-        : commonProperties;
-
-    console.log("PROPERTIES:", customProperties);
-    return customProperties;
-  };
-
-  const setAppConfiguration = (
-    config: DATABASE_PROPERTIES | FILE_PROPERTIES
-  ): DATABASE_CONFIGURATION | FILE_CONFIGURATION => {
-    for (const [key, value] of Object.entries(config)) {
-      if (value === null) {
-        throw new Error(
-          `Missing key ${key} in .properties. \n Path to file: ${propertiesPath}`
-        );
-      }
-    }
-
-    const persistenceType = parseString(
-      "persistencia",
-      config.PERSISTENCIA
-    ) as PersistenceType;
-    const commonProperties = {
-      PASSWORD: parseString("password", config.PASSWORD),
-      PERSISTENCIA: persistenceType,
-      PORT: parseNumber("port", config.PORT),
-      JWT_SECRET: parseString("jwt secret", config.JWT_SECRET),
-      SERVER_TYPE: parseString("server type", config.SERVER_TYPE),
-      SWITCH_REPLY_TIMEOUT: parseNumber(
-        "switch reply timeout",
-        config.SWITCH_REPLY_TIMEOUT
-      ),
-    };
-    return persistenceType === "DATABASE"
-      ? createDatabaseConfiguration(
-          commonProperties,
-          config as DATABASE_CONFIGURATION
-        )
-      : commonProperties;
-  };
-
-  const config = getConfiguration();
-  return setAppConfiguration(config);
+  return getConfiguration(properties);
 }
+
+const getConfiguration = (
+  properties: EnvAwarePropertiesReader
+): DATABASE_CONFIGURATION | FILE_CONFIGURATION => {
+  const commonProperties = {
+    PASSWORD: parseString("password", properties.get("PASSWORD")),
+    PERSISTENCIA: parseString("persistencia", properties.get("PERSISTENCIA")),
+    PORT: parseNumber("port", properties.get("PORT")),
+    JWT_SECRET: parseString("jwt secret", properties.get("JWT_SECRET")),
+    SERVER_TYPE: parseString("server type", properties.get("SERVER_TYPE")),
+    SWITCH_REPLY_TIMEOUT: parseNumber(
+      "switch reply timeout",
+      properties.get("SWITCH_REPLY_TIMEOUT")
+    ),
+  };
+  const customProperties =
+    properties.get("PERSISTENCIA") === "DATABASE"
+      ? {
+          ...commonProperties,
+          DATABASE_URL: parseString(
+            "database url",
+            properties.get("DATABASE_URL")
+          ),
+          DATABASE: parseString("database name", properties.get("DATABASE")),
+          PERSISTENCIA: "DATABASE" as PersistenceType,
+        }
+      : { ...commonProperties, PERSISTENCIA: "FILE" as PersistenceType };
+
+  return customProperties;
+};
 
 function parseString(name: string, value: Value | null): string {
   if (!value) {
@@ -130,6 +86,7 @@ function parseString(name: string, value: Value | null): string {
   }
   return value.toString();
 }
+
 function parseNumber(name: string, value: Value | null): number {
   if (!value) {
     throw Error(`Missing value for ${name}`);
@@ -138,19 +95,7 @@ function parseNumber(name: string, value: Value | null): number {
   if (isNaN(numberValue)) {
     throw Error(`Value for ${name} should be a number`);
   }
-  //return 1
-  return Number(value) as number; // TODO: test if it's not
-}
-
-function createDatabaseConfiguration(
-  commonProperties: COMMON_CONFIGURATION,
-  config: DATABASE_PROPERTIES
-) {
-  return {
-    ...commonProperties,
-    DATABASE_URL: parseString("database url", config.DATABASE_URL),
-    DATABASE: parseString("database name", config.DATABASE),
-  };
+  return Number(value);
 }
 
 async function assureProductionPropertiesFileExists() {

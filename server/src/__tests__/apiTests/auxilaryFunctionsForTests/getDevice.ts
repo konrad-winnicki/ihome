@@ -14,7 +14,6 @@ export function produceGetDeviceFromDB(connection: Connection) {
   };
 }
 
-// domkniecie, clojure, HOF
 export function produceGetDeviceFromFiles(path: string) {
   return async (deviceId: string): Promise<Device[]> => {
     const fileRepositoryMethods = new FileRepositoryHelpers();

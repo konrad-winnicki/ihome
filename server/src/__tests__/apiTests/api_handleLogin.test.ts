@@ -4,7 +4,7 @@ import { initializeApplication } from "../../initializeApplication";
 import { Application } from "../../dependencies/Application";
 import cron from "node-cron";
 import { cleanupFiles } from "./auxilaryFunctionsForTests/fileCleanup";
-import { getNodeEnvType } from "../../../config/config";
+import { getNodeEnvType } from "../../../config/getNodeEnvType";
 
 const environment = getNodeEnvType();
 

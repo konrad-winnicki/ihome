@@ -1,6 +1,6 @@
 import PropertiesReader, { Value } from "properties-reader";
-import { choosePropertyFile } from "../src/propertyWriter";
-import { prepareAppProperties as prepareProductionPropertyFile } from "../src/prepareAppProperties";
+import { choosePropertyFile } from "./propertyWriter";
+import { prepareAppProperties as prepareProductionPropertyFile } from "./prepareAppProperties";
 import { getNodeEnvType } from "./getNodeEnvType";
 import fs from "node:fs/promises";
 import * as sync from "node:fs";

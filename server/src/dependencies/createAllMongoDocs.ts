@@ -1,4 +1,4 @@
-import { MongoDatabase } from "../Infrastructure/database/MongoDatabase";
+import { MongoDatabase } from "../infrastructure/database/MongoDatabase";
 
 export function createAllMongoDocs(database: MongoDatabase) {
   const deviceDoc = database.createDeviceDoc();

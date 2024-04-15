@@ -1,6 +1,6 @@
 import { ServerMessages } from "../../ServerMessages";
-import { FileRepositoryHelpers } from "../../Infrastructure/file/auxilaryFunctions";
-import { FileDeviceRepository } from "../../Infrastructure/file/FileDeviceRepository";
+import { FileRepositoryHelpers } from "../../infrastructure/file/auxilaryFunctions";
+import { FileDeviceRepository } from "../../infrastructure/file/FileDeviceRepository";
 
 export function prepareFileDeviceRepositoryWithMockPerameters(
   helper: FileRepositoryHelpers

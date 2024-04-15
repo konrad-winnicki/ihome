@@ -1,9 +1,11 @@
 import { v4 } from "uuid";
-import { changeExistingProperties, collectUserData } from "./prompt/prompts";
+import {
+  changeExistingProperties,
+  collectUserData,
+} from "../src/infrastructure/prompt/prompts";
 import PropertiesReader from "properties-reader";
 import { propertyWriter } from "./propertyWriter";
-import { checkIfNotMissingParams } from "./Infrastructure/middleware/guardMiddleware/guardHelpers/guardFunctionHelpers";
-
+import { checkIfNotMissingParams } from "../src/infrastructure/middleware/guardMiddleware/guardHelpers/guardFunctionHelpers";
 
 export async function prepareAppProperties(
   properties: PropertiesReader.Reader,
@@ -40,7 +42,6 @@ export async function prepareAppProperties(
       });
   }
 }
-
 
 function checkIfValidPropertyFile(properties: PropertiesReader.Reader) {
   const commonExpectedParameters = [

@@ -1,7 +1,7 @@
 import { ServerMessages } from "../ServerMessages";
-import { FileDeviceRepository } from "../Infrastructure/file/FileDeviceRepository";
-import { FileRepositoryHelpers } from "../Infrastructure/file/auxilaryFunctions";
-import { FileTaskRepository } from "../Infrastructure/file/FileTaskRepository";
+import { FileDeviceRepository } from "../infrastructure/file/FileDeviceRepository";
+import { FileRepositoryHelpers } from "../infrastructure/file/auxilaryFunctions";
+import { FileTaskRepository } from "../infrastructure/file/FileTaskRepository";
 
 export function createFileRepositories() {
   const serverMessages = ServerMessages.getInstance();

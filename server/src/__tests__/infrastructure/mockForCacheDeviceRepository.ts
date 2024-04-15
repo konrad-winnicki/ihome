@@ -2,7 +2,7 @@ import { CacheDeviceRepository } from "../../application/device/CacheDeviceRepos
 import { ServerMessages } from "../../ServerMessages";
 import { DeviceRepository } from "../../application/device/DeviceRepositoryInterface";
 import { Device } from "../../domain/Device";
-import { CachedDevice } from "../../Infrastructure/cache/CachedDevices";
+import { CachedDevice } from "../../infrastructure/cache/CachedDevices";
 
 export function prepareCacheDeviceRepositoryWithMockPerameters(
   inMemoryStorage: CachedDevice,

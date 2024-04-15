@@ -1,5 +1,5 @@
 import { DeviceService } from "../application/device/DeviceService";
-import { CommandExecutor } from "../Infrastructure/command/CommandExecutor";
+import { CommandExecutor } from "../infrastructure/command/CommandExecutor";
 
 export async function switchOffAllDevicesAfterServerStart(
   deviceService: DeviceService

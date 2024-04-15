@@ -1,4 +1,4 @@
-import { AppServer } from "../Infrastructure/AppServer";
+import { AppServer } from "../infrastructure/AppServer";
 
 export async function chooseServerType(
   environment: string,

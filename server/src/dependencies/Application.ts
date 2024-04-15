@@ -1,6 +1,6 @@
-import { MongoDatabase } from "../Infrastructure/database/MongoDatabase";
-import { AppServer } from "../Infrastructure/AppServer";
-import { CachedDevice } from "../Infrastructure/cache/CachedDevices";
+import { MongoDatabase } from "../infrastructure/database/MongoDatabase";
+import { AppServer } from "../infrastructure/AppServer";
+import { CachedDevice } from "../infrastructure/cache/CachedDevices";
 import { ServerMessages } from "../ServerMessages";
 
 export class Application {

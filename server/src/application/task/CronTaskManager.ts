@@ -1,4 +1,4 @@
-import { TaskScheduler } from "../../Infrastructure/cache/TaskScheduler";
+import { TaskScheduler } from "../../infrastructure/cache/TaskScheduler";
 import { TaskManager } from "./TaskManagerInterface";
 import { ServerMessages } from "../../ServerMessages";
 

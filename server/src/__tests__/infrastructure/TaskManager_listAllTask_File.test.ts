@@ -6,7 +6,7 @@ import {
   appCronMockMethods,
   prepareCronTaskManagerForFilePersistenceWithMockParameters,
 } from "./mockForCronManager";
-import { FileRepositoryHelpers } from "../../Infrastructure/file/auxilaryFunctions";
+import { FileRepositoryHelpers } from "../../infrastructure/file/auxilaryFunctions";
 import {
   DeviceTaskError,
   EmptyObject,

@@ -1,7 +1,7 @@
-import { MongoDatabase } from "../Infrastructure/database/MongoDatabase";
+import { MongoDatabase } from "../infrastructure/database/MongoDatabase";
 import { ServerMessages } from "../ServerMessages";
-import { MongoDeviceRepository } from "../Infrastructure/database/MongoDeviceRepository";
-import { MongoTaskRepository } from "../Infrastructure/database/MongoTaskRepository";
+import { MongoDeviceRepository } from "../infrastructure/database/MongoDeviceRepository";
+import { MongoTaskRepository } from "../infrastructure/database/MongoTaskRepository";
 import { DATABASE_CONFIGURATION } from "../../config/sanitizedProperties";
 import { createAllMongoDocs } from "./createAllMongoDocs";
 

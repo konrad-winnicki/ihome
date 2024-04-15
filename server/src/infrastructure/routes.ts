@@ -10,9 +10,9 @@ import { TaskController } from "../controllers/TaskController";
 import { LoginController } from "../controllers/LoginController";
 
 export function initAppRouter(
-  deviceControllers: DeviceController,
-  deviceRunControllers: RunDeviceController,
-  taskControllers: TaskController,
+  deviceController: DeviceController,
+  deviceRunController: RunDeviceController,
+  taskController: TaskController,
   loginController: LoginController
 ) {
   const appRouter = new Router();
@@ -23,35 +23,35 @@ export function initAppRouter(
     "/devices/run/:id",
     authenticate,
     runDeviceGuardMiddleware,
-    deviceRunControllers.runDevice
+    deviceRunController.runDevice
   );
 
   appRouter.post(
     "/tasks",
     authenticate,
     addTaskGuardMiddleware,
-    taskControllers.createTask
+    taskController.createTask
   );
-  appRouter.delete("/tasks/:id", authenticate, taskControllers.deleteTask);
+  appRouter.delete("/tasks/:id", authenticate, taskController.deleteTask);
 
   appRouter.post(
     "/devices",
     authenticate,
     addDeviceGuardMiddleware,
-    deviceControllers.addDevice
+    deviceController.addDevice
   );
   appRouter.delete(
     "/devices/:id",
     authenticate,
-    deviceControllers.deleteDevice
+    deviceController.deleteDevice
   );
 
-  appRouter.get("/sensors", authenticate, deviceControllers.getSensors);
-  appRouter.get("/switches", authenticate, deviceControllers.getSwitches);
+  appRouter.get("/sensors", authenticate, deviceController.getSensors);
+  appRouter.get("/switches", authenticate, deviceController.getSwitches);
   appRouter.get(
     "/tasks/device/:id",
     authenticate,
-    taskControllers.getTasksForDevice
+    taskController.getTasksForDevice
   );
   return appRouter;
 }

@@ -20,7 +20,7 @@
     "test_api_database": "cross-env NODE_ENV=test_api_database npx jest --silent=true --runInBand --coverage  --testPathPattern=./__tests__/apiTests",
     "test_api_file": "cross-env NODE_ENV=test_api_file npx jest --silent=true --runInBand --coverage  --testPathPattern=./__tests__/apiTests",
     "test_all_file": "cross-env NODE_ENV=test_api_file npx jest --silent=true --runInBand --coverage  --testPathPattern=./__tests__/",
-    "test_all_database": "cross-env NODE_ENV=test_api_database npx jest --runInBand --testPathPattern=./__tests__/"
+    "test_all_database": "cross-env NODE_ENV=test_api_database npx jest --silent=true --runInBand --testPathPattern=./__tests__/"
   },
   "author": "Konrad Winnicki",
   "license": "ISC",

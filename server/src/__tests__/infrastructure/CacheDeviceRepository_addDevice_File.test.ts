@@ -6,7 +6,7 @@ import {
   prepareCacheDeviceRepositoryWithMockPerameters,
 } from "./mockForCacheDeviceRepository";
 import { prepareFileDeviceRepositoryWithMockPerameters } from "./mockForFileDevicePersistence";
-import { FileRepositoryHelpers } from "../../Infrastructure/file/auxilaryFunctions";
+import { FileRepositoryHelpers } from "../../infrastructure/file/auxilaryFunctions";
 import {
   DeviceTaskError,
   EmptyObject,

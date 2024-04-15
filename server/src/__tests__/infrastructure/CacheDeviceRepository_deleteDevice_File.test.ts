@@ -6,7 +6,7 @@ import {
   inMemoryStoreWithMockMethods,
   prepareCacheDeviceRepositoryWithMockPerameters,
 } from "./mockForCacheDeviceRepository";
-import { FileRepositoryHelpers } from "../../Infrastructure/file/auxilaryFunctions";
+import { FileRepositoryHelpers } from "../../infrastructure/file/auxilaryFunctions";
 import { prepareFileDeviceRepositoryWithMockPerameters } from "./mockForFileDevicePersistence";
 import {
   DeviceTaskError,

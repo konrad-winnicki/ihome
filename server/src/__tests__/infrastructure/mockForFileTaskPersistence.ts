@@ -1,6 +1,6 @@
 import { ServerMessages } from "../../ServerMessages";
-import { FileRepositoryHelpers } from "../../Infrastructure/file/auxilaryFunctions";
-import { FileTaskRepository } from "../../Infrastructure/file/FileTaskRepository";
+import { FileRepositoryHelpers } from "../../infrastructure/file/auxilaryFunctions";
+import { FileTaskRepository } from "../../infrastructure/file/FileTaskRepository";
 
 export function prepareFileTaskRepositoryWithMockPerameters(
   helper: FileRepositoryHelpers

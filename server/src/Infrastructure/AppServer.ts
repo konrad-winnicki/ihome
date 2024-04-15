@@ -19,14 +19,13 @@ export class AppServer {
 
   private initKoaServer(): Koa {
     const app = new Koa();
-
     app.use(cors());
     app.use(bodyParser());
     app.use(this.appRouter.routes());
     return app;
   }
 
-  startHttpServer(port: number) {
+  public startHttpServer(port: number) {
     return new Promise((resolve, reject) => {
       const server = this.serverConfig.listen(port, () => {
         console.log(`Server listen on port ${port}`);
@@ -39,7 +38,7 @@ export class AppServer {
     });
   }
 
-  async startHttpsServer(port: number) {
+  public async startHttpsServer(port: number) {
     const sslData = await this.readSslFiles();
     const options = {
       key: sslData.privateKey,
@@ -61,7 +60,7 @@ export class AppServer {
     });
   }
 
-  async readSslFiles(): Promise<{ privateKey: string; certificate: string }> {
+  private async readSslFiles(): Promise<{ privateKey: string; certificate: string }> {
     const privatKeyPromise = fs.readFile("./src/_ssl/iHome.key", "utf8");
     const certificatePromise = fs.readFile("./src/_ssl/iHome.crt", "utf8");
     return Promise.all([privatKeyPromise, certificatePromise]).then(

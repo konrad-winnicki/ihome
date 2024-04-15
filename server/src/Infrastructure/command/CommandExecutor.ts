@@ -24,22 +24,22 @@ export class CommandExecutor {
   }
 
   private async executeAndCollectSdtout(command: string): Promise<string> {
-    const collectStdOut = async () => {
-      console.log("Running command:", command);
-      const { stdout } = await execAsync(command);
-      return Promise.resolve(
-        stdout ? stdout : "Acomplished successfuly but not data collected"
-      );
-    };
-
     try {
       return await Promise.race([
-        collectStdOut(),
+        this.collectStdOut(command),
         this.longLastingProcResolver(),
       ]);
     } catch (err) {
       return Promise.reject(`Acomplished with error: ${err}`);
     }
+  }
+
+  private async collectStdOut(command:string) {
+    console.log("Running command:", command);
+    const { stdout } = await execAsync(command);
+    return Promise.resolve(
+      stdout ? stdout : "Acomplished successfuly but not data collected"
+    );
   }
 
   private async longLastingProcResolver() {

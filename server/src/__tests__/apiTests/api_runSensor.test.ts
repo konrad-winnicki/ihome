@@ -1,7 +1,7 @@
 import request from "supertest";
 import { describe, afterAll, beforeAll } from "@jest/globals";
-import { initializeDependencias } from "../../dependencias";
-import { Application } from "../../dependencias";
+import { initializeApplication } from "../../initializeApplication";
+import { Application } from "../../dependencies/Application";
 import { cleanupDatabase } from "./auxilaryFunctionsForTests/dbCleanup";
 import { loginUser } from "./auxilaryFunctionsForTests/loginUser";
 import { addSensor } from "./auxilaryFunctionsForTests/addSensor";
@@ -9,9 +9,9 @@ import { cleanupFiles } from "./auxilaryFunctionsForTests/fileCleanup";
 import { Connection } from "mongoose";
 //import appConfiguration from "../../../config/sanitizedProperties";
 import cron from "node-cron";
-import { getEnvironmentType } from "../../../config/config";
+import { getNodeEnvType } from "../../../config/config";
 
-const environment = getEnvironmentType()
+const environment = getNodeEnvType();
 
 describe("API RUN METER TEST", () => {
   let app: Application;
@@ -20,7 +20,7 @@ describe("API RUN METER TEST", () => {
   let sensorWithNonExistingScriptId: string;
   let requestUri: string;
   beforeAll(async () => {
-    app = await initializeDependencias();
+    app = await initializeApplication();
     requestUri = `http://localhost:${appConfiguration.PORT}`;
     token = await loginUser(requestUri, "testPassword");
     if (environment === "test_api_database") {

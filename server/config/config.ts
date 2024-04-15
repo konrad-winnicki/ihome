@@ -1,6 +1,5 @@
-export function getEnvironmentType(): string {
+export function getNodeEnvType(): string {
   const env = process.env.NODE_ENV;
-
   if (env) {
     return env;
   }

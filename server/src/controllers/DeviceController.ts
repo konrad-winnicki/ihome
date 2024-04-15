@@ -10,7 +10,9 @@ export class DeviceController {
     this.getSensors = this.getSensors.bind(this);
     this.getSwitches = this.getSwitches.bind(this);
   }
-  async addDevice(ctx: Koa.Context) {
+
+
+  async addDevice(ctx: Koa.Context) {    
     return this.deviceService
       .addDevice(ctx.device)
       .then((response) => {

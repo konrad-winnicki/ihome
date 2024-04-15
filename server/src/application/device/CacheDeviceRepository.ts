@@ -1,8 +1,8 @@
-import { CachedDevice } from "./CachedDevices";
+import { CachedDevice } from "../../Infrastructure/cache/CachedDevices";
 import { Device } from "../../domain/Device";
 import { ServerMessages } from "../../ServerMessages";
-import { ManagerResponse } from "../../application/task/TaskManagerInterface";
-import { DeviceRepository } from "../../application/device/DeviceRepository";
+import { ManagerResponse } from "../task/TaskManagerInterface";
+import { DeviceRepository } from "./DeviceRepositoryInterface";
 
 export class CacheDeviceRepository implements DeviceRepository {
   private cachedDevices: CachedDevice;
@@ -123,7 +123,6 @@ export class CacheDeviceRepository implements DeviceRepository {
       .catch((err) => {
         const messageFailure = this.serverMessages.compensation.FAILURE;
         const rejectMessage = { [messageFailure]: err };
-
         console.log(rejectMessage);
         return Promise.reject(rejectMessage);
       });

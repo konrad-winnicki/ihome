@@ -1,7 +1,5 @@
-// middleware/authenticate.ts
 import jwt, { JwtPayload } from "jsonwebtoken";
 import Koa, { Next } from "koa";
-//import appConfiguration from "../../../config/sanitizedProperties";
 
 const authenticate = async (ctx: Koa.Context, next: Next) => {
   const data = ctx.request.headers["authorization"];

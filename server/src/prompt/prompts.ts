@@ -21,25 +21,24 @@ const passwordQuestions = [
   },
 ];
 
-const portQuestion =
-  [{
+const portQuestion = [
+  {
     type: "input",
     name: "PORT",
     message: "Press enter or indicate port on which server will run:",
-    default: '4000',
+    default: "4000",
     validate: (input: string) => {
       const regExp = /^\d{3,4}$/;
-      if (!input){
-        return true
+      if (!input) {
+        return true;
       }
       if (input.match(regExp)) {
         return true;
       }
       return "Port must contain 3 or 4 digits. Please try again.";
     },
-  }]
-
- 
+  },
+];
 
 const persistenciaQuestions = [
   {
@@ -64,7 +63,6 @@ const serverTypeQuestions = [
     message: "Choose place of data persistencia:",
     choices: ["http", "https"],
   },
-  
 ];
 
 const questions = [

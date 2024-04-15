@@ -39,7 +39,7 @@ export const DeviceSchema = new mongoose.Schema({
 
   onStatus: {
     type: Boolean,
-    default:false
+    default: false,
   },
 });
 
@@ -62,7 +62,7 @@ export const TaskSchema = new mongoose.Schema({
       required: true,
     },
   },
-  
+
   deviceId: {
     type: String,
     index: {
@@ -80,6 +80,3 @@ export const TaskSchema = new mongoose.Schema({
     required: true,
   },
 });
-
-
-

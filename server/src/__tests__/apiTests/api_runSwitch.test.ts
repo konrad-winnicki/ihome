@@ -1,16 +1,16 @@
 import request from "supertest";
 import { describe, afterAll, beforeAll } from "@jest/globals";
-import { initializeDependencias } from "../../dependencias";
-import { Application } from "../../dependencias";
+import { initializeApplication } from "../../initializeApplication";
+import { Application } from "../../dependencies/Application";
 import { cleanupDatabase } from "./auxilaryFunctionsForTests/dbCleanup";
 import { loginUser } from "./auxilaryFunctionsForTests/loginUser";
 import { addSwitch } from "./auxilaryFunctionsForTests/addSwitch";
 import { Connection } from "mongoose";
 import { cleanupFiles } from "./auxilaryFunctionsForTests/fileCleanup";
 import cron from "node-cron";
-import { getEnvironmentType } from "../../../config/config";
+import { getNodeEnvType } from "../../../config/config";
 
-const environment = getEnvironmentType();
+const environment = getNodeEnvType();
 
 describe("API RUN SWITCH TEST", () => {
   let app: Application;
@@ -21,7 +21,7 @@ describe("API RUN SWITCH TEST", () => {
   let switchWithNoPrint: string;
   let requestUri: string;
   beforeAll(async () => {
-    app = await initializeDependencias();
+    app = await initializeApplication();
     if (environment === "test_api_database") {
       const connection = app.databaseInstance?.connection as Connection;
       await cleanupDatabase(connection);

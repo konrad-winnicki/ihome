@@ -3,21 +3,6 @@ import { DeviceSchema, TaskSchema } from "./mongoDbModel";
 import { Task } from "../../domain/Task";
 import { Device } from "../../domain/Device";
 
-
-
-/*
-type DeviceInterface = {
- id: string;
-  deviceType: string;
-  name: string;
-  commandOn: string;
-  commandOff?:string;
-  parameters?: {[key: string]:string}
-
-}
-
-*/
-
 export class MongoDatabase {
   private url: string;
   private dbName: string;
@@ -34,7 +19,6 @@ export class MongoDatabase {
       const connection = mongoose.createConnection(this.url, options);
       console.log("Connected to the database 🌱");
       return connection;
-    
     } catch (error) {
       console.error("Error connecting to the database:", error);
       throw error;
@@ -49,7 +33,7 @@ export class MongoDatabase {
     return deviceDocument;
   }
 
-  public createTaskerDoc() {
+  public createTaskDoc() {
     const taskDocument = this.connection.model<Task>("Task", TaskSchema);
     return taskDocument;
   }

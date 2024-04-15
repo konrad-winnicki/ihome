@@ -1,6 +1,6 @@
-import { CacheDeviceRepository } from "../../Infrastructure/cache/CacheDeviceRepository";
+import { CacheDeviceRepository } from "../../application/device/CacheDeviceRepository";
 import { ServerMessages } from "../../ServerMessages";
-import { DeviceRepository } from "../../application/device/DeviceRepository";
+import { DeviceRepository } from "../../application/device/DeviceRepositoryInterface";
 import { Device } from "../../domain/Device";
 import { CachedDevice } from "../../Infrastructure/cache/CachedDevices";
 

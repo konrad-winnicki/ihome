@@ -14,7 +14,6 @@ export class TaskController {
     return this.taskService
       .add(ctx.task)
       .then((response) => {
-        console.log("SETTING HTTP 201 response");
         ctx.status = 201;
         ctx.body = response;
       })

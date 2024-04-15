@@ -1,11 +1,12 @@
 import PropertiesReader, { Value } from "properties-reader";
 import { choosePropertyFile } from "../src/propertyWriter";
 import { prepareAppProperties as prepareProductionPropertyFile } from "../src/prepareAppProperties";
-import { getEnvironmentType } from "./config";
+import { getNodeEnvType } from "./config";
 import fs from "node:fs/promises";
 import * as sync from "node:fs";
 
 // TODO: remove nulls here
+
 interface COMMON_PROPERTIES {
   PASSWORD: Value | null;
   PERSISTENCIA: Value | null;
@@ -38,7 +39,7 @@ export interface DATABASE_CONFIGURATION extends COMMON_CONFIGURATION {
 
 export interface FILE_CONFIGURATION extends COMMON_CONFIGURATION {}
 
-const ENVIRONMENT = getEnvironmentType();
+const ENVIRONMENT = getNodeEnvType();
 
 class EnvAwarePropertiesReader {
   private properties: PropertiesReader.Reader;
@@ -72,7 +73,7 @@ async function prepareApplicationProperties() {
       SERVER_TYPE: properties.get("SERVER_TYPE"),
       SWITCH_REPLY_TIMEOUT: properties.get("SWITCH_REPLY_TIMEOUT"),
     };
-    const readedProperties =
+    const customProperties =
       properties.get("PERSISTENCIA") === "DATABASE"
         ? {
             ...commonProperties,
@@ -81,8 +82,8 @@ async function prepareApplicationProperties() {
           }
         : commonProperties;
 
-    console.log("PROPERTIES:", readedProperties);
-    return readedProperties;
+    console.log("PROPERTIES:", customProperties);
+    return customProperties;
   };
 
   const setAppConfiguration = (
@@ -96,7 +97,6 @@ async function prepareApplicationProperties() {
       }
     }
 
-    // conversion of Values to expected type
     const persistenceType = parseString(
       "persistencia",
       config.PERSISTENCIA
@@ -106,14 +106,17 @@ async function prepareApplicationProperties() {
       PERSISTENCIA: persistenceType,
       PORT: parseNumber("port", config.PORT),
       JWT_SECRET: parseString("jwt secret", config.JWT_SECRET),
-      SERVER_TYPE: parseString("http server type", config.SERVER_TYPE),
+      SERVER_TYPE: parseString("server type", config.SERVER_TYPE),
       SWITCH_REPLY_TIMEOUT: parseNumber(
         "switch reply timeout",
         config.SWITCH_REPLY_TIMEOUT
       ),
     };
     return persistenceType === "DATABASE"
-      ? createDatabaseConfiguration(commonProperties, config as DATABASE_CONFIGURATION)
+      ? createDatabaseConfiguration(
+          commonProperties,
+          config as DATABASE_CONFIGURATION
+        )
       : commonProperties;
   };
 
@@ -131,8 +134,14 @@ function parseNumber(name: string, value: Value | null): number {
   if (!value) {
     throw Error(`Missing value for ${name}`);
   }
-  return value as number; // TODO: test if it's not
+  const numberValue = Number(value);
+  if (isNaN(numberValue)) {
+    throw Error(`Value for ${name} should be a number`);
+  }
+  //return 1
+  return Number(value) as number; // TODO: test if it's not
 }
+
 function createDatabaseConfiguration(
   commonProperties: COMMON_CONFIGURATION,
   config: DATABASE_PROPERTIES

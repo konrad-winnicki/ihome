@@ -1,8 +1,8 @@
 import request from "supertest";
 import { describe, afterAll, beforeEach, beforeAll } from "@jest/globals";
-import { getEnvironmentType } from "../../../config/config";
-import { initializeDependencias } from "../../dependencias";
-import { Application } from "../../dependencias";
+import { getNodeEnvType } from "../../../config/config";
+import { initializeApplication } from "../../initializeApplication";
+import { Application } from "../../dependencies/Application";
 import { cleanupDatabase } from "./auxilaryFunctionsForTests/dbCleanup";
 import { loginUser } from "./auxilaryFunctionsForTests/loginUser";
 import { addSwitch } from "./auxilaryFunctionsForTests/addSwitch";
@@ -15,7 +15,7 @@ import {
   getTasksForDeviceFromFile,
 } from "./auxilaryFunctionsForTests/getTasksForDevice";
 
-const environment = getEnvironmentType();
+const environment = getNodeEnvType();
 
 describe("API ADD TASK TEST", () => {
   const badRequestResponse = {
@@ -31,7 +31,7 @@ describe("API ADD TASK TEST", () => {
   let getTasksForDevice: (deviceId: string) => Promise<Task[]>;
 
   beforeAll(async () => {
-    app = await initializeDependencias();
+    app = await initializeApplication();
     console.log("SERVER IS UP");
     if (environment === "test_api_database") {
       const connection = app.databaseInstance?.connection as Connection;

@@ -1,15 +1,15 @@
 import request from "supertest";
 import { describe, afterAll, beforeAll, it } from "@jest/globals";
-import { getEnvironmentType } from "../../../config/config";
-import { initializeDependencias } from "../../dependencias";
-import { Application } from "../../dependencias";
+import { getNodeEnvType } from "../../../config/config";
+import { initializeApplication } from "../../initializeApplication";
+import { Application } from "../../dependencies/Application";
 import { loginUser } from "./auxilaryFunctionsForTests/loginUser";
 //import appConfiguration from "../../../config/sanitizedProperties";
 import cron from "node-cron";
 import { cleanupFiles } from "./auxilaryFunctionsForTests/fileCleanup";
 import { tokenExpirationTimeInSeconds } from "../../domain/tokenGenerator";
 
-const environment = getEnvironmentType()
+const environment = getNodeEnvType();
 
 describe("API RENEW SESSION TEST", () => {
   let app: Application;
@@ -18,7 +18,7 @@ describe("API RENEW SESSION TEST", () => {
   const tokenExpirationTimeInMS = tokenExpirationTimeInSeconds * 1000;
   const bufferMiliecondsBeforeEnd = 240000;
   beforeAll(async () => {
-    app = await initializeDependencias();
+    app = await initializeApplication();
     requestUri = `http://localhost:${appConfiguration.PORT}`;
 
     token = await loginUser(requestUri, "testPassword");

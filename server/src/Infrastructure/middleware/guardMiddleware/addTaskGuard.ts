@@ -4,7 +4,7 @@ import { isTask } from "./guardHelpers/addTaskGuardHelpers";
 import { v4 } from "uuid";
 
 export async function addTaskGuardMiddleware(ctx: Koa.Context, next: Next) {
-  const body = await ctx.request.body
+  const body = await ctx.request.body;
 
   const maybeTask = body as Task;
   if (isTask(maybeTask)) {
@@ -19,6 +19,8 @@ export async function addTaskGuardMiddleware(ctx: Koa.Context, next: Next) {
   }
 
   ctx.status = 400;
-  return (ctx.body = {BadRequest:`Task request must contain following parameters:\n 
-  {deviceId: string, onStatus:boolean, scheduledTime:{hour: sting, minutes:string}`});
+  return (ctx.body = {
+    BadRequest: `Task request must contain following parameters:\n 
+  {deviceId: string, onStatus:boolean, scheduledTime:{hour: sting, minutes:string}`,
+  });
 }

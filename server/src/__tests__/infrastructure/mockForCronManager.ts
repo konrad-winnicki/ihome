@@ -1,8 +1,8 @@
 import { Model } from "mongoose";
 import { CronTaskManager } from "../../application/task/CronTaskManager";
-import { MongoTaskRepository } from "../../Infrastructure/task/MongoTaskRepository";
+import { MongoTaskRepository } from "../../Infrastructure/database/MongoTaskRepository";
 import { ServerMessages } from "../../ServerMessages";
-import { TaskScheduler } from "../../Infrastructure/task/TaskScheduler";
+import { TaskScheduler } from "../../Infrastructure/cache/TaskScheduler";
 import { Task } from "../../domain/Task";
 import { FileTaskRepository } from "../../Infrastructure/file/FileTaskRepository";
 import { FileRepositoryHelpers } from "../../Infrastructure/file/auxilaryFunctions";

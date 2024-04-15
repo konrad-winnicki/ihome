@@ -5,11 +5,10 @@ import { Device } from "../../domain/Device";
 export class FileRepositoryHelpers {
   public async writeDataToFile(path: string, data: object): Promise<void> {
     const contentToWrite = JSON.stringify(data);
-    return fs
-      .writeFile(path, contentToWrite)
-      .catch((err) => {
-        console.log('console log from writefile error:', err)
-        return Promise.reject({ ["Write file error"]: err })});
+    return fs.writeFile(path, contentToWrite).catch((err) => {
+      console.log("console log from writefile error:", err);
+      return Promise.reject({ ["Write file error"]: err });
+    });
   }
 
   //czy lepiej zwracac generyczny object czy Task | Device
@@ -26,7 +25,8 @@ export class FileRepositoryHelpers {
         return Promise.resolve(fileContentInJSON);
       })
       .catch((error) => {
-        return Promise.reject({ ["Read file error"]: error })});
+        return Promise.reject({ ["Read file error"]: error });
+      });
   }
 
   public findByIdInFile(

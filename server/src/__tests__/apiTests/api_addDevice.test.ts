@@ -1,8 +1,8 @@
 import request from "supertest";
 import { describe, afterAll, beforeEach, beforeAll } from "@jest/globals";
-import { getEnvironmentType } from "../../../config/config";
-import { initializeDependencias } from "../../dependencias";
-import { Application } from "../../dependencias";
+import { getNodeEnvType } from "../../../config/config";
+import { initializeApplication } from "../../initializeApplication";
+import { Application } from "../../dependencies/Application";
 import { cleanupDatabase } from "./auxilaryFunctionsForTests/dbCleanup";
 import { loginUser } from "./auxilaryFunctionsForTests/loginUser";
 import {
@@ -16,7 +16,7 @@ import { Device } from "../../domain/Device";
 //import appConfiguration from "../../../config/sanitizedProperties";
 import cron from "node-cron";
 
-const environment = getEnvironmentType()
+const environment = getNodeEnvType();
 
 describe("API ADD DEVICE TEST", () => {
   const badRequestResponse = {
@@ -30,7 +30,7 @@ describe("API ADD DEVICE TEST", () => {
   let listDevices: () => Promise<Device[]>;
   let requestUri: string;
   beforeAll(async () => {
-    app = await initializeDependencias();
+    app = await initializeApplication();
     if (environment === "test_api_database") {
       const connection = app.databaseInstance?.connection as Connection;
       listDevices = produceGetAllDevicesFromDB(connection);
@@ -75,7 +75,7 @@ describe("API ADD DEVICE TEST", () => {
       name: "switch1",
       commandOn: "switch on",
       commandOff: "switch off",
-      onStatus: false
+      onStatus: false,
     });
 
     expect(device).toMatchObject({
@@ -84,7 +84,7 @@ describe("API ADD DEVICE TEST", () => {
       name: "switch1",
       commandOn: "switch on",
       commandOff: "switch off",
-      onStatus:false
+      onStatus: false,
     });
   });
 
@@ -120,7 +120,6 @@ describe("API ADD DEVICE TEST", () => {
       name: "sensor1",
       parameters: { temperature: "oC", humidity: "%" },
       commandOn: "sensor on",
-
     });
   });
 
@@ -430,14 +429,13 @@ describe("API ADD DEVICE TEST", () => {
       .expect(409)
       .expect("Content-Type", /application\/json/);
 
-    console.log('RESSSS', response.body);
+    console.log("RESSSS", response.body);
 
     expect(response.body).toEqual({
-        "Device not added": {
-          error: "Unique violation error: NameConflictError",
-        },
-      }
-     );
+      "Device not added": {
+        error: "Unique violation error: NameConflictError",
+      },
+    });
 
     const [...devicesInMemoryKeys] = app.devicesInMemory.devices.keys();
     const deviceInMemory = app.devicesInMemory.devices.get(deviceId);
@@ -450,8 +448,7 @@ describe("API ADD DEVICE TEST", () => {
       name: "switch1",
       commandOn: "switch on",
       commandOff: "switch off",
-      onStatus: false
-
+      onStatus: false,
     });
 
     expect(device).toMatchObject({
@@ -460,11 +457,8 @@ describe("API ADD DEVICE TEST", () => {
       name: "switch1",
       commandOn: "switch on",
       commandOff: "switch off",
-      onStatus: false
-
+      onStatus: false,
     });
-
-    
   });
 
   afterAll(async () => {
@@ -474,9 +468,9 @@ describe("API ADD DEVICE TEST", () => {
       await app.databaseInstance?.connection.close();
     }
     if (environment === "test_api_file") {
-      await cleanupFiles(['devices.json', 'tasks.json']);
+      await cleanupFiles(["devices.json", "tasks.json"]);
     }
-    
+
     cron.getTasks().forEach((task) => task.stop());
     cron.getTasks().clear();
     await app.appServer.stopServer();

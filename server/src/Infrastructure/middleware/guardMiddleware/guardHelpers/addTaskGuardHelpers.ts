@@ -12,7 +12,7 @@ export function isTask(maybeTask: Task): boolean {
     checkIfNotMissingParams(maybeTask, expectedParameters) &&
     isScheduledTime(maybeTask.scheduledTime) &&
     typeof maybeTask.deviceId === "string" &&
-    typeof maybeTask.onStatus === "boolean"&&
+    typeof maybeTask.onStatus === "boolean" &&
     typeof maybeTask.scheduledTime === "object"
   );
 }

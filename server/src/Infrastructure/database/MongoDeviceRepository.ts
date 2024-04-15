@@ -1,11 +1,8 @@
 import { Model, mongo } from "mongoose";
 import { Device } from "../../domain/Device";
-import { DeviceRepository } from "../../application/device/DeviceRepository";
+import { DeviceRepository } from "../../application/device/DeviceRepositoryInterface";
 import { ServerMessages } from "../../ServerMessages";
 import { ManagerResponse } from "../../application/task/TaskManagerInterface";
-
-//interface devicePersistence: adddevuce, deleteDevice, getMenager, Getswitch
-//mongo lub file impelement devicePersistence intrtface
 
 export class MongoDeviceRepository implements DeviceRepository {
   private deviceDocument: Model<Device>;
@@ -43,7 +40,7 @@ export class MongoDeviceRepository implements DeviceRepository {
       : { error: error.message };
   }
 
-  uniqueViolationErrorHandler(err: mongo.MongoServerError) {
+  private uniqueViolationErrorHandler(err: mongo.MongoServerError) {
     const isUniqueViolation = err.code === 11000;
     if (isUniqueViolation && err.errmsg.includes("name")) {
       return { error: this.serverMessages.uniqueViolation.NAME_DUPLICATION };

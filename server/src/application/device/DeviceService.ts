@@ -3,7 +3,7 @@ import { Device } from "../../domain/Device";
 import { Switch } from "../../domain/Switch";
 import { EventEmitter } from "node:events";
 import { ManagerResponse } from "../task/TaskManagerInterface";
-import { DeviceRepository } from "./DeviceRepository";
+import { DeviceRepository } from "./DeviceRepositoryInterface";
 
 export class DeviceService {
   private deviceRepository: DeviceRepository;
@@ -53,15 +53,5 @@ export class DeviceService {
 
   async getById(deviceId: string): Promise<Device> {
     return this.deviceRepository.getById(deviceId);
-    /*
-      .then((device) =>
-        device
-          ? Promise.resolve(device)
-          : Promise.reject({
-              Error: `Device with id ${deviceId} does not exist.`,
-            })
-      )
-      .catch((error) => Promise.reject(error));
-      */
   }
 }

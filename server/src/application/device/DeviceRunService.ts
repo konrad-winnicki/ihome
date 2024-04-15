@@ -4,14 +4,12 @@ import { Device } from "../../domain/Device";
 import { CachedDevice } from "../../Infrastructure/cache/CachedDevices";
 import { CommandExecutor } from "../../Infrastructure/command/CommandExecutor";
 
-//PYTANIA: czy devicePerformer powinien byc przekazywany kalo zaleznosc
-// czy inicjalizowany w konstruktorze
 export class DeviceRunService implements DeviceRunInterface {
   private cachedDevices: CachedDevice;
-  private devicePerformer: CommandExecutor;
+  private commandExecutor: CommandExecutor;
   constructor(cachedDevices: CachedDevice) {
     this.cachedDevices = cachedDevices;
-    this.devicePerformer = CommandExecutor.getInstance();
+    this.commandExecutor = CommandExecutor.getInstance();
     this.switchOn = this.switchOn.bind(this);
     this.switchOff = this.switchOff.bind(this);
   }
@@ -22,12 +20,10 @@ export class DeviceRunService implements DeviceRunInterface {
         return Promise.reject("Device is currently on");
       }
 
-      return this.devicePerformer.switchOn(device).then((response) => {
+      return this.commandExecutor.switchOn(device).then((response) => {
         if (device.deviceType === "switch") {
           this.cachedDevices.changeStatus(device.id, true);
         }
-        console.log(this.cachedDevices.devices);
-
         return response;
       });
     });
@@ -44,11 +40,10 @@ export class DeviceRunService implements DeviceRunInterface {
         return Promise.reject("Device is currently off");
       }
 
-      return this.devicePerformer
+      return this.commandExecutor
         .switchOff(device as Switch)
         .then((response) => {
           this.cachedDevices.changeStatus(device.id, false);
-          console.log(this.cachedDevices.devices);
           return response;
         });
     });
@@ -66,7 +61,7 @@ export class DeviceRunService implements DeviceRunInterface {
     });
   }
 
-  isOn(deviceId: string): boolean {
+  private isOn(deviceId: string): boolean {
     return (this.cachedDevices.devices.get(deviceId) as Switch).onStatus;
   }
 }

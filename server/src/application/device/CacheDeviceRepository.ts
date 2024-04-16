@@ -1,6 +1,6 @@
-import { CachedDevice } from "../../infrastructure/cache/CachedDevices";
+import { CachedDevice } from "../../infrastructure/cache/CachedDevice";
 import { Device } from "../../domain/Device";
-import { ServerMessages } from "../../ServerMessages";
+import { ServerMessages } from "../../infrastructure/ServerMessages";
 import { ManagerResponse } from "../task/TaskManagerInterface";
 import { DeviceRepository } from "./DeviceRepositoryInterface";
 
@@ -34,7 +34,6 @@ export class CacheDeviceRepository implements DeviceRepository {
               Error: errorToPass,
               compensation: compensationError,
             };
-            console.log(rejectMessage);
             return Promise.reject(rejectMessage);
           })
           .then((compensationResult) => {
@@ -42,7 +41,6 @@ export class CacheDeviceRepository implements DeviceRepository {
               Error: errorToPass,
               compensation: compensationResult,
             };
-            console.log(rejectMessage);
             return Promise.reject(rejectMessage);
           });
       });
@@ -53,7 +51,6 @@ export class CacheDeviceRepository implements DeviceRepository {
     return this.getById(deviceId)
       .then((device) => this.deleteDevice(device))
       .catch((error) => {
-        console.log("__final delete", error);
         const messageFailure = this.serverMessages.deleteDevice.FAILURE;
         return Promise.reject({ [messageFailure]: error });
       });
@@ -63,8 +60,7 @@ export class CacheDeviceRepository implements DeviceRepository {
     device: Device
   ): Promise<ManagerResponse<object | string>> {
     const deviceId = device.id;
-    return this.delegate.delete(deviceId).then((res) => {
-      console.log("delegate res", res);
+    return this.delegate.delete(deviceId).then(() => {
       return new Promise<ManagerResponse<object | string>>((resolve) => {
         this.cachedDevices.delete(deviceId);
         const messageSuccess = this.serverMessages.deleteDevice.SUCCESS;

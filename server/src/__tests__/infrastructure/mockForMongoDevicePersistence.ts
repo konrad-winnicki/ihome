@@ -1,7 +1,7 @@
 import { Model, mongo } from "mongoose";
 import { Device } from "../../domain/Device";
 import { MongoDeviceRepository } from "../../infrastructure/database/MongoDeviceRepository";
-import { ServerMessages } from "../../ServerMessages";
+import { ServerMessages } from "../../infrastructure/ServerMessages";
 
 export class CustomMongoServerError extends mongo.MongoServerError {
   constructor(code: number, message: mongo.ErrorDescription) {

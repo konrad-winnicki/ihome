@@ -1,7 +1,7 @@
 import { MongoDatabase } from "../infrastructure/database/MongoDatabase";
 import { AppServer } from "../infrastructure/AppServer";
-import { CachedDevice } from "../infrastructure/cache/CachedDevices";
-import { ServerMessages } from "../ServerMessages";
+import { CachedDevice } from "../infrastructure/cache/CachedDevice";
+import { ServerMessages } from "../infrastructure/ServerMessages";
 
 export class Application {
   private static instance: Application | null = null;

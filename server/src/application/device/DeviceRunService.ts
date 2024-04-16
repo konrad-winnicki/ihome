@@ -1,7 +1,7 @@
 import { DeviceRunInterface } from "./DeviceRunInterface";
 import { Switch } from "../../domain/Switch";
 import { Device } from "../../domain/Device";
-import { CachedDevice } from "../../infrastructure/cache/CachedDevices";
+import { CachedDevice } from "../../infrastructure/cache/CachedDevice";
 import { CommandExecutor } from "../../infrastructure/command/CommandExecutor";
 
 export class DeviceRunService implements DeviceRunInterface {

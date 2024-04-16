@@ -1,13 +1,13 @@
 import { Model } from "mongoose";
 import { CronTaskManager } from "../../application/task/CronTaskManager";
 import { MongoTaskRepository } from "../../infrastructure/database/MongoTaskRepository";
-import { ServerMessages } from "../../ServerMessages";
+import { ServerMessages } from "../../infrastructure/ServerMessages";
 import { TaskScheduler } from "../../infrastructure/cache/TaskScheduler";
 import { Task } from "../../domain/Task";
 import { FileTaskRepository } from "../../infrastructure/file/FileTaskRepository";
 import { FileRepositoryHelpers } from "../../infrastructure/file/auxilaryFunctions";
 import { DeviceRunService } from "../../application/device/DeviceRunService";
-import { CachedDevice } from "../../infrastructure/cache/CachedDevices";
+import { CachedDevice } from "../../infrastructure/cache/CachedDevice";
 
 export function prepareCronTaskManagerForDatabasePersistenceWithMockParameters(
   appCron: TaskScheduler,

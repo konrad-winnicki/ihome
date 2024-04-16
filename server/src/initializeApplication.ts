@@ -4,14 +4,14 @@ import { EventEmitter } from "node:events";
 import { recoverTasks } from "./domain/recoveryFunctions";
 import { AppServer } from "./infrastructure/AppServer";
 import { initAppRouter } from "./infrastructure/routes";
-import { CachedDevice } from "./infrastructure/cache/CachedDevices";
+import { CachedDevice } from "./infrastructure/cache/CachedDevice";
 import { DeviceController } from "./controllers/DeviceController";
 import { RunDeviceController } from "./controllers/DeviceRunController";
 import { TaskController } from "./controllers/TaskController";
 import { LoginController } from "./controllers/LoginController";
 import { tokenGenerator } from "./domain/tokenGenerator";
 import { TaskRecoveryManager } from "./infrastructure/database/TaskRecoveryManager";
-import { ServerMessages } from "./ServerMessages";
+import { ServerMessages } from "./infrastructure/ServerMessages";
 import prepareApplicationProperties from "../config/sanitizedProperties";
 import { CacheDeviceRepository } from "./application/device/CacheDeviceRepository";
 import { DeviceService } from "./application/device/DeviceService";
@@ -52,6 +52,11 @@ export async function initializeApplication() {
     serverMessages
   );
 
+  const cronTaskRepository = new TaskRecoveryManager(
+    repositories.taskRepository,
+    appCorn
+  );
+
   const taskService = new TaskService(
     cronTaskManager,
     deviceService,
@@ -60,23 +65,20 @@ export async function initializeApplication() {
 
   const deviceRunController = new RunDeviceController(deviceRunService);
 
-  const deviceControllers = new DeviceController(deviceService);
+  const deviceController = new DeviceController(deviceService);
   const taskControlles = new TaskController(taskService);
-  const loginControllers = new LoginController(tokenGenerator);
+  const loginController = new LoginController(tokenGenerator);
 
   const appRouter = initAppRouter(
-    deviceControllers,
+    deviceController,
     deviceRunController,
     taskControlles,
-    loginControllers
+    loginController
   );
 
   const appServer = new AppServer(appRouter);
 
-  const cronTaskRepository = new TaskRecoveryManager(
-    repositories.taskRepository,
-    appCorn
-  );
+  
 
   await switchOffAllDevicesAfterServerStart(deviceService)
     .then((result) => console.log("Switched off all devices:", result))

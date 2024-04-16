@@ -92,7 +92,7 @@ function parseNumber(name: string, value: Value | null): number {
     throw Error(`Missing value for ${name}`);
   }
   const numberValue = Number(value);
-  if (isNaN(numberValue)) {
+  if (!numberValue) {
     throw Error(`Value for ${name} should be a number`);
   }
   return Number(value);

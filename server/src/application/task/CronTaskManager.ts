@@ -1,6 +1,6 @@
 import { TaskScheduler } from "../../infrastructure/cache/TaskScheduler";
 import { TaskManager } from "./TaskManagerInterface";
-import { ServerMessages } from "../../ServerMessages";
+import { ServerMessages } from "../../infrastructure/ServerMessages";
 
 import { TaskRepository } from "./TaskRepositoryInterface";
 import { Task } from "../../domain/Task";
@@ -25,46 +25,14 @@ export class CronTaskManager implements TaskManager {
   }
 
   public async add(task: Task): Promise<ManagerResponse<object | string>> {
-    return this.delegate
-      .add(task)
-      .then(() => {
-        return this.appCron
-          .add(
-            task.id,
-            Number(task.scheduledTime.minutes),
-            Number(task.scheduledTime.hour),
-            task.onStatus,
-            task.deviceId
-          )
-          .catch((error) => {
-            //const errorToPass = error instanceof Error ? error.message : error;
-            return this.compensateTaskAddition(task.id)
-              .catch((compensationError) => {
-                const rejectMessage = {
-                  Error: error,
-                  compensation: compensationError,
-                };
-                console.log(rejectMessage);
-                return Promise.reject(rejectMessage);
-              })
-              .then((compensationResult) => {
-                const rejectMessage = {
-                  Error: error,
-                  compensation: compensationResult,
-                };
-                console.log(rejectMessage);
-                return Promise.reject(rejectMessage);
-              });
-          });
-      })
-      .catch((error) => {
+    return this.addTask(task)
+      .catch((delegateError) => {
         const message = this.serverMessages.addTask.FAILURE;
-        const rejectMessage = { [message]: error };
+        const rejectMessage = { [message]: delegateError };
         return Promise.reject(rejectMessage);
       });
   }
 
-  //TODO czy findBy Id powinno byc w interface CronTask Managera?
   public async delete(
     taskId: string
   ): Promise<ManagerResponse<object | string>> {
@@ -83,6 +51,40 @@ export class CronTaskManager implements TaskManager {
 
   public async getByDevice(deviceId: string): Promise<Task[]> {
     return this.delegate.getByDevice(deviceId);
+  }
+
+
+  private async addTask(task: Task): Promise<ManagerResponse<object | string>> {
+    return this.delegate
+      .add(task)
+      .then(() => {
+        return this.appCron
+          .add(
+            task.id,
+            Number(task.scheduledTime.minutes),
+            Number(task.scheduledTime.hour),
+            task.onStatus,
+            task.deviceId
+          )
+          .catch((error) => {
+            return this.compensateTaskAddition(task.id)
+              .catch((compensationError) => {
+                const rejectMessage = {
+                  Error: error,
+                  compensation: compensationError,
+                };
+                return Promise.reject(rejectMessage);
+              })
+              .then((compensationResult) => {
+                const rejectMessage = {
+                  Error: error,
+                  compensation: compensationResult,
+                };
+                console.log(rejectMessage);
+                return Promise.reject(rejectMessage);
+              });
+          });
+      })
   }
 
   private async deleteTask(task: Task) {

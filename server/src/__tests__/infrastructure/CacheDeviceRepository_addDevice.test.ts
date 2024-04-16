@@ -68,7 +68,8 @@ describe("CacheDeviceReposiotory with database persistence CLASS TEST - add devi
 
     await cacheDeviceRepository
       .add(deviceToAdd)
-      .then((result) => expect(result).toEqual({ deviceId: "12345" }));
+      .then((result) => {
+        expect(result).toEqual({ deviceId: "12345" })});
   });
 
   test("Should not add device if not added to database", async () => {

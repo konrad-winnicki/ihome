@@ -1,7 +1,7 @@
 import { TaskRepository } from "../../application/task/TaskRepositoryInterface";
 import { Task } from "../../domain/Task";
 import { Model, mongo } from "mongoose";
-import { ServerMessages } from "../../ServerMessages";
+import { ServerMessages } from "../ServerMessages";
 import { ManagerResponse } from "../../application/task/TaskManagerInterface";
 
 export class MongoTaskRepository implements TaskRepository {

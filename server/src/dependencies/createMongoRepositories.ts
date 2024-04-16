@@ -1,5 +1,5 @@
 import { MongoDatabase } from "../infrastructure/database/MongoDatabase";
-import { ServerMessages } from "../ServerMessages";
+import { ServerMessages } from "../infrastructure/ServerMessages";
 import { MongoDeviceRepository } from "../infrastructure/database/MongoDeviceRepository";
 import { MongoTaskRepository } from "../infrastructure/database/MongoTaskRepository";
 import { DATABASE_CONFIGURATION } from "../../config/sanitizedProperties";

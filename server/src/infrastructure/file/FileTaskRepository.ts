@@ -1,4 +1,4 @@
-import { ServerMessages } from "../../ServerMessages";
+import { ServerMessages } from "../ServerMessages";
 import { ManagerResponse } from "../../application/task/TaskManagerInterface";
 import { FileRepositoryHelpers } from "./auxilaryFunctions";
 import { TaskRepository } from "../../application/task/TaskRepositoryInterface";

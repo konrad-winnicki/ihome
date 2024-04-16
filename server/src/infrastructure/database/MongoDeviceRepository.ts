@@ -1,7 +1,7 @@
 import { Model, mongo } from "mongoose";
 import { Device } from "../../domain/Device";
 import { DeviceRepository } from "../../application/device/DeviceRepositoryInterface";
-import { ServerMessages } from "../../ServerMessages";
+import { ServerMessages } from "../ServerMessages";
 import { ManagerResponse } from "../../application/task/TaskManagerInterface";
 
 export class MongoDeviceRepository implements DeviceRepository {

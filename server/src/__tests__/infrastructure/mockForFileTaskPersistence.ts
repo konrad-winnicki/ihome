@@ -1,4 +1,4 @@
-import { ServerMessages } from "../../ServerMessages";
+import { ServerMessages } from "../../infrastructure/ServerMessages";
 import { FileRepositoryHelpers } from "../../infrastructure/file/auxilaryFunctions";
 import { FileTaskRepository } from "../../infrastructure/file/FileTaskRepository";
 

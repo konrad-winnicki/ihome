@@ -57,12 +57,12 @@ export const Login: React.FC = () => {
         authorizationContext.setLoggedIn(true);
 
         navigation("/dashboard");
-        return renewToken(token, formData.deviceIdentifier)
-          .then((token: string) => {
-            localStorage.setItem("token", token);
+        return renevToken(token, formData.deviceIdentifier)
+          .then((renevedToken: string) => {
+            localStorage.setItem("token", renevedToken);
           })
           .catch((e) => {
-            console.log("renew failed", e);
+            console.log("Token renev failed", e);
             authorizationContext.setLoggedIn(false);
             navigation("/login");
           });
@@ -126,7 +126,7 @@ function calculateTimeToFinishToken(token: DecodedToken) {
   return timeoutInMiliseconds;
 }
 
-async function renewToken(currentToken: string, deviceIdentifier:string): Promise<string> {
+async function renevToken(currentToken: string, deviceIdentifier:string): Promise<string> {
   const decodedToken: DecodedToken = jwt_decode(currentToken);
   const timeoutToRefreshToken = calculateTimeToFinishToken(decodedToken);
   return new Promise<string>((resolve, reject) => {
@@ -135,7 +135,6 @@ async function renewToken(currentToken: string, deviceIdentifier:string): Promis
         .then((response) => response.json())
         .then((data) => {
           const token: string = data.token;
-          localStorage.setItem("token", token);
           resolve(token);
         })
         .catch((err) => {

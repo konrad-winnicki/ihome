@@ -57,7 +57,7 @@ export class LoginController {
     const token = (ctx as ExtendedContext).token;
     const decodedToken = (jwt.decode(token) as DecodedToken);
 
-    if (!checkIfTokenExpiresInLessThenDesiredTime(decodedToken, 5)) {
+    if (!checkIfTokenExpiresInLessThenDesiredTime(decodedToken, 8)) {
       sessionStore.destroy(decodedToken.sessionId, (err) => {
         if (err) {
           console.log("Destoing session error", err);

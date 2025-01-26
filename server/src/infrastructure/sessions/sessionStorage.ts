@@ -6,6 +6,8 @@ export const sessionStore = new MemoryStore({
   checkPeriod: 86400000, // prune expired entries every 24h
 });
 
-setTimeout(()=>{
+function clearMemoryStore (){
   sessionStore.clear()
-}, 86400000)
+}
+
+setInterval(clearMemoryStore, 86400000);

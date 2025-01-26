@@ -1,11 +1,10 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { login, renewSession } from "./services";
 import jwt_decode from "jwt-decode";
-import {
-  AuthContextValue,
-  AuthorizationContext,
-} from "./contexts/AuthorizationContext";
+import { AuthorizationContext } from "./contexts/AuthorizationContext";
 import { useNavigate } from "react-router-dom";
+import { Device } from "@capacitor/device";
+import { v4 } from "uuid";
 
 interface DecodedToken {
   sessionId: string;
@@ -13,10 +12,21 @@ interface DecodedToken {
   exp: number;
 }
 
+const getDeviceId = async () => {
+  return Device.getId()
+    .then((result) => result.identifier)
+    .catch((err) => {
+      console.log("Getting device id error", err);
+      return Promise.resolve(v4());
+    });
+};
+
 export const Login: React.FC = () => {
   const [formData, setFormData] = useState({
     password: "",
+    deviceIdentifier: "",
   });
+  
   const authorizationContext = useContext(AuthorizationContext);
   const navigation = useNavigate();
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -26,6 +36,16 @@ export const Login: React.FC = () => {
       [name]: value,
     }));
   };
+
+  useEffect(()=>{
+    getDeviceId()
+  .then((identifier) => {
+    setFormData((prevData) => ({
+      ...prevData,
+      deviceIdentifier: identifier,
+    }))
+  })
+  },[])
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     try {
@@ -35,10 +55,17 @@ export const Login: React.FC = () => {
         const token = data.token;
         localStorage.setItem("token", token);
         authorizationContext.setLoggedIn(true);
-        renewToken(token).then((token: string) => {
-          autoLogOutTiming(token, authorizationContext);
-        });
+
         navigation("/dashboard");
+        return renewToken(token, formData.deviceIdentifier)
+          .then((token: string) => {
+            localStorage.setItem("token", token);
+          })
+          .catch((e) => {
+            console.log("renew failed", e);
+            authorizationContext.setLoggedIn(false);
+            navigation("/login");
+          });
       } else {
         alert("Password incorrect");
         console.error("login failed");
@@ -99,31 +126,23 @@ function calculateTimeToFinishToken(token: DecodedToken) {
   return timeoutInMiliseconds;
 }
 
-async function renewToken(currentToken: string): Promise<string> {
+async function renewToken(currentToken: string, deviceIdentifier:string): Promise<string> {
   const decodedToken: DecodedToken = jwt_decode(currentToken);
   const timeoutToRefreshToken = calculateTimeToFinishToken(decodedToken);
-  return new Promise<string>((resolve) => {
+  return new Promise<string>((resolve, reject) => {
     setTimeout(() => {
-      renewSession(currentToken)
+      renewSession({ deviceIdentifier }, currentToken)
         .then((response) => response.json())
         .then((data) => {
           const token: string = data.token;
           localStorage.setItem("token", token);
           resolve(token);
+        })
+        .catch((err) => {
+          reject(err);
         });
     }, timeoutToRefreshToken);
   });
-}
-
-function autoLogOutTiming(
-  currentToken: string,
-  authorizationContext: AuthContextValue
-) {
-  const decodedToken: DecodedToken = jwt_decode(currentToken);
-  const timeToLogout = calculateTimeToFinishToken(decodedToken);
-  setTimeout(() => {
-    authorizationContext.setLoggedIn(false);
-  }, timeToLogout);
 }
 
 export default Login;

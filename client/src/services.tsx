@@ -7,6 +7,7 @@ export function prepareURL() {
 
 export interface FormData {
   password: string;
+  deviceIdentifier:string
 }
 
 export interface RegistrationData {
@@ -27,32 +28,21 @@ export async function login(data: FormData) {
   return response;
 }
 
-export const renewSession = async (token: string | null): Promise<Response> => {
+export const renewSession = async (data: {deviceIdentifier: string}, token: string | null): Promise<Response> => {
   const URL = prepareURL();
 
   const response = await fetch(`${URL}/renew`, {
-    method: "GET",
-    headers: {
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json",
-    },
-  });
-  return response;
-};
-/*
-export async function getMeasurement(meterId: string, token: string | null) {
-  const URL = prepareURL();
-
-  const response = await fetch(`${URL}/meters/run/${meterId}`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${token}`,
       "Content-Type": "application/json",
     },
+    body: JSON.stringify(data),
+
   });
   return response;
-}
-*/
+};
+
 export async function getSensors(token: string | null) {
   const URL = prepareURL();
 

@@ -1,6 +1,6 @@
 {
   "name": "pi_manager_server",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "",
   "main": "app.ts",
   "engines": {
@@ -25,6 +25,7 @@
   "author": "Konrad Winnicki",
   "license": "ISC",
   "devDependencies": {
+    "@types/express-session": "^1.18.1",
     "@types/inquirer": "^9.0.6",
     "@types/jest": "^29.5.5",
     "@types/jsonwebtoken": "^9.0.2",
@@ -55,14 +56,17 @@
     "bcryptjs": "^2.4.3",
     "concurrently": "^8.2.1",
     "esm": "^3.2.25",
+    "express-session": "^1.18.1",
     "inquirer": "^8.2.6",
     "jest-mock": "^29.7.0",
     "jsonwebtoken": "^9.0.2",
+    "jwt-decode": "^4.0.0",
     "koa": "^2.14.2",
     "koa-bodyparser": "^4.4.1",
     "koa-router": "^12.0.0",
     "koa-session": "^6.4.0",
     "koa-session-memory": "^1.0.4",
+    "memorystore": "^1.6.7",
     "mongoose": "^7.6.3",
     "node-cron": "^3.0.2",
     "properties-reader": "^2.3.0",

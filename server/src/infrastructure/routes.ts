@@ -17,7 +17,7 @@ export function initAppRouter(
 ) {
   const appRouter = new Router();
   appRouter.post("/login", loginController.loginHandler);
-  appRouter.get("/renew", authenticate, loginController.refreshToken);
+  appRouter.post("/renew", authenticate, loginController.refreshToken);
 
   appRouter.post(
     "/devices/run/:id",

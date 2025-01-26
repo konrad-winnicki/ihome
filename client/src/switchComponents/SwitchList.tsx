@@ -23,7 +23,7 @@ const SwitchesList: React.FC = () => {
   const showSwitcherParamFromUrl = paramsInUrl.get("showSwitchesParam");
   const showSwitchesDefaultValue = showSwitcherParamFromUrl === "true";
 
-  const [showSwitches, setShowSwitches] = useState<boolean>(
+  const [showSwitches, setShowSwitches] = useState<boolean|null>(
     showSwitchesDefaultValue
   );
   const [refreshList, setRefreshList] = useState(false);
@@ -47,7 +47,7 @@ const SwitchesList: React.FC = () => {
 
   useEffect(() => {
     
-    if (switches.switches.length === 0 || refreshList) {
+    if (!switches.switches || refreshList) {
       getSwitchList().then((data) => {
         setSwitches({ switches: data });
         setRefreshList(false);
